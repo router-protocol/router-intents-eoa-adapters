@@ -13,7 +13,7 @@ import { TokenInterface__factory } from "../../typechain/factories/TokenInterfac
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { decodeUnsupportedOperationEvent, getPathfinderData } from "../utils";
+import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 
@@ -264,7 +264,7 @@ describe("StaderStakeEth Adapter: ", async () => {
     expect(ethxBalAfter).gt(ethxBalBefore);
   });
 
-  it.only("Can stake ETH on Stader on dest chain when instruction is received directly on StaderStakeEth adapter", async () => {
+  it("Can stake ETH on Stader on dest chain when instruction is received directly on StaderStakeEth adapter", async () => {
     const { staderStakeEthAdapter, ethx, mockAssetForwarder } =
       await setupTests();
 
