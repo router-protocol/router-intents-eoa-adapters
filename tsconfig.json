@@ -8,5 +8,5 @@
     "declaration": true,
     "resolveJsonModule": true
   },
-  "include": ["./hardhat.config.ts", "./scripts", "./tasks", "test-old"]
+  "include": ["./hardhat.config.ts", "./scripts", "./tasks", "test"]
 }
