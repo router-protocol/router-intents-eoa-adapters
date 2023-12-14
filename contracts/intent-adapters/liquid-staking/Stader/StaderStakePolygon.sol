@@ -140,4 +140,7 @@ contract StaderStakePolygon is RouterIntentAdapter {
     ) public pure returns (address, uint256) {
         return abi.decode(data, (address, uint256));
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    receive() external payable {}
 }

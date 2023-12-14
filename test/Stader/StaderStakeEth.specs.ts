@@ -13,7 +13,7 @@ import { TokenInterface__factory } from "../../typechain/factories/TokenInterfac
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { getPathfinderData } from "../utils";
+import { decodeUnsupportedOperationEvent, getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 
@@ -218,6 +218,75 @@ describe("StaderStakeEth Adapter: ", async () => {
     const ethxBalAfter = await ethx.balanceOf(deployer.address);
 
     expect(usdtBalBefore).gt(usdtBalAfter);
+    expect(ethxBalAfter).gt(ethxBalBefore);
+  });
+
+  it("Can stake ETH on Stader on dest chain when instruction is received from BatchTransaction contract", async () => {
+    const {
+      batchTransaction,
+      staderStakeEthAdapter,
+      ethx,
+      mockAssetForwarder,
+    } = await setupTests();
+
+    const amount = "100000000000000000";
+
+    const targets = [staderStakeEthAdapter.address];
+    const data = [
+      defaultAbiCoder.encode(
+        ["address", "uint256"],
+        [deployer.address, amount]
+      ),
+    ];
+    const value = [0];
+    const callType = [2];
+
+    const assetForwarderData = defaultAbiCoder.encode(
+      ["address", "address[]", "uint256[]", "uint256[]", "bytes[]"],
+      [deployer.address, targets, value, callType, data]
+    );
+
+    const balBefore = await ethers.provider.getBalance(deployer.address);
+    const ethxBalBefore = await ethx.balanceOf(deployer.address);
+
+    await mockAssetForwarder.handleMessage(
+      NATIVE_TOKEN,
+      amount,
+      assetForwarderData,
+      batchTransaction.address,
+      { value: amount }
+    );
+
+    const balAfter = await ethers.provider.getBalance(deployer.address);
+    const ethxBalAfter = await ethx.balanceOf(deployer.address);
+
+    expect(balAfter).lt(balBefore);
+    expect(ethxBalAfter).gt(ethxBalBefore);
+  });
+
+  it.only("Can stake ETH on Stader on dest chain when instruction is received directly on StaderStakeEth adapter", async () => {
+    const { staderStakeEthAdapter, ethx, mockAssetForwarder } =
+      await setupTests();
+
+    const amount = "100000000000000000";
+
+    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
+
+    const balBefore = await ethers.provider.getBalance(deployer.address);
+    const ethxBalBefore = await ethx.balanceOf(deployer.address);
+
+    await mockAssetForwarder.handleMessage(
+      NATIVE_TOKEN,
+      amount,
+      data,
+      staderStakeEthAdapter.address,
+      { value: amount }
+    );
+
+    const balAfter = await ethers.provider.getBalance(deployer.address);
+    const ethxBalAfter = await ethx.balanceOf(deployer.address);
+
+    expect(balAfter).lt(balBefore);
     expect(ethxBalAfter).gt(ethxBalBefore);
   });
 });

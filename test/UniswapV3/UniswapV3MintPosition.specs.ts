@@ -15,6 +15,7 @@ import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { IUniswapV3NonfungiblePositionManager__factory } from "../../typechain/factories/IUniswapV3NonfungiblePositionManager__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
 import { getUniswapV3Data } from "./utils";
+import { decodeExecutionEvent } from "../utils";
 
 const CHAIN_ID = "5";
 const UNISWAP_V3_POSITION_MANAGER =
@@ -186,24 +187,11 @@ describe("UniswapV3Mint Adapter: ", async () => {
     );
     const txReceipt = await tx.wait();
 
-    const EventInterface = new ethers.utils.Interface([
-      "event ExecutionEvent(string indexed adapterName, bytes data)",
-    ]);
-
-    const executionEventForUniswap = txReceipt.logs.filter(
-      (_log: any) =>
-        _log.topics[0] === EventInterface.getEventTopic("ExecutionEvent")
-    );
-
-    const uniswapExecutionEvent = EventInterface.decodeEventLog(
-      "ExecutionEvent",
-      executionEventForUniswap[0].data,
-      executionEventForUniswap[0].topics
-    );
+    const { data: uniswapExecutionEventData } = decodeExecutionEvent(txReceipt);
 
     const uniswapEventData = defaultAbiCoder.decode(
       [mintParamsIface, "uint256"],
-      uniswapExecutionEvent[1]
+      uniswapExecutionEventData
     );
 
     const position = await positionManager.positions(uniswapEventData[1]);

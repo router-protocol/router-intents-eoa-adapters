@@ -1,3 +1,9 @@
 {
-  "testnet": {}
+  "testnet": {
+    "5": { "StaderStakeEth": "0x3A57b8c1DAbEF37269d1E6b26A7ED06eCb72097c" },
+    "80001": {
+      "DexSpanAdapter": "0xDced4AA5DD278DDEeEeEa562d3b2C61b65Ad505A",
+      "AaveV3Supply": "0x6995c20C57fF1D927a3C288B9Edc1424Acb39761"
+    }
+  }
 }

@@ -163,4 +163,7 @@ contract AaveV3Supply is RouterIntentAdapter, AaveV3Helpers {
     ) public pure returns (address, address, uint256) {
         return abi.decode(data, (address, address, uint256));
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    receive() external payable {}
 }
