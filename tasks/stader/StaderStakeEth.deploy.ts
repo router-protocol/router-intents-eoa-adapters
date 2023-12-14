@@ -30,6 +30,9 @@ task(DEPLOY_STADER_STAKE_ETH_ADAPTER)
     let env = process.env.ENV;
     if (!env) env = DEFAULT_ENV;
 
+    let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
+    if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
+
     const network = await _hre.getChainId();
 
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
@@ -39,7 +42,7 @@ task(DEPLOY_STADER_STAKE_ETH_ADAPTER)
       WNATIVE[env][network],
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      DEFAULT_REFUND_ADDRESS,
+      defaultRefundAddress,
       STADER_ETH_X_TOKEN[network],
       STADER_POOL[network]
     );
@@ -68,6 +71,9 @@ task(VERIFY_STADER_STAKE_ETH_ADAPTER).setAction(async function (
   let env = process.env.ENV;
   if (!env) env = DEFAULT_ENV;
 
+  let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
+  if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
+
   const network = await _hre.getChainId();
 
   const deployments: IDeployment = getDeployments();
@@ -81,7 +87,7 @@ task(VERIFY_STADER_STAKE_ETH_ADAPTER).setAction(async function (
       WNATIVE[env][network],
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      DEFAULT_REFUND_ADDRESS,
+      defaultRefundAddress,
       STADER_ETH_X_TOKEN[network],
       STADER_POOL[network],
     ],

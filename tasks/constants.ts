@@ -1,9 +1,10 @@
 export const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 export const DEFAULT_ENV = "testnet";
 export const DEFAULT_REFUND_ADDRESS =
-  process.env.DEFAULT_REFUND_ADDRESS ||
   "0x54485755c209Cb47A4c7aAeAF3a14818CFe675A5";
 
+export const DEPLOY_BATCH_TRANSACTION = "DEPLOY_BATCH_TRANSACTION";
+export const VERIFY_BATCH_TRANSACTION = "VERIFY_BATCH_TRANSACTION";
 export const DEPLOY_LIDO_STAKE_ETH_ADAPTER = "DEPLOY_LIDO_STAKE_ETH_ADAPTER";
 export const VERIFY_LIDO_STAKE_ETH_ADAPTER = "VERIFY_LIDO_STAKE_ETH_ADAPTER";
 export const DEPLOY_LIDO_STAKE_MATIC_ADAPTER =
@@ -142,6 +143,7 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
 };
 
 export const CONTRACT_NAME: { [key: string]: string } = {
+  BatchTransaction: "BatchTransaction",
   LidoStakeEth: "LidoStakeEth",
   LidoStakeMatic: "LidoStakeMatic",
   StaderStakePolygon: "StaderStakePolygon",
