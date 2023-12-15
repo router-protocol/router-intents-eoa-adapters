@@ -14,7 +14,6 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 contract StaderStakeMatic is RouterIntentAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _self;
     address public immutable _maticx;
     address public immutable _matic;
 
@@ -42,7 +41,6 @@ contract StaderStakeMatic is RouterIntentAdapter {
         )
     // solhint-disable-next-line no-empty-blocks
     {
-        _self = address(this);
         _matic = __matic;
         _maticx = __maticx;
     }
@@ -70,8 +68,8 @@ contract StaderStakeMatic is RouterIntentAdapter {
         (address _recipient, uint256 _amount) = parseInputs(data);
 
         // If the adapter is called using `call` and not `delegatecall`
-        if (address(this) == _self) {
-            IERC20(_matic).safeTransferFrom(msg.sender, _self, _amount);
+        if (address(this) == self()) {
+            IERC20(_matic).safeTransferFrom(msg.sender, self(), _amount);
             IERC20(_matic).safeIncreaseAllowance(_maticx, _amount);
         }
 

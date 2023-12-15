@@ -13,8 +13,6 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 contract AaveV3Supply is RouterIntentAdapter, AaveV3Helpers {
     using SafeERC20 for IERC20;
 
-    address private immutable _self;
-
     event AaveV3SupplyDest(address _token, address _recipient, uint256 _amount);
 
     constructor(
@@ -41,7 +39,7 @@ contract AaveV3Supply is RouterIntentAdapter, AaveV3Helpers {
         )
     // solhint-disable-next-line no-empty-blocks
     {
-        _self = address(this);
+
     }
 
     function name() public pure override returns (string memory) {
@@ -61,18 +59,13 @@ contract AaveV3Supply is RouterIntentAdapter, AaveV3Helpers {
         );
 
         // If the adapter is called using `call` and not `delegatecall`
-        if (address(this) == _self) {
+        if (address(this) == self()) {
             if (_asset == native())
                 require(
                     msg.value == _amount,
                     Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
                 );
-            else
-                IERC20(_asset).safeTransferFrom(
-                    msg.sender,
-                    address(this),
-                    _amount
-                );
+            else IERC20(_asset).safeTransferFrom(msg.sender, self(), _amount);
         }
 
         bytes memory logData;

@@ -13,8 +13,6 @@ import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 contract DexSpanAdapter is RouterIntentAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _self;
-
     constructor(
         address __native,
         address __wnative,
@@ -31,7 +29,7 @@ contract DexSpanAdapter is RouterIntentAdapter {
         )
     // solhint-disable-next-line no-empty-blocks
     {
-        _self = address(this);
+
     }
 
     function name() public pure override returns (string memory) {
@@ -49,11 +47,11 @@ contract DexSpanAdapter is RouterIntentAdapter {
         IDexSpan.SwapParams memory swapData = parseInputs(data);
 
         // If the adapter is called using `call` and not `delegatecall`
-        if (address(this) == _self) {
+        if (address(this) == self()) {
             if (address(swapData.tokens[0]) != native())
                 swapData.tokens[0].safeTransferFrom(
                     msg.sender,
-                    _self,
+                    self(),
                     swapData.amount
                 );
             else

@@ -14,7 +14,6 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 contract StaderStakeEth is RouterIntentAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _self;
     address private immutable _ethx;
     IStaderPool private immutable _staderPool;
 
@@ -36,9 +35,7 @@ contract StaderStakeEth is RouterIntentAdapter {
             __dexspan,
             __defaultRefundAddress
         )
-    // solhint-disable-next-line no-empty-blocks
     {
-        _self = address(this);
         _ethx = __ethx;
         _staderPool = IStaderPool(__staderPool);
     }
@@ -66,7 +63,7 @@ contract StaderStakeEth is RouterIntentAdapter {
         (address _recipient, uint256 _amount) = parseInputs(data);
 
         // If the adapter is called using `call` and not `delegatecall`
-        if (address(this) == _self) {
+        if (address(this) == self()) {
             require(
                 msg.value == _amount,
                 Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED

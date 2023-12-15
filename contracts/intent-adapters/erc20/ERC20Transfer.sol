@@ -12,8 +12,6 @@ import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 contract ERC20Transfer is RouterIntentAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _self;
-
     constructor(
         address __native,
         address __wnative,
@@ -30,7 +28,7 @@ contract ERC20Transfer is RouterIntentAdapter {
         )
     // solhint-disable-next-line no-empty-blocks
     {
-        _self = address(this);
+
     }
 
     function name() public pure override returns (string memory) {
@@ -59,7 +57,7 @@ contract ERC20Transfer is RouterIntentAdapter {
         );
 
         // If the adapter is called using `call` and not `delegatecall`
-        if (address(this) == _self) {
+        if (address(this) == self()) {
             uint256 totalValue;
             for (uint256 i = 0; i < tokens.length; ) {
                 totalValue += _pullTokens(_tokens[i], _amounts[i]);

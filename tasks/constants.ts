@@ -79,6 +79,8 @@ export const VERIFY_METAPOOL_STAKE_ETH_ADAPTER =
   "VERIFY_METAPOOL_STAKE_ETH_ADAPTER";
 export const DEPLOY_AAVE_V3_SUPPLY_ADAPTER = "DEPLOY_AAVE_V3_SUPPLY_ADAPTER";
 export const VERIFY_AAVE_V3_SUPPLY_ADAPTER = "VERIFY_AAVE_V3_SUPPLY_ADAPTER";
+export const DEPLOY_AAVE_V3_BORROW_ADAPTER = "DEPLOY_AAVE_V3_BORROW_ADAPTER";
+export const VERIFY_AAVE_V3_BORROW_ADAPTER = "VERIFY_AAVE_V3_BORROW_ADAPTER";
 export const DEPLOY_AAVE_V3_PAYBACK_ADAPTER = "DEPLOY_AAVE_V3_PAYBACK_ADAPTER";
 export const VERIFY_AAVE_V3_PAYBACK_ADAPTER = "VERIFY_AAVE_V3_PAYBACK_ADAPTER";
 export const DEPLOY_DEXSPAN_ADAPTER = "DEPLOY_DEXSPAN_ADAPTER";
@@ -166,6 +168,7 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   SynClubStakeBnb: "SynClubStakeBnb",
   MetaPoolStakeEth: "MetaPoolStakeEth",
   AaveV3Supply: "AaveV3Supply",
+  AaveV3Borrow: "AaveV3Borrow",
   AaveV3Payback: "AaveV3Payback",
   DexSpanAdapter: "DexSpanAdapter",
   ERC20Approval: "ERC20Approval",

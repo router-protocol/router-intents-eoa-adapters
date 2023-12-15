@@ -14,8 +14,6 @@ import {UniswapV3Helpers} from "./UniswapV3Helpers.sol";
 contract UniswapV3Mint is RouterIntentAdapter, UniswapV3Helpers {
     using SafeERC20 for IERC20;
 
-    address private immutable _self;
-
     event UniswapV3MintPositionDest();
 
     constructor(
@@ -34,8 +32,9 @@ contract UniswapV3Mint is RouterIntentAdapter, UniswapV3Helpers {
             __defaultRefundAddress
         )
         UniswapV3Helpers(__nonFungiblePositionManager)
+    // solhint-disable-next-line no-empty-blocks
     {
-        _self = address(this);
+
     }
 
     function name() public pure override returns (string memory) {
@@ -64,16 +63,16 @@ contract UniswapV3Mint is RouterIntentAdapter, UniswapV3Helpers {
         }
 
         // If the adapter is called using `call` and not `delegatecall`
-        if (address(this) == _self) {
+        if (address(this) == self()) {
             IERC20(mintParams.token0).safeTransferFrom(
                 msg.sender,
-                address(this),
+                self(),
                 mintParams.amount0Desired
             );
 
             IERC20(mintParams.token1).safeTransferFrom(
                 msg.sender,
-                address(this),
+                self(),
                 mintParams.amount1Desired
             );
         }

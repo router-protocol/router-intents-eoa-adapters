@@ -12,8 +12,6 @@ import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 contract ERC20Approval is RouterIntentAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _self;
-
     constructor(
         address __native,
         address __wnative,
@@ -30,7 +28,7 @@ contract ERC20Approval is RouterIntentAdapter {
         )
     // solhint-disable-next-line no-empty-blocks
     {
-        _self = address(this);
+
     }
 
     function name() public pure override returns (string memory) {
