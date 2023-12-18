@@ -17,14 +17,16 @@ contract ERC20Transfer is RouterIntentAdapter {
         address __wnative,
         address __assetForwarder,
         address __dexspan,
-        address __defaultRefundAddress
+        address __defaultRefundAddress,
+        address __owner
     )
         RouterIntentAdapter(
             __native,
             __wnative,
             __assetForwarder,
             __dexspan,
-            __defaultRefundAddress
+            __defaultRefundAddress,
+            __owner
         )
     // solhint-disable-next-line no-empty-blocks
     {

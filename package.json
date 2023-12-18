@@ -79,7 +79,7 @@
     "@ethersproject/constants": "^5.6.1",
     "axios": "^1.5.0",
     "ethereumjs-util": "^7.1.0",
-    "router-intents": "^2.0.2"
+    "router-intents": "^2.0.3"
   },
   "husky": {
     "hooks": {

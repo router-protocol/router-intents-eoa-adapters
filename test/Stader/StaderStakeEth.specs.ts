@@ -51,7 +51,8 @@ describe("StaderStakeEth Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS
+      DEFAULT_REFUND_ADDRESS,
+      deployer.address
     );
 
     const StaderStakeEth = await ethers.getContractFactory("StaderStakeEth");
@@ -61,6 +62,7 @@ describe("StaderStakeEth Adapter: ", async () => {
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
       DEFAULT_REFUND_ADDRESS,
+      deployer.address,
       STADER_X_TOKEN,
       STADER_POOL
     );

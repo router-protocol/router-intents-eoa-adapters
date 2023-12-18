@@ -48,7 +48,8 @@ describe("DexSpan Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS
+      DEFAULT_REFUND_ADDRESS,
+      deployer.address
     );
 
     return {
