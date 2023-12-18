@@ -54,6 +54,33 @@ contract UniswapV3Mint is RouterIntentAdapter, UniswapV3Helpers {
         IUniswapV3NonfungiblePositionManager.MintParams
             memory mintParams = parseInputs(data);
 
+        // If the adapter is called using `call` and not `delegatecall`
+        if (address(this) == self()) {
+            if (mintParams.token0 != native())
+                IERC20(mintParams.token0).safeTransferFrom(
+                    msg.sender,
+                    self(),
+                    mintParams.amount0Desired
+                );
+            else
+                require(
+                    msg.value == mintParams.amount0Desired,
+                    Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
+                );
+
+            if (mintParams.token1 != native())
+                IERC20(mintParams.token1).safeTransferFrom(
+                    msg.sender,
+                    self(),
+                    mintParams.amount1Desired
+                );
+            else
+                require(
+                    msg.value == mintParams.amount1Desired,
+                    Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
+                );
+        }
+
         if (mintParams.token0 == native()) {
             convertNativeToWnative(mintParams.amount0Desired);
             mintParams.token0 = wnative();
@@ -62,21 +89,6 @@ contract UniswapV3Mint is RouterIntentAdapter, UniswapV3Helpers {
         if (mintParams.token1 == native()) {
             convertNativeToWnative(mintParams.amount0Desired);
             mintParams.token1 = wnative();
-        }
-
-        // If the adapter is called using `call` and not `delegatecall`
-        if (address(this) == self()) {
-            IERC20(mintParams.token0).safeTransferFrom(
-                msg.sender,
-                self(),
-                mintParams.amount0Desired
-            );
-
-            IERC20(mintParams.token1).safeTransferFrom(
-                msg.sender,
-                self(),
-                mintParams.amount1Desired
-            );
         }
 
         IERC20(mintParams.token0).safeIncreaseAllowance(

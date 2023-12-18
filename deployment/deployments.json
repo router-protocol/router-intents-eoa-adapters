@@ -1,14 +1,14 @@
 {
   "testnet": {
     "5": {
-      "StaderStakeEth": "0x3A57b8c1DAbEF37269d1E6b26A7ED06eCb72097c",
-      "BatchTransaction": "0x961B831F2eB23cfCe552CFdC8DBc7475b5031c61",
-      "DexSpanAdapter": "0xd5Fd5DaC1E69E44f8CFA0f4F29A594091502680b"
+      "StaderStakeEth": "0x06B8207cf2fC3F4AFa38fbA9E99d401d01750CB8",
+      "BatchTransaction": "0x81B8743b9e8454e910aFD2Ea52845B993CA54faE",
+      "DexSpanAdapter": "0xb37a4D800a9AF6E142b8078F1392122E06762aA6"
     },
     "80001": {
-      "DexSpanAdapter": "0xDced4AA5DD278DDEeEeEa562d3b2C61b65Ad505A",
-      "AaveV3Supply": "0x6995c20C57fF1D927a3C288B9Edc1424Acb39761",
-      "BatchTransaction": "0x2a8d76B69bC2983F20fD864a28eA887EaaA7c1E0"
+      "DexSpanAdapter": "0xA6d70E82Ed1F8a93dfE6350f9D846cBe6C75543A",
+      "AaveV3Supply": "0xE51eB3318d9616f8D84A23f4C05d1360E43F2Fa5",
+      "BatchTransaction": "0x4c5CfbD2967E399bcf2f326647F50FBDEEa1323A"
     }
   }
 }
