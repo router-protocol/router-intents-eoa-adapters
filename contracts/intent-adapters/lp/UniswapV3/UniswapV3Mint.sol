@@ -22,6 +22,7 @@ contract UniswapV3Mint is RouterIntentAdapter, UniswapV3Helpers {
         address __assetForwarder,
         address __dexspan,
         address __defaultRefundAddress,
+        address __owner,
         address __nonFungiblePositionManager
     )
         RouterIntentAdapter(
@@ -29,7 +30,8 @@ contract UniswapV3Mint is RouterIntentAdapter, UniswapV3Helpers {
             __wnative,
             __assetForwarder,
             __dexspan,
-            __defaultRefundAddress
+            __defaultRefundAddress,
+            __owner
         )
         UniswapV3Helpers(__nonFungiblePositionManager)
     // solhint-disable-next-line no-empty-blocks

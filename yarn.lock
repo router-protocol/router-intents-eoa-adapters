@@ -6903,10 +6903,10 @@ rlp@^2.2.3, rlp@^2.2.4:
   dependencies:
     bn.js "^5.2.0"
 
-router-intents@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/router-intents/-/router-intents-2.0.2.tgz#1f2457068342fbe85f2b375ca09d12e534e8e0c1"
-  integrity sha512-cKhs9mws4EGtDKZWlI5ebUi0yjjtuU7/mQRWCIEWiFbzXIKDCJjvPRqT2c9TegA3TWopX/fTb62gu/ajJsyQaQ==
+router-intents@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/router-intents/-/router-intents-2.0.3.tgz#75f6bb2ce81c2d0356b69d1c547fe64d20e7c02d"
+  integrity sha512-8Iy2R7KXdLjB9TyGFzpzxsVuQwWW9unIc2s6fwLJPP8BhI7sQJAC+DEyfBlIPfCu7rPdgengD8sRKEuz7ScK3A==
   dependencies:
     "@ethersproject/abstract-signer" "^5.6.2"
     "@ethersproject/constants" "^5.6.1"

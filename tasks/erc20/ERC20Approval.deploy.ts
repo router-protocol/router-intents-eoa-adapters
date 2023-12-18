@@ -3,6 +3,7 @@ import {
   ASSET_FORWARDER,
   CONTRACT_NAME,
   DEFAULT_ENV,
+  DEFAULT_OWNER,
   DEFAULT_REFUND_ADDRESS,
   DEPLOY_ERC20_APPROVAL_ADAPTER,
   DEXSPAN,
@@ -32,6 +33,9 @@ task(DEPLOY_ERC20_APPROVAL_ADAPTER)
     let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
     if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
 
+    let owner = process.env.OWNER;
+    if (!owner) owner = DEFAULT_OWNER;
+
     const network = await _hre.getChainId();
 
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
@@ -41,7 +45,8 @@ task(DEPLOY_ERC20_APPROVAL_ADAPTER)
       WNATIVE[env][network],
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress
+      defaultRefundAddress,
+      owner
     );
     await instance.deployed();
 
@@ -71,6 +76,9 @@ task(VERIFY_ERC20_APPROVAL_ADAPTER).setAction(async function (
   let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
   if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
 
+  let owner = process.env.OWNER;
+  if (!owner) owner = DEFAULT_OWNER;
+
   const network = await _hre.getChainId();
 
   const deployments: IDeployment = getDeployments();
@@ -85,6 +93,7 @@ task(VERIFY_ERC20_APPROVAL_ADAPTER).setAction(async function (
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       defaultRefundAddress,
+      owner,
     ],
   });
 

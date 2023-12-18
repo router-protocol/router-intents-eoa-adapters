@@ -29,6 +29,7 @@ contract StaderStakePolygon is RouterIntentAdapter {
         address __assetForwarder,
         address __dexspan,
         address __defaultRefundAddress,
+        address __owner,
         address __maticx,
         address __staderPool
     )
@@ -37,7 +38,8 @@ contract StaderStakePolygon is RouterIntentAdapter {
             __wnative,
             __assetForwarder,
             __dexspan,
-            __defaultRefundAddress
+            __defaultRefundAddress,
+            __owner
         )
     {
         _maticx = __maticx;

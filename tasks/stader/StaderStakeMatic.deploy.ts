@@ -3,6 +3,7 @@ import {
   ASSET_FORWARDER,
   CONTRACT_NAME,
   DEFAULT_ENV,
+  DEFAULT_OWNER,
   DEFAULT_REFUND_ADDRESS,
   DEPLOY_STADER_STAKE_MATIC_ADAPTER,
   DEXSPAN,
@@ -33,6 +34,9 @@ task(DEPLOY_STADER_STAKE_MATIC_ADAPTER)
     let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
     if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
 
+    let owner = process.env.OWNER;
+    if (!owner) owner = DEFAULT_OWNER;
+
     const network = await _hre.getChainId();
 
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
@@ -43,6 +47,7 @@ task(DEPLOY_STADER_STAKE_MATIC_ADAPTER)
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       defaultRefundAddress,
+      owner,
       STADER_MATIC_X_TOKEN[network],
       MATIC[network]
     );
@@ -74,6 +79,9 @@ task(VERIFY_STADER_STAKE_MATIC_ADAPTER).setAction(async function (
   let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
   if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
 
+  let owner = process.env.OWNER;
+  if (!owner) owner = DEFAULT_OWNER;
+
   const network = await _hre.getChainId();
 
   const deployments: IDeployment = getDeployments();
@@ -88,6 +96,7 @@ task(VERIFY_STADER_STAKE_MATIC_ADAPTER).setAction(async function (
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       defaultRefundAddress,
+      owner,
       STADER_MATIC_X_TOKEN[network],
       MATIC[network],
     ],

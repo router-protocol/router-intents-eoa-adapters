@@ -21,6 +21,7 @@ contract AaveV3Supply is RouterIntentAdapter, AaveV3Helpers {
         address __assetForwarder,
         address __dexspan,
         address __defaultRefundAddress,
+        address __owner,
         address __aaveV3Pool,
         address __aaveV3WrappedTokenGateway,
         uint16 __aaveV3ReferralCode
@@ -30,7 +31,8 @@ contract AaveV3Supply is RouterIntentAdapter, AaveV3Helpers {
             __wnative,
             __assetForwarder,
             __dexspan,
-            __defaultRefundAddress
+            __defaultRefundAddress,
+            __owner
         )
         AaveV3Helpers(
             __aaveV3Pool,

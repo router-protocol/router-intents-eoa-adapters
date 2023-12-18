@@ -25,6 +25,7 @@ contract StaderStakeEth is RouterIntentAdapter {
         address __assetForwarder,
         address __dexspan,
         address __defaultRefundAddress,
+        address __owner,
         address __ethx,
         address __staderPool
     )
@@ -33,7 +34,8 @@ contract StaderStakeEth is RouterIntentAdapter {
             __wnative,
             __assetForwarder,
             __dexspan,
-            __defaultRefundAddress
+            __defaultRefundAddress,
+            __owner
         )
     {
         _ethx = __ethx;
