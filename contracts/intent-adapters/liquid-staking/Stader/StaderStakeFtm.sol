@@ -1,27 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IMaticX} from "./Interfaces.sol";
+import {IStakeManager} from "./Interfaces.sol";
 import {RouterIntentAdapter, NitroMessageHandler, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
- * @title StaderStakeMatic
- * @author Shivam Agrawal
- * @notice Staking Matic to receive MaticX on Stader.
- * @notice This contract is only for Ethereum chain.
+ * @title StaderStakeFtm
+ * @author Yashika Goyal
+ * @notice Staking FTM to receive FtmX on Stader.
+ * @notice This contract is only for Fantom chain.
  */
-contract StaderStakeMatic is RouterIntentAdapter {
+contract StaderStakeFtm is RouterIntentAdapter {
     using SafeERC20 for IERC20;
 
-    address public immutable _maticx;
-    address public immutable _matic;
+    address private immutable _sftmx;
+    IStakeManager private immutable _staderPool;
 
-    event StaderStakeMaticDest(
-        address _recipient,
-        uint256 _amount,
-        uint256 _receivedMaticX
-    );
+    event StaderStakeFtmDest(address _recipient, uint256 _amount, uint256 _receivedSFtmx);
 
     constructor(
         address __native,
@@ -30,8 +26,8 @@ contract StaderStakeMatic is RouterIntentAdapter {
         address __dexspan,
         address __defaultRefundAddress,
         address __owner,
-        address __maticx,
-        address __matic
+        address __sftmx,
+        address __staderPool
     )
         RouterIntentAdapter(
             __native,
@@ -41,22 +37,21 @@ contract StaderStakeMatic is RouterIntentAdapter {
             __defaultRefundAddress,
             __owner
         )
-    // solhint-disable-next-line no-empty-blocks
     {
-        _matic = __matic;
-        _maticx = __maticx;
+        _sftmx = __sftmx;
+        _staderPool = IStakeManager(__staderPool);
     }
 
-    function maticx() public view returns (address) {
-        return _maticx;
+    function sftmx() public view returns (address) {
+        return _sftmx;
     }
 
-    function matic() public view returns (address) {
-        return _matic;
+    function staderPool() public view returns (IStakeManager) {
+        return _staderPool;
     }
 
     function name() public pure override returns (string memory) {
-        return "StaderStakeMatic";
+        return "StaderStakeFtm";
     }
 
     /**
@@ -71,7 +66,10 @@ contract StaderStakeMatic is RouterIntentAdapter {
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
-            IERC20(_matic).safeTransferFrom(msg.sender, self(), _amount);
+            require(
+                msg.value == _amount,
+                Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
+            );
         }
 
         bytes memory logData;
@@ -92,19 +90,20 @@ contract StaderStakeMatic is RouterIntentAdapter {
     ) external override onlyNitro nonReentrant {
         address recipient = abi.decode(instruction, (address));
 
-        if (tokenSent != _matic) {
+        if (tokenSent != native()) {
             withdrawTokens(tokenSent, recipient, amount);
             emit OperationFailedRefundEvent(tokenSent, recipient, amount);
             return;
         }
 
-        IERC20(_matic).safeIncreaseAllowance(_maticx, amount);
+        _staderPool.deposit{value: amount}();
+        uint256 receivedSFtmX = withdrawTokens(
+            _sftmx,
+            recipient,
+            type(uint256).max
+        );
 
-        IMaticX(_maticx).submit(amount);
-        uint256 receivedMaticX = IERC20(_maticx).balanceOf(address(this));
-        withdrawTokens(_maticx, recipient, receivedMaticX);
-
-        emit StaderStakeMaticDest(recipient, amount, receivedMaticX);
+        emit StaderStakeFtmDest(recipient, amount, receivedSFtmX);
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
@@ -113,16 +112,18 @@ contract StaderStakeMatic is RouterIntentAdapter {
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        IERC20(_matic).safeIncreaseAllowance(_maticx, _amount);
-        IMaticX(_maticx).submit(_amount);
-        uint256 receivedMaticX = IERC20(_maticx).balanceOf(address(this));
-        withdrawTokens(_maticx, _recipient, receivedMaticX);
+        _staderPool.deposit{value: _amount}();
+        uint256 receivedSFtmX = withdrawTokens(
+            _sftmx,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
-        tokens[0] = _matic;
-        tokens[1] = _maticx;
+        tokens[0] = native();
+        tokens[1] = sftmx();
 
-        logData = abi.encode(_recipient, _amount, receivedMaticX);
+        logData = abi.encode(_recipient, _amount, receivedSFtmX);
     }
 
     /**
@@ -134,4 +135,7 @@ contract StaderStakeMatic is RouterIntentAdapter {
     ) public pure returns (address, uint256) {
         return abi.decode(data, (address, uint256));
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    receive() external payable {}
 }

@@ -1,7 +1,7 @@
 export const RPC: { [networkId: string]: string } = {
   "1": "https://rpc.ankr.com/eth",
   "56": "https://rpc.ankr.com/bsc",
-  "250": "https://rpc2.fantom.network",
+  "250": "https://fantom-mainnet.public.blastapi.io",
   "42161": "https://arbitrum.llamarpc.com",
   "137": "https://rpc-mainnet.matic.quiknode.pro",
   "10": "https://optimism-mainnet.public.blastapi.io",
