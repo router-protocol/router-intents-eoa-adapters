@@ -17,7 +17,11 @@ contract StaderStakeBnb is RouterIntentAdapter {
     address private immutable _bnbx;
     IStakeManager private immutable _staderPool;
 
-    event StaderStakeBnbDest(address _recipient, uint256 _amount, uint256 _receivedBnbx);
+    event StaderStakeBnbDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _receivedBnbx
+    );
 
     constructor(
         address __native,

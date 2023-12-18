@@ -17,7 +17,11 @@ contract StaderStakeFtm is RouterIntentAdapter {
     address private immutable _sftmx;
     IStakeManager private immutable _staderPool;
 
-    event StaderStakeFtmDest(address _recipient, uint256 _amount, uint256 _receivedSFtmx);
+    event StaderStakeFtmDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _receivedSFtmx
+    );
 
     constructor(
         address __native,
