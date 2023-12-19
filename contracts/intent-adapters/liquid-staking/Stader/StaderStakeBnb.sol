@@ -100,14 +100,18 @@ contract StaderStakeBnb is RouterIntentAdapter {
             return;
         }
 
-        _staderPool.deposit{value: amount}();
-        uint256 receivedBnbX = withdrawTokens(
-            _bnbx,
-            recipient,
-            type(uint256).max
-        );
+        try _staderPool.deposit{value: amount}() {
+            uint256 receivedBnbX = withdrawTokens(
+                _bnbx,
+                recipient,
+                type(uint256).max
+            );
 
-        emit StaderStakeBnbDest(recipient, amount, receivedBnbX);
+            emit StaderStakeBnbDest(recipient, amount, receivedBnbX);
+        } catch {
+            withdrawTokens(tokenSent, recipient, amount);
+            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
+        }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////

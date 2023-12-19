@@ -4,7 +4,6 @@ import { RPC } from "../constants";
 import {
   DEXSPAN,
   DEFAULT_ENV,
-  NATIVE,
   WNATIVE,
   DEFAULT_REFUND_ADDRESS,
 } from "../../tasks/constants";
@@ -13,13 +12,10 @@ import { TokenInterface__factory } from "../../typechain/factories/TokenInterfac
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
-import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 
 const CHAIN_ID = "1";
 const STADER_X_TOKEN = "0xf03A7Eb46d01d9EcAA104558C732Cf82f6B6B645";
-const STADER_POOL = "0xf03A7Eb46d01d9EcAA104558C732Cf82f6B6B645";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const MATIC_TOKEN = "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0";
 const USDT = "0xdac17f958d2ee523a2206206994597c13d831ec7";
@@ -40,25 +36,17 @@ describe("StaderStakeMatic Adapter: ", async () => {
     );
 
     const batchTransaction = await BatchTransaction.deploy(
-      NATIVE,
+      NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID]
     );
 
-    const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
-    const dexSpanAdapter = await DexSpanAdapter.deploy(
-      NATIVE,
-      WNATIVE[env][CHAIN_ID],
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
-      deployer.address
+    const StaderStakeMatic = await ethers.getContractFactory(
+      "StaderStakeMatic"
     );
-
-    const StaderStakeMatic = await ethers.getContractFactory("StaderStakeMatic");
     const staderStakeMaticAdapter = await StaderStakeMatic.deploy(
-      NATIVE,
+      NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
@@ -75,10 +63,6 @@ describe("StaderStakeMatic Adapter: ", async () => {
       ),
       staderStakeMaticAdapter: StaderStakeMatic__factory.connect(
         staderStakeMaticAdapter.address,
-        deployer
-      ),
-      dexSpanAdapter: DexSpanAdapter__factory.connect(
-        dexSpanAdapter.address,
         deployer
       ),
       mockAssetForwarder: MockAssetForwarder__factory.connect(
@@ -159,7 +143,7 @@ describe("StaderStakeMatic Adapter: ", async () => {
       targets,
       value,
       callType,
-      data,
+      data
     );
 
     const maticxBalAfter = await maticx.balanceOf(deployer.address);
@@ -173,7 +157,7 @@ describe("StaderStakeMatic Adapter: ", async () => {
       staderStakeMaticAdapter,
       maticx,
       mockAssetForwarder,
-      matic
+      matic,
     } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
@@ -202,7 +186,7 @@ describe("StaderStakeMatic Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      {gasLimit: 1000000}
+      { gasLimit: 1000000 }
     );
 
     const maticxBalAfter = await maticx.balanceOf(deployer.address);
@@ -227,6 +211,7 @@ describe("StaderStakeMatic Adapter: ", async () => {
       amount,
       data,
       staderStakeMaticAdapter.address,
+      { gasLimit: 1000000 }
     );
 
     const maticxBalAfter = await maticx.balanceOf(deployer.address);

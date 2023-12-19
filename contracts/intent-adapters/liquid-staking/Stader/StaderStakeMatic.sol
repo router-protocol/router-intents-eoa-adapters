@@ -100,11 +100,14 @@ contract StaderStakeMatic is RouterIntentAdapter {
 
         IERC20(_matic).safeIncreaseAllowance(_maticx, amount);
 
-        IMaticX(_maticx).submit(amount);
-        uint256 receivedMaticX = IERC20(_maticx).balanceOf(address(this));
-        withdrawTokens(_maticx, recipient, receivedMaticX);
-
-        emit StaderStakeMaticDest(recipient, amount, receivedMaticX);
+        try IMaticX(_maticx).submit(amount) {
+            uint256 receivedMaticX = IERC20(_maticx).balanceOf(address(this));
+            withdrawTokens(_maticx, recipient, receivedMaticX);
+            emit StaderStakeMaticDest(recipient, amount, receivedMaticX);
+        } catch {
+            withdrawTokens(tokenSent, recipient, amount);
+            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
+        }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////

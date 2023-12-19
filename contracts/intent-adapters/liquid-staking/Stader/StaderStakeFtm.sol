@@ -100,14 +100,18 @@ contract StaderStakeFtm is RouterIntentAdapter {
             return;
         }
 
-        _staderPool.deposit{value: amount}();
-        uint256 receivedSFtmX = withdrawTokens(
-            _sftmx,
-            recipient,
-            type(uint256).max
-        );
+        try _staderPool.deposit{value: amount}() {
+            uint256 receivedSFtmX = withdrawTokens(
+                _sftmx,
+                recipient,
+                type(uint256).max
+            );
 
-        emit StaderStakeFtmDest(recipient, amount, receivedSFtmX);
+            emit StaderStakeFtmDest(recipient, amount, receivedSFtmX);
+        } catch {
+            withdrawTokens(tokenSent, recipient, amount);
+            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
+        }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////

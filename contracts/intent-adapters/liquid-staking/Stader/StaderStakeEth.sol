@@ -96,9 +96,12 @@ contract StaderStakeEth is RouterIntentAdapter {
             return;
         }
 
-        _staderPool.deposit{value: amount}(recipient);
-
-        emit StaderStakeEthDest(recipient, amount);
+        try _staderPool.deposit{value: amount}(recipient) {
+            emit StaderStakeEthDest(recipient, amount);
+        } catch {
+            withdrawTokens(tokenSent, recipient, amount);
+            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
+        }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////

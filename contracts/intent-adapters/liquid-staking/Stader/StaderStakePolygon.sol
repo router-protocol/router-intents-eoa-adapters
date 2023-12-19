@@ -100,14 +100,18 @@ contract StaderStakePolygon is RouterIntentAdapter {
             return;
         }
 
-        _staderPool.swapMaticForMaticXViaInstantPool{value: amount}();
-        uint256 receivedMaticX = withdrawTokens(
-            _maticx,
-            recipient,
-            type(uint256).max
-        );
+        try _staderPool.swapMaticForMaticXViaInstantPool{value: amount}() {
+            uint256 receivedMaticX = withdrawTokens(
+                _maticx,
+                recipient,
+                type(uint256).max
+            );
 
-        emit StaderStakePolygonDest(recipient, amount, receivedMaticX);
+            emit StaderStakePolygonDest(recipient, amount, receivedMaticX);
+        } catch {
+            withdrawTokens(tokenSent, recipient, amount);
+            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
+        }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
