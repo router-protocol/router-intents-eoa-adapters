@@ -12,7 +12,8 @@
     "80001": {
       "DexSpanAdapter": "0xA6d70E82Ed1F8a93dfE6350f9D846cBe6C75543A",
       "AaveV3Supply": "0xE51eB3318d9616f8D84A23f4C05d1360E43F2Fa5",
-      "BatchTransaction": "0x4c5CfbD2967E399bcf2f326647F50FBDEEa1323A"
+      "BatchTransaction": "0x4c5CfbD2967E399bcf2f326647F50FBDEEa1323A",
+      "AaveV3Borrow": "0x7a0DbcF70CAd57515B34d971A6eB545336ae7375"
     }
   }
 }
