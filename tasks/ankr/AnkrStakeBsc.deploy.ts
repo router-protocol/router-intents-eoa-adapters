@@ -4,10 +4,11 @@ import {
   CONTRACT_NAME,
   DEFAULT_ENV,
   DEFAULT_OWNER,
-  DEPLOY_LIDO_STAKE_MATIC_ADAPTER,
+  DEFAULT_REFUND_ADDRESS,
+  DEPLOY_ANKR_STAKE_BSC_ADAPTER,
   DEXSPAN,
   NATIVE,
-  VERIFY_LIDO_STAKE_MATIC_ADAPTER,
+  VERIFY_ANKR_STAKE_BSC_ADAPTER,
   WNATIVE,
 } from "../constants";
 import { task } from "hardhat/config";
@@ -17,11 +18,11 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../utils";
-import { LIDO_ST_MATIC, MATIC, LIDO_REFERRAL_ADDRESS } from "./constants";
+import { ANKR_LSD_TOKEN, ANKR_POOL } from "./constants";
 
-const contractName: string = CONTRACT_NAME.LidoStakeMatic;
+const contractName: string = CONTRACT_NAME.AnkrStakeBsc;
 
-task(DEPLOY_LIDO_STAKE_MATIC_ADAPTER)
+task(DEPLOY_ANKR_STAKE_BSC_ADAPTER)
   .addFlag("verify", "pass true to verify the contract")
   .setAction(async function (
     _taskArguments: TaskArguments,
@@ -29,6 +30,9 @@ task(DEPLOY_LIDO_STAKE_MATIC_ADAPTER)
   ) {
     let env = process.env.ENV;
     if (!env) env = DEFAULT_ENV;
+
+    let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
+    if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
 
     let owner = process.env.OWNER;
     if (!owner) owner = DEFAULT_OWNER;
@@ -43,9 +47,8 @@ task(DEPLOY_LIDO_STAKE_MATIC_ADAPTER)
       owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      LIDO_ST_MATIC[network],
-      MATIC[network],
-      LIDO_REFERRAL_ADDRESS
+      ANKR_LSD_TOKEN[network],
+      ANKR_POOL[network]
     );
     await instance.deployed();
 
@@ -61,16 +64,19 @@ task(DEPLOY_LIDO_STAKE_MATIC_ADAPTER)
     console.log(`${contractName} contract deployed at`, instance.address);
 
     if (_taskArguments.verify === true) {
-      await _hre.run(VERIFY_LIDO_STAKE_MATIC_ADAPTER);
+      await _hre.run(VERIFY_ANKR_STAKE_BSC_ADAPTER);
     }
   });
 
-task(VERIFY_LIDO_STAKE_MATIC_ADAPTER).setAction(async function (
+task(VERIFY_ANKR_STAKE_BSC_ADAPTER).setAction(async function (
   _taskArguments: TaskArguments,
   _hre: HardhatRuntimeEnvironment
 ) {
   let env = process.env.ENV;
   if (!env) env = DEFAULT_ENV;
+
+  let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
+  if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
 
   let owner = process.env.OWNER;
   if (!owner) owner = DEFAULT_OWNER;
@@ -89,9 +95,8 @@ task(VERIFY_LIDO_STAKE_MATIC_ADAPTER).setAction(async function (
       owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      LIDO_ST_MATIC[network],
-      MATIC[network],
-      LIDO_REFERRAL_ADDRESS,
+      ANKR_LSD_TOKEN[network],
+      ANKR_POOL[network],
     ],
   });
 
