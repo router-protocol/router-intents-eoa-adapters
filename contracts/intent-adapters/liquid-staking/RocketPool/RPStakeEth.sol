@@ -5,7 +5,6 @@ import {IRocketDepositPool} from "./Interfaces.sol";
 import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
 import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
-import {console} from "hardhat/console.sol";
 
 /**
  * @title RPStakeEth
@@ -114,16 +113,12 @@ contract RPStakeEth is RouterIntentAdapter, NitroMessageHandler {
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        console.log(_amount);
-        console.log(address(this).balance);
         _rocketDepositPool.deposit{value: _amount}();
         uint256 _receivedREth = withdrawTokens(
-                _rEth,
-                _recipient,
-                type(uint256).max
-            );
-        
-        console.log("log4");
+            _rEth,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
         tokens[0] = native();
