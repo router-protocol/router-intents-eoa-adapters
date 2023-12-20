@@ -15,6 +15,7 @@
     "prepare": "husky install .husky",
     "compile": "npx hardhat compile",
     "ci:clean": "rm -rf ./artifacts ./cache",
+    "setup:testenv": ". ./setup_test_env.sh",
     "compile:clean": "npm run ci:clean && npm run compile"
   },
   "keywords": [
