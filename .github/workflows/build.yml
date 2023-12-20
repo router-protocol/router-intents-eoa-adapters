@@ -17,6 +17,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           scope: "@routerprotocol"
+      - name: Setup test env
+        run: sh ./setup-test-env.sh
       - name: Install yarn
         run: npm install -g yarn
       - name: Installing dependencies
