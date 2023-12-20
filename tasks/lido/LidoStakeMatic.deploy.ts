@@ -4,7 +4,6 @@ import {
   CONTRACT_NAME,
   DEFAULT_ENV,
   DEFAULT_OWNER,
-  DEFAULT_REFUND_ADDRESS,
   DEPLOY_LIDO_STAKE_MATIC_ADAPTER,
   DEXSPAN,
   NATIVE,
@@ -31,9 +30,6 @@ task(DEPLOY_LIDO_STAKE_MATIC_ADAPTER)
     let env = process.env.ENV;
     if (!env) env = DEFAULT_ENV;
 
-    let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
-    if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
-
     let owner = process.env.OWNER;
     if (!owner) owner = DEFAULT_OWNER;
 
@@ -44,10 +40,9 @@ task(DEPLOY_LIDO_STAKE_MATIC_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress,
-      owner,
       LIDO_ST_MATIC[network],
       MATIC[network],
       LIDO_REFERRAL_ADDRESS
@@ -77,9 +72,6 @@ task(VERIFY_LIDO_STAKE_MATIC_ADAPTER).setAction(async function (
   let env = process.env.ENV;
   if (!env) env = DEFAULT_ENV;
 
-  let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
-  if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
-
   let owner = process.env.OWNER;
   if (!owner) owner = DEFAULT_OWNER;
 
@@ -94,13 +86,12 @@ task(VERIFY_LIDO_STAKE_MATIC_ADAPTER).setAction(async function (
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress,
-      owner,
       LIDO_ST_MATIC[network],
       MATIC[network],
-      LIDO_REFERRAL_ADDRESS
+      LIDO_REFERRAL_ADDRESS,
     ],
   });
 

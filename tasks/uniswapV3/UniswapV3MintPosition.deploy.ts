@@ -44,10 +44,10 @@ task(DEPLOY_UNISWAP_V3_MINT_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       defaultRefundAddress,
-      owner,
       NON_FUNGIBLE_POSITION_MANAGER[network]
     );
     await instance.deployed();
@@ -92,10 +92,10 @@ task(VERIFY_UNISWAP_V3_MINT_ADAPTER).setAction(async function (
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       defaultRefundAddress,
-      owner,
       NON_FUNGIBLE_POSITION_MANAGER[network],
     ],
   });

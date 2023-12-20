@@ -51,10 +51,9 @@ describe("AaveV3Borrow Adapter: ", async () => {
     const aaveV3SupplyAdapter = await AaveV3SupplyAdapter.deploy(
       NATIVE_TOKEN,
       WMATIC,
+      deployer.address,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
-      deployer.address,
       AAVE_V3_POOL,
       AAVE_V3_WRAPPED_TOKEN_GATEWAY,
       AAVE_V3_REFERRAL_CODE
@@ -65,10 +64,10 @@ describe("AaveV3Borrow Adapter: ", async () => {
     const aaveV3BorrowAdapter = await AaveV3BorrowAdapter.deploy(
       NATIVE_TOKEN,
       WMATIC,
+      deployer.address,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
       DEFAULT_REFUND_ADDRESS,
-      deployer.address,
       AAVE_V3_POOL,
       AAVE_V3_WRAPPED_TOKEN_GATEWAY,
       AAVE_V3_REFERRAL_CODE

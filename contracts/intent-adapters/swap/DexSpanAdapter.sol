@@ -2,7 +2,9 @@
 pragma solidity 0.8.18;
 
 import {IDexSpan} from "../../interfaces/IDexSpan.sol";
-import {RouterIntentAdapter, NitroMessageHandler, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
+import {DefaultRefundable} from "router-intents/contracts/DefaultRefundable.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 
 /**
@@ -10,25 +12,24 @@ import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
  * @author Shivam Agrawal
  * @notice Swapping tokens using DexSpan contract
  */
-contract DexSpanAdapter is RouterIntentAdapter {
+contract DexSpanAdapter is
+    RouterIntentAdapter,
+    NitroMessageHandler,
+    DefaultRefundable
+{
     using SafeERC20 for IERC20;
 
     constructor(
         address __native,
         address __wnative,
+        address __owner,
         address __assetForwarder,
         address __dexspan,
-        address __defaultRefundAddress,
-        address __owner
+        address __defaultRefundAddress
     )
-        RouterIntentAdapter(
-            __native,
-            __wnative,
-            __assetForwarder,
-            __dexspan,
-            __defaultRefundAddress,
-            __owner
-        )
+        RouterIntentAdapter(__native, __wnative, __owner)
+        NitroMessageHandler(__assetForwarder, __dexspan)
+        DefaultRefundable(__defaultRefundAddress)
     // solhint-disable-next-line no-empty-blocks
     {
 

@@ -44,10 +44,9 @@ task(DEPLOY_STADER_STAKE_ETH_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress,
-      owner,
       STADER_ETH_X_TOKEN[network],
       STADER_POOL[network]
     );
@@ -93,10 +92,9 @@ task(VERIFY_STADER_STAKE_ETH_ADAPTER).setAction(async function (
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress,
-      owner,
       STADER_ETH_X_TOKEN[network],
       STADER_POOL[network],
     ],

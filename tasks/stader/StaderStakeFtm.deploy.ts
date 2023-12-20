@@ -4,7 +4,6 @@ import {
   CONTRACT_NAME,
   DEFAULT_ENV,
   DEFAULT_OWNER,
-  DEFAULT_REFUND_ADDRESS,
   DEPLOY_STADER_STAKE_FTM_ADAPTER,
   DEXSPAN,
   NATIVE,
@@ -18,7 +17,7 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../utils";
-import { STADER_SFTM_X_TOKEN, STADER_POOL} from "./constants";
+import { STADER_SFTM_X_TOKEN, STADER_POOL } from "./constants";
 
 const contractName: string = CONTRACT_NAME.StaderStakeFtm;
 
@@ -31,9 +30,6 @@ task(DEPLOY_STADER_STAKE_FTM_ADAPTER)
     let env = process.env.ENV;
     if (!env) env = DEFAULT_ENV;
 
-    let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
-    if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
-
     let owner = process.env.OWNER;
     if (!owner) owner = DEFAULT_OWNER;
 
@@ -44,10 +40,9 @@ task(DEPLOY_STADER_STAKE_FTM_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress,
-      owner,
       STADER_SFTM_X_TOKEN[network],
       STADER_POOL[network]
     );
@@ -76,9 +71,6 @@ task(VERIFY_STADER_STAKE_FTM_ADAPTER).setAction(async function (
   let env = process.env.ENV;
   if (!env) env = DEFAULT_ENV;
 
-  let defaultRefundAddress = process.env.DEFAULT_REFUND_ADDRESS;
-  if (!defaultRefundAddress) defaultRefundAddress = DEFAULT_REFUND_ADDRESS;
-
   let owner = process.env.OWNER;
   if (!owner) owner = DEFAULT_OWNER;
 
@@ -93,10 +85,9 @@ task(VERIFY_STADER_STAKE_FTM_ADAPTER).setAction(async function (
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress,
-      owner,
       STADER_SFTM_X_TOKEN[network],
       STADER_POOL[network],
     ],

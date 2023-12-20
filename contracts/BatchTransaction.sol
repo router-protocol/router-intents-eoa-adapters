@@ -2,7 +2,8 @@
 pragma solidity 0.8.18;
 
 import {ReentrancyGuard} from "./utils/ReentrancyGuard.sol";
-import {Basic, NitroMessageHandler} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {Basic} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
 import {CallLib} from "./CallLib.sol";
 import {IERC20, SafeERC20} from "./utils/SafeERC20.sol";
 import {Errors} from "./Errors.sol";
@@ -17,8 +18,6 @@ contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
 
     address private immutable _native;
     address private immutable _wnative;
-    address private immutable _assetForwarder;
-    address private immutable _dexspan;
 
     struct RefundData {
         address[] tokens;
@@ -39,11 +38,9 @@ contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
         address __wnative,
         address __assetForwarder,
         address __dexspan
-    ) {
+    ) NitroMessageHandler(__assetForwarder, __dexspan) {
         _native = __native;
         _wnative = __wnative;
-        _assetForwarder = __assetForwarder;
-        _dexspan = __dexspan;
     }
 
     /**
@@ -58,20 +55,6 @@ contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
      */
     function native() public view virtual override returns (address) {
         return _native;
-    }
-
-    /**
-     * @dev function to get the address of asset forwarder
-     */
-    function assetForwarder() public view returns (address) {
-        return _assetForwarder;
-    }
-
-    /**
-     * @dev function to get the address of dexspan
-     */
-    function dexspan() public view returns (address) {
-        return _dexspan;
     }
 
     /**
@@ -339,21 +322,6 @@ contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
             withdrawTokens(tokenSent, refundAddress, amount);
             emit OperationFailedRefundEvent(tokenSent, refundAddress, amount);
         }
-    }
-
-    /**
-     * @notice modifier to ensure that only Nitro bridge can call handleMessage function
-     */
-    modifier onlyNitro() {
-        _onlyNitro();
-        _;
-    }
-
-    function _onlyNitro() private view {
-        require(
-            msg.sender == _assetForwarder || msg.sender == _dexspan,
-            Errors.ONLY_NITRO
-        );
     }
 
     // solhint-disable-next-line no-empty-blocks

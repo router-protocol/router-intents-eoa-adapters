@@ -2,7 +2,8 @@
 pragma solidity 0.8.18;
 
 import {ILidoStakeEth} from "./Interfaces.sol";
-import {RouterIntentAdapter, NitroMessageHandler, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -11,32 +12,29 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking ETH to receive StEth on Lido.
  * @notice This contract is only for Ethereum chain.
  */
-contract LidoStakeEth is RouterIntentAdapter {
+contract LidoStakeEth is RouterIntentAdapter, NitroMessageHandler {
     using SafeERC20 for IERC20;
 
     address private immutable _lidoStETH;
     address private immutable _referralId;
 
-    event LidoStakeEthDest(address _recipient, uint256 _amount, uint256 _receivedStEth);
+    event LidoStakeEthDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _receivedStEth
+    );
 
     constructor(
         address __native,
         address __wnative,
+        address __owner,
         address __assetForwarder,
         address __dexspan,
-        address __defaultRefundAddress,
-        address __owner,
         address __lidoStETH,
         address __referralId
     )
-        RouterIntentAdapter(
-            __native,
-            __wnative,
-            __assetForwarder,
-            __dexspan,
-            __defaultRefundAddress,
-            __owner
-        )
+        RouterIntentAdapter(__native, __wnative, __owner)
+        NitroMessageHandler(__assetForwarder, __dexspan)
     {
         _lidoStETH = __lidoStETH;
         _referralId = __referralId;
@@ -118,10 +116,10 @@ contract LidoStakeEth is RouterIntentAdapter {
     ) internal returns (address[] memory tokens, bytes memory logData) {
         ILidoStakeEth(_lidoStETH).submit{value: _amount}(_referralId);
         uint256 _receivedStEth = withdrawTokens(
-                _lidoStETH,
-                _recipient,
-                type(uint256).max
-            );
+            _lidoStETH,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
         tokens[0] = native();

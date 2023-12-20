@@ -2,7 +2,9 @@
 pragma solidity 0.8.18;
 
 import {IStakeManager} from "./Interfaces.sol";
-import {RouterIntentAdapter, NitroMessageHandler, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
+
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -11,7 +13,7 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking BNB to receive BnbX on Stader.
  * @notice This contract is only for Binance chain.
  */
-contract StaderStakeBnb is RouterIntentAdapter {
+contract StaderStakeBnb is RouterIntentAdapter, NitroMessageHandler {
     using SafeERC20 for IERC20;
 
     address private immutable _bnbx;
@@ -26,21 +28,14 @@ contract StaderStakeBnb is RouterIntentAdapter {
     constructor(
         address __native,
         address __wnative,
+        address __owner,
         address __assetForwarder,
         address __dexspan,
-        address __defaultRefundAddress,
-        address __owner,
         address __bnbx,
         address __staderPool
     )
-        RouterIntentAdapter(
-            __native,
-            __wnative,
-            __assetForwarder,
-            __dexspan,
-            __defaultRefundAddress,
-            __owner
-        )
+        RouterIntentAdapter(__native, __wnative, __owner)
+        NitroMessageHandler(__assetForwarder, __dexspan)
     {
         _bnbx = __bnbx;
         _staderPool = IStakeManager(__staderPool);

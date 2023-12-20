@@ -1,11 +1,7 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV } from "../../tasks/constants";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
@@ -38,10 +34,9 @@ describe("AaveV3Supply Adapter: ", async () => {
     const aaveV3SupplyAdapter = await AaveV3SupplyAdapter.deploy(
       NATIVE_TOKEN,
       WMATIC,
+      deployer.address,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
-      deployer.address,
       AAVE_V3_POOL,
       AAVE_V3_WRAPPED_TOKEN_GATEWAY,
       AAVE_V3_REFERRAL_CODE

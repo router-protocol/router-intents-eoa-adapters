@@ -1,12 +1,7 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  WNATIVE,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, WNATIVE } from "../../tasks/constants";
 import { StaderStakeBnb__factory } from "../../typechain/factories/StaderStakeBnb__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
@@ -45,10 +40,9 @@ describe("StaderStakeBnb Adapter: ", async () => {
     const staderStakeBnbAdapter = await StaderStakeBnb.deploy(
       NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
+      deployer.address,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
-      deployer.address,
       STADER_X_TOKEN,
       STADER_POOL
     );

@@ -2,7 +2,8 @@
 pragma solidity 0.8.18;
 
 import {ILidoStakeMatic} from "./Interfaces.sol";
-import {RouterIntentAdapter, NitroMessageHandler, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -12,34 +13,31 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice This contract is for chains other than Polygon where liquid staking for Matic
  * is supported by Lido
  */
-contract LidoStakeMatic is RouterIntentAdapter {
+contract LidoStakeMatic is RouterIntentAdapter, NitroMessageHandler {
     using SafeERC20 for IERC20;
 
     address private immutable _lidoStMatic;
     address private immutable _matic;
     address private immutable _referralId;
 
-    event LidoStakeMaticDest(address _recipient, uint256 _amount, uint256 _receivedStMatic);
+    event LidoStakeMaticDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _receivedStMatic
+    );
 
     constructor(
         address __native,
         address __wnative,
+        address __owner,
         address __assetForwarder,
         address __dexspan,
-        address __defaultRefundAddress,
-        address __owner,
         address __lidoStMatic,
         address __matic,
         address __referralId
     )
-        RouterIntentAdapter(
-            __native,
-            __wnative,
-            __assetForwarder,
-            __dexspan,
-            __defaultRefundAddress,
-            __owner
-        )
+        RouterIntentAdapter(__native, __wnative, __owner)
+        NitroMessageHandler(__assetForwarder, __dexspan)
     {
         _lidoStMatic = __lidoStMatic;
         _matic = __matic;
@@ -49,7 +47,7 @@ contract LidoStakeMatic is RouterIntentAdapter {
     function lidoStMatic() public view returns (address) {
         return _lidoStMatic;
     }
-     
+
     function matic() public view returns (address) {
         return _matic;
     }
@@ -125,10 +123,10 @@ contract LidoStakeMatic is RouterIntentAdapter {
         IERC20(_matic).safeIncreaseAllowance(_lidoStMatic, _amount);
         ILidoStakeMatic(_lidoStMatic).submit(_amount, _referralId);
         uint256 _receivedStMatic = withdrawTokens(
-                _lidoStMatic,
-                _recipient,
-                type(uint256).max
-            );
+            _lidoStMatic,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
         tokens[0] = native();

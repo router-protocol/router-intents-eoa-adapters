@@ -43,10 +43,10 @@ task(DEPLOY_ERC20_TRANSFER_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress,
-      owner
+      defaultRefundAddress
     );
     await instance.deployed();
 
@@ -90,10 +90,10 @@ task(VERIFY_ERC20_TRANSFER_ADAPTER).setAction(async function (
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       defaultRefundAddress,
-      owner,
     ],
   });
 

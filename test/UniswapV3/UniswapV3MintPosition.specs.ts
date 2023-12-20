@@ -53,10 +53,10 @@ describe("UniswapV3Mint Adapter: ", async () => {
       await UniswapV3MintPositionAdapter.deploy(
         NATIVE_TOKEN,
         WNATIVE,
+        deployer.address,
         mockAssetForwarder.address,
         DEXSPAN[env][CHAIN_ID],
         DEFAULT_REFUND_ADDRESS,
-        deployer.address,
         UNISWAP_V3_POSITION_MANAGER
       );
 

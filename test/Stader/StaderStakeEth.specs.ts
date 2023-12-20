@@ -49,20 +49,19 @@ describe("StaderStakeEth Adapter: ", async () => {
     const dexSpanAdapter = await DexSpanAdapter.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
+      deployer.address,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
-      deployer.address
+      DEFAULT_REFUND_ADDRESS
     );
 
     const StaderStakeEth = await ethers.getContractFactory("StaderStakeEth");
     const staderStakeEthAdapter = await StaderStakeEth.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
+      deployer.address,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
-      deployer.address,
       STADER_X_TOKEN,
       STADER_POOL
     );

@@ -49,20 +49,19 @@ describe("LidoStakeMatic Adapter: ", async () => {
     const dexSpanAdapter = await DexSpanAdapter.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
+      deployer.address,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
-      deployer.address
+      DEFAULT_REFUND_ADDRESS
     );
 
     const LidoStakeMatic = await ethers.getContractFactory("LidoStakeMatic");
     const lidoStakeMaticAdapter = await LidoStakeMatic.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
+      deployer.address,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
-      deployer.address,
       LIDO_ST_TOKEN,
       MATIC_TOKEN,
       LIDO_REFERRAL_ADDRESS
@@ -234,7 +233,7 @@ describe("LidoStakeMatic Adapter: ", async () => {
       lidoStakeMaticAdapter,
       steth,
       mockAssetForwarder,
-      matic
+      matic,
     } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
@@ -265,8 +264,7 @@ describe("LidoStakeMatic Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      { value: amount,
-        gasLimit: 1000000 }
+      { value: amount, gasLimit: 1000000 }
     );
 
     const balAfter = await ethers.provider.getBalance(deployer.address);

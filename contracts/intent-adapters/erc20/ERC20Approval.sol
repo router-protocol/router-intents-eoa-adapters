@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {RouterIntentAdapter, NitroMessageHandler, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
+import {DefaultRefundable} from "router-intents/contracts/DefaultRefundable.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 
 /**
@@ -9,25 +11,24 @@ import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
  * @author Shivam Agrawal
  * @notice Providing approval for ERC20 tokens.
  */
-contract ERC20Approval is RouterIntentAdapter {
+contract ERC20Approval is
+    RouterIntentAdapter,
+    NitroMessageHandler,
+    DefaultRefundable
+{
     using SafeERC20 for IERC20;
 
     constructor(
         address __native,
         address __wnative,
+        address __owner,
         address __assetForwarder,
         address __dexspan,
-        address __defaultRefundAddress,
-        address __owner
+        address __defaultRefundAddress
     )
-        RouterIntentAdapter(
-            __native,
-            __wnative,
-            __assetForwarder,
-            __dexspan,
-            __defaultRefundAddress,
-            __owner
-        )
+        RouterIntentAdapter(__native, __wnative, __owner)
+        NitroMessageHandler(__assetForwarder, __dexspan)
+        DefaultRefundable(__defaultRefundAddress)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -75,18 +76,6 @@ contract ERC20Approval is RouterIntentAdapter {
         return _tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory
-    ) external override onlyNitro nonReentrant {
-        withdrawTokens(tokenSent, defaultRefundAddress(), amount);
-        emit UnsupportedOperation(tokenSent, defaultRefundAddress(), amount);
-    }
-
     function _pullTokens(
         address token,
         uint256 amount
@@ -99,6 +88,18 @@ contract ERC20Approval is RouterIntentAdapter {
         }
 
         return totalValue;
+    }
+
+    /**
+     * @inheritdoc NitroMessageHandler
+     */
+    function handleMessage(
+        address tokenSent,
+        uint256 amount,
+        bytes memory
+    ) external override onlyNitro nonReentrant {
+        withdrawTokens(tokenSent, defaultRefundAddress(), amount);
+        emit UnsupportedOperation(tokenSent, defaultRefundAddress(), amount);
     }
 
     /**

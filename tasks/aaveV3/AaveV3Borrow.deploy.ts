@@ -48,10 +48,10 @@ task(DEPLOY_AAVE_V3_BORROW_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       defaultRefundAddress,
-      owner,
       AAVE_V3_POOL[network],
       AAVE_V3_WRAPPED_TOKEN_GATEWAY[network],
       AAVE_V3_REFERRAL_CODE
@@ -98,10 +98,10 @@ task(VERIFY_AAVE_V3_BORROW_ADAPTER).setAction(async function (
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       defaultRefundAddress,
-      owner,
       AAVE_V3_POOL[network],
       AAVE_V3_WRAPPED_TOKEN_GATEWAY[network],
       AAVE_V3_REFERRAL_CODE,

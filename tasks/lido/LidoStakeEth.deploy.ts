@@ -44,10 +44,9 @@ task(DEPLOY_LIDO_STAKE_ETH_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress,
-      owner,
       LIDO_ST_ETH[network],
       LIDO_REFERRAL_ADDRESS
     );
@@ -93,12 +92,11 @@ task(VERIFY_LIDO_STAKE_ETH_ADAPTER).setAction(async function (
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
+      owner,
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      defaultRefundAddress,
-      owner,
       LIDO_ST_ETH[network],
-      LIDO_REFERRAL_ADDRESS
+      LIDO_REFERRAL_ADDRESS,
     ],
   });
 

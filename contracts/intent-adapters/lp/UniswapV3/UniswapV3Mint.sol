@@ -2,7 +2,9 @@
 pragma solidity 0.8.18;
 
 import {IUniswapV3NonfungiblePositionManager} from "./Interfaces.sol";
-import {RouterIntentAdapter, NitroMessageHandler, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
+import {DefaultRefundable} from "router-intents/contracts/DefaultRefundable.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {UniswapV3Helpers} from "./UniswapV3Helpers.sol";
 
@@ -11,7 +13,12 @@ import {UniswapV3Helpers} from "./UniswapV3Helpers.sol";
  * @author Shivam Agrawal
  * @notice Minting a new position on Uniswap V3.
  */
-contract UniswapV3Mint is RouterIntentAdapter, UniswapV3Helpers {
+contract UniswapV3Mint is
+    RouterIntentAdapter,
+    NitroMessageHandler,
+    DefaultRefundable,
+    UniswapV3Helpers
+{
     using SafeERC20 for IERC20;
 
     event UniswapV3MintPositionDest();
@@ -19,20 +26,15 @@ contract UniswapV3Mint is RouterIntentAdapter, UniswapV3Helpers {
     constructor(
         address __native,
         address __wnative,
+        address __owner,
         address __assetForwarder,
         address __dexspan,
         address __defaultRefundAddress,
-        address __owner,
         address __nonFungiblePositionManager
     )
-        RouterIntentAdapter(
-            __native,
-            __wnative,
-            __assetForwarder,
-            __dexspan,
-            __defaultRefundAddress,
-            __owner
-        )
+        RouterIntentAdapter(__native, __wnative, __owner)
+        NitroMessageHandler(__assetForwarder, __dexspan)
+        DefaultRefundable(__defaultRefundAddress)
         UniswapV3Helpers(__nonFungiblePositionManager)
     // solhint-disable-next-line no-empty-blocks
     {
