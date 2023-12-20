@@ -19,7 +19,11 @@ contract AnkrStakeMatic is RouterIntentAdapter, NitroMessageHandler {
     address private immutable _matic;
     IAnkrStakeMatic private immutable _ankrPool;
 
-    event AnkrStakeMaticDest(address _recipient, uint256 _amount, uint256 _returnAmount);
+    event AnkrStakeMaticDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _returnAmount
+    );
 
     constructor(
         address __native,
@@ -118,10 +122,10 @@ contract AnkrStakeMatic is RouterIntentAdapter, NitroMessageHandler {
         IERC20(_matic).safeIncreaseAllowance(address(_ankrPool), _amount);
         _ankrPool.stakeAndClaimCerts(_amount);
         uint256 returnAmount = withdrawTokens(
-                _ankrMatic,
-                _recipient,
-                type(uint256).max
-            );
+            _ankrMatic,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
         tokens[0] = native();

@@ -17,7 +17,11 @@ contract BenqiStakeAvax is RouterIntentAdapter, NitroMessageHandler {
 
     address private immutable _benqiSAvax;
 
-    event BenqiStakeAvaxDest(address _recipient, uint256 _amount, uint256 _receivedSAvax);
+    event BenqiStakeAvaxDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _receivedSAvax
+    );
 
     constructor(
         address __native,
@@ -105,10 +109,10 @@ contract BenqiStakeAvax is RouterIntentAdapter, NitroMessageHandler {
     ) internal returns (address[] memory tokens, bytes memory logData) {
         IBenqiStakeAvax(_benqiSAvax).submit{value: _amount}();
         uint256 _receivedSAvax = withdrawTokens(
-                _benqiSAvax,
-                _recipient,
-                type(uint256).max
-            );
+            _benqiSAvax,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
         tokens[0] = native();

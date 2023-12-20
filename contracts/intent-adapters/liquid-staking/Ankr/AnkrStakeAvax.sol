@@ -18,7 +18,11 @@ contract AnkrStakeAvax is RouterIntentAdapter, NitroMessageHandler {
     address private immutable _ankrAvax;
     IAnkrStakeAvax private immutable _ankrPool;
 
-    event AnkrStakeAvaxDest(address _recipient, uint256 _amount, uint256 _returnAmount);
+    event AnkrStakeAvaxDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _returnAmount
+    );
 
     constructor(
         address __native,
@@ -112,10 +116,10 @@ contract AnkrStakeAvax is RouterIntentAdapter, NitroMessageHandler {
     ) internal returns (address[] memory tokens, bytes memory logData) {
         _ankrPool.stakeAndClaimCerts{value: _amount}();
         uint256 returnAmount = withdrawTokens(
-                _ankrAvax,
-                _recipient,
-                type(uint256).max
-            );
+            _ankrAvax,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
         tokens[0] = native();

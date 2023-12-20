@@ -1,27 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IOriginStakeEth} from "./Interfaces.sol";
+import {IRocketDepositPool} from "./Interfaces.sol";
 import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
 import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
+import {console} from "hardhat/console.sol";
 
 /**
- * @title OriginStakeEth
+ * @title RPStakeEth
  * @author Yashika Goyal
- * @notice Staking ETH to receive OETH on Origin.
+ * @notice Staking ETH to receive rETH on RocketPool.
  * @notice This contract is only for Ethereum chain.
  */
-contract OriginStakeEth is RouterIntentAdapter, NitroMessageHandler {
+contract RPStakeEth is RouterIntentAdapter, NitroMessageHandler {
     using SafeERC20 for IERC20;
 
-    IOriginStakeEth private immutable _oETHZapper;
-    address private immutable _oETH;
+    IRocketDepositPool private immutable _rocketDepositPool;
+    address private immutable _rEth;
 
-    event OriginStakeEthDest(
+    event RPStakeEthDest(
         address _recipient,
         uint256 _amount,
-        uint256 _receivedOEth
+        uint256 _receivedREth
     );
 
     constructor(
@@ -30,26 +31,26 @@ contract OriginStakeEth is RouterIntentAdapter, NitroMessageHandler {
         address __owner,
         address __assetForwarder,
         address __dexspan,
-        address __oETH,
-        address __oETHZapper
+        address __rEth,
+        address __rocketDepositPool
     )
         RouterIntentAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
     {
-        _oETHZapper = IOriginStakeEth(__oETHZapper);
-        _oETH = __oETH;
+        _rEth = __rEth;
+        _rocketDepositPool = IRocketDepositPool(__rocketDepositPool);
     }
 
-    function oEth() public view returns (address) {
-        return _oETH;
+    function rEth() public view returns (address) {
+        return _rEth;
     }
 
-    function originPool() public view returns (IOriginStakeEth) {
-        return _oETHZapper;
+    function rocketDepositPool() public view returns (IRocketDepositPool) {
+        return _rocketDepositPool;
     }
 
     function name() public pure override returns (string memory) {
-        return "OriginStakeEth";
+        return "RPStakeEth";
     }
 
     /**
@@ -69,7 +70,6 @@ contract OriginStakeEth is RouterIntentAdapter, NitroMessageHandler {
                 Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
             );
         }
-
         bytes memory logData;
 
         (tokens, logData) = _stake(_recipient, _amount);
@@ -94,14 +94,14 @@ contract OriginStakeEth is RouterIntentAdapter, NitroMessageHandler {
             return;
         }
 
-        try _oETHZapper.deposit{value: amount}() {
-            uint256 _receivedOEth = withdrawTokens(
-                _oETH,
+        try _rocketDepositPool.deposit{value: amount}() {
+            uint256 _receivedREth = withdrawTokens(
+                _rEth,
                 recipient,
                 type(uint256).max
             );
 
-            emit OriginStakeEthDest(recipient, amount, _receivedOEth);
+            emit RPStakeEthDest(recipient, amount, _receivedREth);
         } catch {
             withdrawTokens(tokenSent, recipient, amount);
             emit OperationFailedRefundEvent(tokenSent, recipient, amount);
@@ -114,18 +114,22 @@ contract OriginStakeEth is RouterIntentAdapter, NitroMessageHandler {
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        _oETHZapper.deposit{value: _amount}();
-        uint256 _receivedOEth = withdrawTokens(
-            _oETH,
-            _recipient,
-            type(uint256).max
-        );
+        console.log(_amount);
+        console.log(address(this).balance);
+        _rocketDepositPool.deposit{value: _amount}();
+        uint256 _receivedREth = withdrawTokens(
+                _rEth,
+                _recipient,
+                type(uint256).max
+            );
+        
+        console.log("log4");
 
         tokens = new address[](2);
         tokens[0] = native();
-        tokens[1] = oEth();
+        tokens[1] = rEth();
 
-        logData = abi.encode(_recipient, _amount, _receivedOEth);
+        logData = abi.encode(_recipient, _amount, _receivedREth);
     }
 
     /**
