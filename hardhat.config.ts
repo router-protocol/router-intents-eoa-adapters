@@ -6,6 +6,7 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "solidity-docgen";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-dependency-compiler";
