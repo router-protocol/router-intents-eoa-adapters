@@ -2,6 +2,7 @@ import "./stader";
 import "./lido";
 import "./ankr";
 import "./origin";
+import "./benqi";
 import "./dexspan";
 import "./erc20";
 import "./uniswapV3";
