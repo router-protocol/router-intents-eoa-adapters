@@ -22,7 +22,7 @@ jobs:
           echo REPORT_GAS=${{ secrets.REPORT_GAS }} >> .env
           echo ENV=${{ secrets.ENV }} >> .env
           echo PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} >> .env
-          echo OWNER={{ secrets.OWNER }} >> .env
+          echo OWNER=${{ secrets.OWNER }} >> .env
           cat .env
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
