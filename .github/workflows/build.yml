@@ -23,5 +23,3 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Test
         run: npm run test
-        with:
-          fail_ci_if_error: true
