@@ -5,10 +5,10 @@ import {
   DEFAULT_ENV,
   DEFAULT_OWNER,
   DEFAULT_REFUND_ADDRESS,
-  DEPLOY_AAVE_V3_SUPPLY_ADAPTER,
+  DEPLOY_AAVE_V3_BORROW_ADAPTER,
   DEXSPAN,
   NATIVE,
-  VERIFY_AAVE_V3_SUPPLY_ADAPTER,
+  VERIFY_AAVE_V3_BORROW_ADAPTER,
   WNATIVE,
 } from "../constants";
 import { task } from "hardhat/config";
@@ -26,7 +26,7 @@ import {
 
 const contractName: string = CONTRACT_NAME.AaveV3Borrow;
 
-task(DEPLOY_AAVE_V3_SUPPLY_ADAPTER)
+task(DEPLOY_AAVE_V3_BORROW_ADAPTER)
   .addFlag("verify", "pass true to verify the contract")
   .setAction(async function (
     _taskArguments: TaskArguments,
@@ -70,11 +70,11 @@ task(DEPLOY_AAVE_V3_SUPPLY_ADAPTER)
     console.log(`${contractName} contract deployed at`, instance.address);
 
     if (_taskArguments.verify === true) {
-      await _hre.run(VERIFY_AAVE_V3_SUPPLY_ADAPTER);
+      await _hre.run(VERIFY_AAVE_V3_BORROW_ADAPTER);
     }
   });
 
-task(VERIFY_AAVE_V3_SUPPLY_ADAPTER).setAction(async function (
+task(VERIFY_AAVE_V3_BORROW_ADAPTER).setAction(async function (
   _taskArguments: TaskArguments,
   _hre: HardhatRuntimeEnvironment
 ) {
