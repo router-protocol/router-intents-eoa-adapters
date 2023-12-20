@@ -13,7 +13,9 @@
     "postpack": "pinst --enable",
     "coverage": "COVERAGE=1 DISABLE_VIA_IR=true hardhat coverage",
     "prepare": "husky install .husky",
-    "compile": "npx hardhat compile"
+    "compile": "npx hardhat compile",
+    "ci:clean": "rm -rf ./artifacts ./cache",
+    "compile:clean": "npm run ci:clean && npm run compile"
   },
   "keywords": [
     "blockchain",
