@@ -4,6 +4,7 @@ import "./ankr";
 import "./origin";
 import "./benqi";
 import "./rocketPool";
+import "./swell";
 import "./dexspan";
 import "./erc20";
 import "./uniswapV3";
