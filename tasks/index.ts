@@ -6,6 +6,7 @@ import "./benqi";
 import "./rocketPool";
 import "./swell";
 import "./synClub";
+import "./metaPool";
 import "./dexspan";
 import "./erc20";
 import "./uniswapV3";
