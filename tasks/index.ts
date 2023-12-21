@@ -7,6 +7,7 @@ import "./rocketPool";
 import "./swell";
 import "./synClub";
 import "./metaPool";
+import "./frax";
 import "./dexspan";
 import "./erc20";
 import "./uniswapV3";
