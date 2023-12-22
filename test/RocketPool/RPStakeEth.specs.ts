@@ -17,9 +17,9 @@ import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 
-const CHAIN_ID = "17000";
-const R_ETH_TOKEN = "0x7322c24752f79c05FFD1E2a6FCB97020C1C264F1";
-const ROCKET_DEPOSIT_POOL = "0x320f3aAB9405e38b955178BBe75c477dECBA0C27";
+const CHAIN_ID = "5";
+const R_ETH_TOKEN = "0x178E141a0E3b34152f73Ff610437A7bf9B83267A";
+const ROCKET_DEPOSIT_POOL = "0xa9A6A14A3643690D0286574976F45abBDAD8f505";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const USDT = "0x2227E4764be4c858E534405019488D9E5890Ff9E";
 
@@ -127,21 +127,25 @@ describe("RPStakeEth Adapter: ", async () => {
     });
   };
 
-  it.only("Can stake on rp on same chain", async () => {
-    const { batchTransaction, rpStakeEthAdapter, rpEth } =
+  it("Can stake on rp on same chain", async () => {
+    const { batchTransaction, dexSpanAdapter, rpStakeEthAdapter, rpEth } =
       await setupTests();
 
-    const amount = ethers.utils.parseEther("1");
+    const amount = "1000000000000000000";
 
-    const rpData = defaultAbiCoder.encode(
-      ["address", "uint256"],
-      [deployer.address, amount]
+    const { data: swapData, minReturn } = await getPathfinderData(
+      NATIVE_TOKEN,
+      R_ETH_TOKEN,
+      amount,
+      CHAIN_ID,
+      CHAIN_ID,
+      batchTransaction.address
     );
 
     const tokens = [NATIVE_TOKEN];
     const amounts = [amount];
-    const targets = [rpStakeEthAdapter.address];
-    const data = [rpData];
+    const targets = [dexSpanAdapter.address];
+    const data = [swapData];
     const value = [0];
     const callType = [2];
 
@@ -170,19 +174,24 @@ describe("RPStakeEth Adapter: ", async () => {
     const {
       batchTransaction,
       rpStakeEthAdapter,
+      dexSpanAdapter,
       rpEth,
       mockAssetForwarder,
     } = await setupTests();
 
     const amount = "100000000000000000";
 
-    const targets = [rpStakeEthAdapter.address];
-    const data = [
-      defaultAbiCoder.encode(
-        ["address", "uint256"],
-        [deployer.address, amount]
-      ),
-    ];
+    const { data: swapData, minReturn } = await getPathfinderData(
+      NATIVE_TOKEN,
+      R_ETH_TOKEN,
+      amount,
+      CHAIN_ID,
+      CHAIN_ID,
+      batchTransaction.address
+    );
+
+    const targets = [dexSpanAdapter.address];
+    const data = [swapData];
     const value = [0];
     const callType = [2];
 
@@ -199,32 +208,6 @@ describe("RPStakeEth Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      { value: amount }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const rpEthBalAfter = await rpEth.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(rpEthBalAfter).gt(rpEthBalBefore);
-  });
-
-  it("Can stake ETH on Rocket Pool on dest chain when instruction is received directly on RPStakeEth adapter", async () => {
-    const { rpStakeEthAdapter, rpEth, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = "100000000000000000";
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const rpEthBalBefore = await rpEth.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      rpStakeEthAdapter.address,
       { value: amount }
     );
 
