@@ -18,7 +18,11 @@ contract AnkrStakeFantom is RouterIntentAdapter, NitroMessageHandler {
     address private immutable _ankrFtm;
     IAnkrStakeFtm private immutable _ankrPool;
 
-    event AnkrStakeFantomDest(address _recipient, uint256 _amount, uint256 _returnAmount);
+    event AnkrStakeFantomDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _returnAmount
+    );
 
     constructor(
         address __native,
@@ -112,10 +116,10 @@ contract AnkrStakeFantom is RouterIntentAdapter, NitroMessageHandler {
     ) internal returns (address[] memory tokens, bytes memory logData) {
         _ankrPool.stakeAndClaimCerts{value: _amount}();
         uint256 returnAmount = withdrawTokens(
-                _ankrFtm,
-                _recipient,
-                type(uint256).max
-            );
+            _ankrFtm,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
         tokens[0] = native();

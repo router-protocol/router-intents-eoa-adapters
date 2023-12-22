@@ -1,28 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IAnkrStakeMatic} from "./Interfaces.sol";
+import {IOriginStakeEth} from "./Interfaces.sol";
 import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
 import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
- * @title AnkrStakeMatic
+ * @title OriginStakeEth
  * @author Yashika Goyal
- * @notice Staking MATIC to receive AnkrMATIC on Ankr.
+ * @notice Staking ETH to receive OETH on Origin.
  * @notice This contract is only for Ethereum chain.
  */
-contract AnkrStakeMatic is RouterIntentAdapter, NitroMessageHandler {
+contract OriginStakeEth is RouterIntentAdapter, NitroMessageHandler {
     using SafeERC20 for IERC20;
 
-    address private immutable _ankrMatic;
-    address private immutable _matic;
-    IAnkrStakeMatic private immutable _ankrPool;
+    IOriginStakeEth private immutable _oETHZapper;
+    address private immutable _oETH;
 
-    event AnkrStakeMaticDest(
+    event OriginStakeEthDest(
         address _recipient,
         uint256 _amount,
-        uint256 _returnAmount
+        uint256 _receivedOEth
     );
 
     constructor(
@@ -31,32 +30,26 @@ contract AnkrStakeMatic is RouterIntentAdapter, NitroMessageHandler {
         address __owner,
         address __assetForwarder,
         address __dexspan,
-        address __ankrMatic,
-        address __matic,
-        address __ankrPool
+        address __oETH,
+        address __oETHZapper
     )
         RouterIntentAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
     {
-        _ankrMatic = __ankrMatic;
-        _matic = __matic;
-        _ankrPool = IAnkrStakeMatic(__ankrPool);
+        _oETHZapper = IOriginStakeEth(__oETHZapper);
+        _oETH = __oETH;
     }
 
-    function ankrMatic() public view returns (address) {
-        return _ankrMatic;
+    function oEth() public view returns (address) {
+        return _oETH;
     }
 
-    function matic() public view returns (address) {
-        return _matic;
-    }
-
-    function ankrPool() public view returns (IAnkrStakeMatic) {
-        return _ankrPool;
+    function originPool() public view returns (IOriginStakeEth) {
+        return _oETHZapper;
     }
 
     function name() public pure override returns (string memory) {
-        return "AnkrStakeMatic";
+        return "OriginStakeEth";
     }
 
     /**
@@ -71,7 +64,10 @@ contract AnkrStakeMatic is RouterIntentAdapter, NitroMessageHandler {
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
-            IERC20(_matic).safeTransferFrom(msg.sender, self(), _amount);
+            require(
+                msg.value == _amount,
+                Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
+            );
         }
 
         bytes memory logData;
@@ -92,21 +88,20 @@ contract AnkrStakeMatic is RouterIntentAdapter, NitroMessageHandler {
     ) external override onlyNitro nonReentrant {
         address recipient = abi.decode(instruction, (address));
 
-        if (tokenSent != matic()) {
+        if (tokenSent != native()) {
             withdrawTokens(tokenSent, recipient, amount);
             emit OperationFailedRefundEvent(tokenSent, recipient, amount);
             return;
         }
 
-        IERC20(_matic).safeIncreaseAllowance(address(_ankrPool), amount);
-        try _ankrPool.stakeAndClaimCerts(amount) {
-            uint256 returnAmount = withdrawTokens(
-                _ankrMatic,
+        try _oETHZapper.deposit{value: amount}() {
+            uint256 _receivedOEth = withdrawTokens(
+                _oETH,
                 recipient,
                 type(uint256).max
             );
 
-            emit AnkrStakeMaticDest(recipient, amount, returnAmount);
+            emit OriginStakeEthDest(recipient, amount, _receivedOEth);
         } catch {
             withdrawTokens(tokenSent, recipient, amount);
             emit OperationFailedRefundEvent(tokenSent, recipient, amount);
@@ -119,19 +114,18 @@ contract AnkrStakeMatic is RouterIntentAdapter, NitroMessageHandler {
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        IERC20(_matic).safeIncreaseAllowance(address(_ankrPool), _amount);
-        _ankrPool.stakeAndClaimCerts(_amount);
-        uint256 returnAmount = withdrawTokens(
-            _ankrMatic,
+        _oETHZapper.deposit{value: _amount}();
+        uint256 _receivedOEth = withdrawTokens(
+            _oETH,
             _recipient,
             type(uint256).max
         );
 
         tokens = new address[](2);
         tokens[0] = native();
-        tokens[1] = ankrMatic();
+        tokens[1] = oEth();
 
-        logData = abi.encode(_recipient, _amount, returnAmount);
+        logData = abi.encode(_recipient, _amount, _receivedOEth);
     }
 
     /**

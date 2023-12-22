@@ -18,7 +18,11 @@ contract AnkrStakeEth is RouterIntentAdapter, NitroMessageHandler {
     address private immutable _ankrEth;
     IAnkrStakeEth private immutable _ankrPool;
 
-    event AnkrStakeEthDest(address _recipient, uint256 _amount, uint256 _returnAmount);
+    event AnkrStakeEthDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _returnAmount
+    );
 
     constructor(
         address __native,
@@ -112,10 +116,10 @@ contract AnkrStakeEth is RouterIntentAdapter, NitroMessageHandler {
     ) internal returns (address[] memory tokens, bytes memory logData) {
         _ankrPool.stake{value: _amount}();
         uint256 returnAmount = withdrawTokens(
-                _ankrEth,
-                _recipient,
-                type(uint256).max
-            );
+            _ankrEth,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
         tokens[0] = native();
