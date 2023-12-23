@@ -252,21 +252,18 @@ contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
     }
 
     function processRefunds(address user) internal {
-        uint256 len = tokensToRefund[user].tokens.length;
+        address[] memory tokens = tokensToRefund[user].tokens;
+        delete tokensToRefund[user].tokens;
+
+        uint256 len = tokens.length;
 
         for (uint256 i = 0; i < len; ) {
-            withdrawTokens(
-                tokensToRefund[user].tokens[i],
-                user,
-                type(uint256).max
-            );
+            withdrawTokens(tokens[i], user, type(uint256).max);
 
             unchecked {
                 ++i;
             }
         }
-
-        delete tokensToRefund[user];
     }
 
     /**
