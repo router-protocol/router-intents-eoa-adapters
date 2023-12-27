@@ -2,8 +2,9 @@
 pragma solidity 0.8.18;
 
 import {IMetaPoolStakeEth} from "./Interfaces.sol";
-import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
+import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
+import {Errors} from "router-intents/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -12,13 +13,17 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking ETH to receive mpETH on MetaPool.
  * @notice This contract is only for Ethereum chain.
  */
-contract MetaPoolStakeEth is RouterIntentAdapter, NitroMessageHandler {
+contract MetaPoolStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
     using SafeERC20 for IERC20;
 
     address private immutable _mpEth;
     IMetaPoolStakeEth private immutable _metaPoolPool;
 
-    event MetaPoolStakeEthDest(address _recipient, uint256 _amount, uint256 _returnAmount);
+    event MetaPoolStakeEthDest(
+        address _recipient,
+        uint256 _amount,
+        uint256 _returnAmount
+    );
 
     constructor(
         address __native,
@@ -29,7 +34,7 @@ contract MetaPoolStakeEth is RouterIntentAdapter, NitroMessageHandler {
         address __mpEth,
         address __metaPoolPool
     )
-        RouterIntentAdapter(__native, __wnative, __owner)
+        RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
     {
         _mpEth = __mpEth;
@@ -49,7 +54,7 @@ contract MetaPoolStakeEth is RouterIntentAdapter, NitroMessageHandler {
     }
 
     /**
-     * @inheritdoc RouterIntentAdapter
+     * @inheritdoc EoaExecutor
      */
     function execute(
         address,
@@ -106,7 +111,9 @@ contract MetaPoolStakeEth is RouterIntentAdapter, NitroMessageHandler {
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        uint256 _returnAmount = _metaPoolPool.depositETH{value: _amount}(_recipient);
+        uint256 _returnAmount = _metaPoolPool.depositETH{value: _amount}(
+            _recipient
+        );
 
         tokens = new address[](2);
         tokens[0] = native();

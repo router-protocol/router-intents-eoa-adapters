@@ -2,9 +2,10 @@
 pragma solidity 0.8.18;
 
 import {IUniswapV3NonfungiblePositionManager} from "./Interfaces.sol";
-import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
-import {DefaultRefundable} from "router-intents/contracts/DefaultRefundable.sol";
+import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
+import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {UniswapV3Helpers} from "./UniswapV3Helpers.sol";
 
@@ -14,7 +15,7 @@ import {UniswapV3Helpers} from "./UniswapV3Helpers.sol";
  * @notice Minting a new position on Uniswap V3.
  */
 contract UniswapV3Mint is
-    RouterIntentAdapter,
+    RouterIntentEoaAdapter,
     NitroMessageHandler,
     DefaultRefundable,
     UniswapV3Helpers
@@ -32,7 +33,7 @@ contract UniswapV3Mint is
         address __defaultRefundAddress,
         address __nonFungiblePositionManager
     )
-        RouterIntentAdapter(__native, __wnative, __owner)
+        RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
         DefaultRefundable(__defaultRefundAddress)
         UniswapV3Helpers(__nonFungiblePositionManager)
@@ -46,7 +47,7 @@ contract UniswapV3Mint is
     }
 
     /**
-     * @inheritdoc RouterIntentAdapter
+     * @inheritdoc EoaExecutor
      */
     function execute(
         address,

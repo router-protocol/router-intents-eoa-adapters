@@ -92,6 +92,8 @@ export const DEPLOY_ERC20_TRANSFER_ADAPTER = "DEPLOY_ERC20_TRANSFER_ADAPTER";
 export const VERIFY_ERC20_TRANSFER_ADAPTER = "VERIFY_ERC20_TRANSFER_ADAPTER";
 export const DEPLOY_UNISWAP_V3_MINT_ADAPTER = "DEPLOY_UNISWAP_V3_MINT_ADAPTER";
 export const VERIFY_UNISWAP_V3_MINT_ADAPTER = "VERIFY_UNISWAP_V3_MINT_ADAPTER";
+export const DEPLOY_SUSHISWAP_MINT_ADAPTER = "DEPLOY_SUSHISWAP_MINT_ADAPTER";
+export const VERIFY_SUSHISWAP_MINT_ADAPTER = "VERIFY_SUSHISWAP_MINT_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -175,4 +177,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ERC20Approval: "ERC20Approval",
   ERC20Transfer: "ERC20Transfer",
   UniswapV3Mint: "UniswapV3Mint",
+  SushiswapMint: "SushiswapMint"
 };

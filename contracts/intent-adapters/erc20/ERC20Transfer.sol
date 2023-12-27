@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
-import {DefaultRefundable} from "router-intents/contracts/DefaultRefundable.sol";
+import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
+import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 
 /**
@@ -12,7 +13,7 @@ import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
  * @notice Transferring ERC20 tokens.
  */
 contract ERC20Transfer is
-    RouterIntentAdapter,
+    RouterIntentEoaAdapter,
     NitroMessageHandler,
     DefaultRefundable
 {
@@ -26,7 +27,7 @@ contract ERC20Transfer is
         address __dexspan,
         address __defaultRefundAddress
     )
-        RouterIntentAdapter(__native, __wnative, __owner)
+        RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
         DefaultRefundable(__defaultRefundAddress)
     // solhint-disable-next-line no-empty-blocks
@@ -39,7 +40,7 @@ contract ERC20Transfer is
     }
 
     /**
-     * @inheritdoc RouterIntentAdapter
+     * @inheritdoc EoaExecutor
      */
     function execute(
         address,

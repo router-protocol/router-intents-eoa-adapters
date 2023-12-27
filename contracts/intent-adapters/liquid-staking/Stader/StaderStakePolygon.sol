@@ -2,8 +2,9 @@
 pragma solidity 0.8.18;
 
 import {IStaderPool} from "./Interfaces.sol";
-import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
+import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
+import {Errors} from "router-intents/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -12,7 +13,7 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking MATIC to receive MaticX on Stader.
  * @notice This contract is only for Polygon chain.
  */
-contract StaderStakePolygon is RouterIntentAdapter, NitroMessageHandler {
+contract StaderStakePolygon is RouterIntentEoaAdapter, NitroMessageHandler {
     using SafeERC20 for IERC20;
 
     address public immutable _maticx;
@@ -33,7 +34,7 @@ contract StaderStakePolygon is RouterIntentAdapter, NitroMessageHandler {
         address __maticx,
         address __staderPool
     )
-        RouterIntentAdapter(__native, __wnative, __owner)
+        RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
     {
         _maticx = __maticx;
@@ -53,7 +54,7 @@ contract StaderStakePolygon is RouterIntentAdapter, NitroMessageHandler {
     }
 
     /**
-     * @inheritdoc RouterIntentAdapter
+     * @inheritdoc EoaExecutor
      */
     function execute(
         address,

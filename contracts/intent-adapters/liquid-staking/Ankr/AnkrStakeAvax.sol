@@ -2,8 +2,9 @@
 pragma solidity 0.8.18;
 
 import {IAnkrStakeAvax} from "./Interfaces.sol";
-import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
+import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
+import {Errors} from "router-intents/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -12,7 +13,7 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking AVAX to receive AnkrAVAX on Ankr.
  * @notice This contract is only for Avalanche chain.
  */
-contract AnkrStakeAvax is RouterIntentAdapter, NitroMessageHandler {
+contract AnkrStakeAvax is RouterIntentEoaAdapter, NitroMessageHandler {
     using SafeERC20 for IERC20;
 
     address private immutable _ankrAvax;
@@ -33,7 +34,7 @@ contract AnkrStakeAvax is RouterIntentAdapter, NitroMessageHandler {
         address __ankrAvax,
         address __ankrPool
     )
-        RouterIntentAdapter(__native, __wnative, __owner)
+        RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
     {
         _ankrAvax = __ankrAvax;
@@ -53,7 +54,7 @@ contract AnkrStakeAvax is RouterIntentAdapter, NitroMessageHandler {
     }
 
     /**
-     * @inheritdoc RouterIntentAdapter
+     * @inheritdoc EoaExecutor
      */
     function execute(
         address,

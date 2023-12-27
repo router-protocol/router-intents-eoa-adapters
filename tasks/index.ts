@@ -11,5 +11,6 @@ import "./frax";
 import "./dexspan";
 import "./erc20";
 import "./uniswapV3";
+import "./sushiswap";
 import "./aaveV3";
 import "./BatchTransaction.deploy";

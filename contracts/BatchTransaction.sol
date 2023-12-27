@@ -2,8 +2,8 @@
 pragma solidity 0.8.18;
 
 import {ReentrancyGuard} from "./utils/ReentrancyGuard.sol";
-import {Basic} from "router-intents/contracts/RouterIntentAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
+import {Basic} from "router-intents/contracts/BaseAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
 import {CallLib} from "./CallLib.sol";
 import {IERC20, SafeERC20} from "./utils/SafeERC20.sol";
 import {Errors} from "./Errors.sol";
