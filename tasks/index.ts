@@ -13,4 +13,5 @@ import "./erc20";
 import "./uniswapV3";
 import "./sushiswap";
 import "./aaveV3";
+import "./compound";
 import "./BatchTransaction.deploy";

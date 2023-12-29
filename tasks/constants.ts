@@ -94,6 +94,10 @@ export const DEPLOY_UNISWAP_V3_MINT_ADAPTER = "DEPLOY_UNISWAP_V3_MINT_ADAPTER";
 export const VERIFY_UNISWAP_V3_MINT_ADAPTER = "VERIFY_UNISWAP_V3_MINT_ADAPTER";
 export const DEPLOY_SUSHISWAP_MINT_ADAPTER = "DEPLOY_SUSHISWAP_MINT_ADAPTER";
 export const VERIFY_SUSHISWAP_MINT_ADAPTER = "VERIFY_SUSHISWAP_MINT_ADAPTER";
+export const DEPLOY_COMPOUND_SUPPLY_ADAPTER = "DEPLOY_COMPOUND_SUPPLY_ADAPTER";
+export const VERIFY_COMPOUND_SUPPLY_ADAPTER = "VERIFY_COMPOUND_SUPPLY_ADAPTER";
+export const DEPLOY_COMPOUND_BORROW_ADAPTER = "DEPLOY_COMPOUND_BORROW_ADAPTER";
+export const VERIFY_COMPOUND_BORROW_ADAPTER = "VERIFY_COMPOUND_BORROW_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -177,5 +181,7 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ERC20Approval: "ERC20Approval",
   ERC20Transfer: "ERC20Transfer",
   UniswapV3Mint: "UniswapV3Mint",
-  SushiswapMint: "SushiswapMint"
+  SushiswapMint: "SushiswapMint",
+  CompoundSupply: "CompoundSupply",
+  CompoundBorrow: "CompoundBorrow",
 };
