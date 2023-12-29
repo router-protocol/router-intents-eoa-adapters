@@ -1,28 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IUniswapV3NonfungiblePositionManager} from "./Interfaces.sol";
+import {ISushiswapNonfungiblePositionManager} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
 import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
 import {Errors} from "router-intents/contracts/utils/Errors.sol";
 import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
-import {UniswapV3Helpers} from "./UniswapV3Helpers.sol";
+import {SushiswapHelpers} from "./SushiswapHelpers.sol";
 
 /**
- * @title UniswapV3Mint
- * @author Shivam Agrawal
- * @notice Minting a new position on Uniswap V3.
+ * @title SushiswapMint
+ * @author Yashika Goyal
+ * @notice Minting a new position on Sushiswap.
  */
-contract UniswapV3Mint is
+contract SushiswapMint is
     RouterIntentEoaAdapter,
     NitroMessageHandler,
     DefaultRefundable,
-    UniswapV3Helpers
+    SushiswapHelpers
 {
     using SafeERC20 for IERC20;
 
-    event UniswapV3MintPositionDest();
+    event SushiswapMintPositionDest();
 
     constructor(
         address __native,
@@ -36,14 +36,14 @@ contract UniswapV3Mint is
         RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
         DefaultRefundable(__defaultRefundAddress)
-        UniswapV3Helpers(__nonFungiblePositionManager)
+        SushiswapHelpers(__nonFungiblePositionManager)
     // solhint-disable-next-line no-empty-blocks
     {
 
     }
 
     function name() public pure override returns (string memory) {
-        return "UniswapV3Mint";
+        return "SushiswapMint";
     }
 
     /**
@@ -54,7 +54,7 @@ contract UniswapV3Mint is
         address,
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
-        IUniswapV3NonfungiblePositionManager.MintParams
+        ISushiswapNonfungiblePositionManager.MintParams
             memory mintParams = parseInputs(data);
 
         // If the adapter is called using `call` and not `delegatecall`
@@ -127,7 +127,7 @@ contract UniswapV3Mint is
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _mint(
-        IUniswapV3NonfungiblePositionManager.MintParams memory mintParams
+        ISushiswapNonfungiblePositionManager.MintParams memory mintParams
     ) internal returns (address[] memory tokens, bytes memory logData) {
         (uint256 tokenId, , , ) = positionManager().mint(mintParams);
 
@@ -147,10 +147,10 @@ contract UniswapV3Mint is
     )
         public
         pure
-        returns (IUniswapV3NonfungiblePositionManager.MintParams memory)
+        returns (ISushiswapNonfungiblePositionManager.MintParams memory)
     {
         return
-            abi.decode(data, (IUniswapV3NonfungiblePositionManager.MintParams));
+            abi.decode(data, (ISushiswapNonfungiblePositionManager.MintParams));
     }
 
     // solhint-disable-next-line no-empty-blocks

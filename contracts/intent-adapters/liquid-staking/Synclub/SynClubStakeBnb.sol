@@ -2,8 +2,9 @@
 pragma solidity 0.8.18;
 
 import {ISynClubPool} from "./Interfaces.sol";
-import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
+import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
+import {Errors} from "router-intents/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -12,7 +13,7 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking BNB to receive snBNB on SynClub.
  * @notice This contract is only for BSC chain.
  */
-contract SynClubStakeBnb is RouterIntentAdapter, NitroMessageHandler {
+contract SynClubStakeBnb is RouterIntentEoaAdapter, NitroMessageHandler {
     using SafeERC20 for IERC20;
 
     address private immutable _snBnb;
@@ -33,7 +34,7 @@ contract SynClubStakeBnb is RouterIntentAdapter, NitroMessageHandler {
         address __snBnb,
         address __synClubPool
     )
-        RouterIntentAdapter(__native, __wnative, __owner)
+        RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
     {
         _snBnb = __snBnb;
@@ -53,7 +54,7 @@ contract SynClubStakeBnb is RouterIntentAdapter, NitroMessageHandler {
     }
 
     /**
-     * @inheritdoc RouterIntentAdapter
+     * @inheritdoc EoaExecutor
      */
     function execute(
         address,
@@ -116,10 +117,10 @@ contract SynClubStakeBnb is RouterIntentAdapter, NitroMessageHandler {
     ) internal returns (address[] memory tokens, bytes memory logData) {
         _synClubPool.deposit{value: _amount}();
         uint256 receivedSnBnb = withdrawTokens(
-                _snBnb,
-                _recipient,
-                type(uint256).max
-            );
+            _snBnb,
+            _recipient,
+            type(uint256).max
+        );
 
         tokens = new address[](2);
         tokens[0] = native();

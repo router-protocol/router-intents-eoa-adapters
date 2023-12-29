@@ -2,9 +2,10 @@
 pragma solidity 0.8.18;
 
 import {AaveV3Helpers} from "./AaveV3Helpers.sol";
-import {RouterIntentAdapter, Errors} from "router-intents/contracts/RouterIntentAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/NitroMessageHandler.sol";
-import {DefaultRefundable} from "router-intents/contracts/DefaultRefundable.sol";
+import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
+import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
+import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -13,7 +14,7 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Borrowing funds on AaveV3.
  */
 contract AaveV3Borrow is
-    RouterIntentAdapter,
+    RouterIntentEoaAdapter,
     NitroMessageHandler,
     DefaultRefundable,
     AaveV3Helpers
@@ -31,7 +32,7 @@ contract AaveV3Borrow is
         address __aaveV3WrappedTokenGateway,
         uint16 __aaveV3ReferralCode
     )
-        RouterIntentAdapter(__native, __wnative, __owner)
+        RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
         DefaultRefundable(__defaultRefundAddress)
         AaveV3Helpers(
@@ -49,7 +50,7 @@ contract AaveV3Borrow is
     }
 
     /**
-     * @inheritdoc RouterIntentAdapter
+     * @inheritdoc EoaExecutor
      */
     function execute(
         address,

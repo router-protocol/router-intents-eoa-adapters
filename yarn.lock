@@ -6914,10 +6914,10 @@ rlp@^2.2.3, rlp@^2.2.4:
   dependencies:
     bn.js "^5.2.0"
 
-router-intents@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/router-intents/-/router-intents-3.0.1.tgz#c1109ce2349874165be556b65ef1c29e4bb44564"
-  integrity sha512-R4yHkN1Fug2BojHAStUNevV/UQd8joMpkEX8eDTFIHGhpfJ9tBL1D1FZPleoJxRtL2zGaniAW4H5WlDlN7npAg==
+router-intents@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/router-intents/-/router-intents-4.0.1.tgz#fe138e21b72aa53f03ca35f9b7833380c4852b65"
+  integrity sha512-49XdSQUdAOdYCoChZIvENj43OjhDdRD6YWkIz/6+0m4xHv2NlgFSqQ4seNVc29G4RI5qX0zl8IPW81HOsQe1/w==
   dependencies:
     "@ethersproject/abstract-signer" "^5.6.2"
     "@ethersproject/constants" "^5.6.1"
