@@ -11,11 +11,7 @@ contract CompoundHelpers {
     error InvalidBorrowMarket();
     error InvalidSupplyMarket();
 
-    constructor(
-        address __usdc,
-        address __cUSDCV3Pool,
-        address __cWETHV3Pool
-    ) {
+    constructor(address __usdc, address __cUSDCV3Pool, address __cWETHV3Pool) {
         _usdc = __usdc;
         _cUSDCV3Pool = IComet(__cUSDCV3Pool);
         _cWETHV3Pool = IComet(__cWETHV3Pool);
@@ -25,19 +21,11 @@ contract CompoundHelpers {
         return _usdc;
     }
 
-    function cUSDCV3Pool()
-        public
-        view
-        returns (IComet)
-    {
+    function cUSDCV3Pool() public view returns (IComet) {
         return _cUSDCV3Pool;
     }
 
-    function cWETHV3Pool()
-        public
-        view
-        returns (IComet)
-    {
+    function cWETHV3Pool() public view returns (IComet) {
         return _cWETHV3Pool;
-    }   
+    }
 }

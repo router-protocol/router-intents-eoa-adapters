@@ -36,11 +36,7 @@ contract CompoundBorrow is
         RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
         DefaultRefundable(__defaultRefundAddress)
-        CompoundHelpers(
-            __usdc,
-            __cUSDCV3Pool,
-            __cWETHV3Pool
-        )
+        CompoundHelpers(__usdc, __cUSDCV3Pool, __cWETHV3Pool)
     // solhint-disable-next-line no-empty-blocks
     {
 

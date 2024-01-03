@@ -21,7 +21,11 @@ contract CompoundSupply is
 {
     using SafeERC20 for IERC20;
 
-    event CompoundSupplyDest(address _token, address _recipient, uint256 _amount);
+    event CompoundSupplyDest(
+        address _token,
+        address _recipient,
+        uint256 _amount
+    );
 
     constructor(
         address __native,
@@ -29,17 +33,13 @@ contract CompoundSupply is
         address __owner,
         address __assetForwarder,
         address __dexspan,
-       address __usdc,
+        address __usdc,
         address __cUSDCV3Pool,
         address __cWETHV3Pool
     )
         RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
-        CompoundHelpers(
-            __usdc,
-            __cUSDCV3Pool,
-            __cWETHV3Pool
-        )
+        CompoundHelpers(__usdc, __cUSDCV3Pool, __cWETHV3Pool)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -57,9 +57,12 @@ contract CompoundSupply is
         address,
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
-        (address _asset, address _recipient, uint256 _amount, address _market) = parseInputs(
-            data
-        );
+        (
+            address _asset,
+            address _recipient,
+            uint256 _amount,
+            address _market
+        ) = parseInputs(data);
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
@@ -73,7 +76,12 @@ contract CompoundSupply is
 
         bytes memory logData;
 
-        (tokens, logData) = _compoundSupply(_asset, _recipient, _amount, _market);
+        (tokens, logData) = _compoundSupply(
+            _asset,
+            _recipient,
+            _amount,
+            _market
+        );
 
         emit ExecutionEvent(name(), logData);
         return tokens;
@@ -115,18 +123,14 @@ contract CompoundSupply is
             IWETH(wnative()).deposit{value: supplyAmount}();
             IWETH(wnative()).approve(address(_cTokenV3Pool), supplyAmount);
 
-            try
-                _cTokenV3Pool.supplyTo(recipient, wnative(), supplyAmount)
-            {
+            try _cTokenV3Pool.supplyTo(recipient, wnative(), supplyAmount) {
                 emit CompoundSupplyDest(native(), recipient, amount);
             } catch {
                 withdrawTokens(native(), recipient, amount);
                 emit OperationFailedRefundEvent(native(), recipient, amount);
             }
-        }
-        else
-            try _cTokenV3Pool.supplyTo(recipient, tokenSent, amount)
-            {
+        } else
+            try _cTokenV3Pool.supplyTo(recipient, tokenSent, amount) {
                 emit CompoundSupplyDest(tokenSent, recipient, amount);
             } catch {
                 withdrawTokens(tokenSent, recipient, amount);
@@ -148,7 +152,7 @@ contract CompoundSupply is
         address recipient,
         uint256 amount,
         address market
-    ) private returns (address[] memory tokens, bytes memory logData){
+    ) private returns (address[] memory tokens, bytes memory logData) {
         IComet _cTokenV3Pool;
 
         if (market == usdc()) {
