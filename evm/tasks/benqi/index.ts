@@ -1,0 +1,1 @@
+import "./BenqiStakeAvax.deploy";
