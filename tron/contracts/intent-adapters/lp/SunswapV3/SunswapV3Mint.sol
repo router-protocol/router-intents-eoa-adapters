@@ -11,7 +11,7 @@ import {SunswapHelpers} from "./SunswapV3Helpers.sol";
 
 /**
  * @title SunswapMint
- * @author Shivam Agrawal
+ * @author Yashika Goyal
  * @notice Minting a new position on Sunswap V3.
  */
 contract SunswapMint is

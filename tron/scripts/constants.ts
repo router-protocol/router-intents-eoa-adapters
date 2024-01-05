@@ -1,6 +1,9 @@
 export const DEFAULT_ENV = "testnet";
 export const DEFAULT_NETWORK = "shasta";
 export const ETH = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+export const DEFAULT_REFUND_ADDRESS =
+  "0x54485755c209Cb47A4c7aAeAF3a14818CFe675A5";
+export const DEFAULT_OWNER = "0x54485755c209Cb47A4c7aAeAF3a14818CFe675A5";
 
 export const WETH: { [network: string]: { [chainId: string]: string } } = {
   testnet: {

@@ -6,7 +6,7 @@ import {
 } from "../utils";
 import fs from "fs";
 import path from "path";
-import { JUST_LEND_S_TRX } from "./constants";
+import { NON_FUNGIBLE_POSITION_MANAGER } from "./constants";
 import {
   ETH,
   WETH,
@@ -16,11 +16,12 @@ import {
   DEFAULT_ENV,
   DEFAULT_NETWORK,
   DEFAULT_OWNER,
+  DEFAULT_REFUND_ADDRESS,
 } from "../constants";
 
-const contractName = CONTRACTS.JustLendStakeTrx;
+const contractName = CONTRACTS.SunswapMint;
 
-// ts-node ./scripts/JustLendStakeTrx.deploy.ts --network "mainnet"
+// ts-node ./scripts/SunswapMint.deploy.ts --network "mainnet"
 async function main() {
   console.log(`${contractName} Deployment Started:`);
 
@@ -59,7 +60,8 @@ async function main() {
       DEFAULT_OWNER,
       ASSET_FORWARDER[env][chainId],
       DEXSPAN[env][chainId],
-      JUST_LEND_S_TRX[chainId],
+      DEFAULT_REFUND_ADDRESS,
+      NON_FUNGIBLE_POSITION_MANAGER[chainId]
     ]
   );
 
