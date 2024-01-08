@@ -1,25 +1,29 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {AaveV3Helpers} from "./AaveV3Helpers.sol";
+import {IJustLendPool} from "./interfaces/IJustLendPool.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
 import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
 import {Errors} from "router-intents/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
+import {SafeMath} from "../../../utils/SafeMath.sol";
 
 /**
- * @title AaveV3Supply
- * @author Shivam Agrawal
- * @notice Supplying funds on AaveV3.
+ * @title JustLendSupply
+ * @author Yashika Goyal
+ * @notice Supplying funds on JustLend.
  */
-contract AaveV3Supply is
+
+contract JustLendSupply is
     RouterIntentEoaAdapter,
-    NitroMessageHandler,
-    AaveV3Helpers
+    NitroMessageHandler
 {
     using SafeERC20 for IERC20;
+    using SafeMath for uint256;
 
-    event AaveV3SupplyDest(address _token, address _recipient, uint256 _amount);
+    address private immutable _cToken;
+
+    event JustLendSupplyDest(address _token, address _recipient, uint256 _amount);
 
     constructor(
         address __native,
@@ -27,24 +31,21 @@ contract AaveV3Supply is
         address __owner,
         address __assetForwarder,
         address __dexspan,
-        address __aaveV3Pool,
-        address __aaveV3WrappedTokenGateway,
-        uint16 __aaveV3ReferralCode
+        address __cToken
     )
         RouterIntentEoaAdapter(__native, __wnative, __owner)
         NitroMessageHandler(__assetForwarder, __dexspan)
-        AaveV3Helpers(
-            __aaveV3Pool,
-            __aaveV3WrappedTokenGateway,
-            __aaveV3ReferralCode
-        )
     // solhint-disable-next-line no-empty-blocks
     {
-
+        _cToken = __cToken;
     }
 
     function name() public pure override returns (string memory) {
-        return "AaveV3Supply";
+        return "JustLendSupply";
+    }
+
+    function cToken() public view returns (address) {
+        return _cToken;
     }
 
     /**
@@ -71,7 +72,7 @@ contract AaveV3Supply is
 
         bytes memory logData;
 
-        (tokens, logData) = _aaveV3Supply(_asset, _recipient, _amount);
+        (tokens, logData) = _justLendSupply(_asset, _recipient, _amount);
 
         emit ExecutionEvent(name(), logData);
         return tokens;
@@ -87,63 +88,58 @@ contract AaveV3Supply is
     ) external override onlyNitro nonReentrant {
         address recipient = abi.decode(instruction, (address));
 
-        approveToken(tokenSent, address(aaveV3Pool()), amount);
+        uint256 cTokenAmountBefore = getBalance(_cToken, address(this));
 
         if (tokenSent == native())
-            try
-                aaveV3WrappedTokenGateway().depositETH{value: amount}(
-                    address(0),
-                    recipient,
-                    aaveV3ReferralCode()
-                )
-            {
-                emit AaveV3SupplyDest(native(), recipient, amount);
+            try IJustLendPool(_cToken).mint{value: amount}() {
+                uint256 cTokenAmountReceived = getBalance(_cToken, address(this)).sub(cTokenAmountBefore);
+
+                withdrawTokens(_cToken, recipient, cTokenAmountReceived);
+                emit JustLendSupplyDest(native(), recipient, amount);
             } catch {
                 withdrawTokens(native(), recipient, amount);
                 emit OperationFailedRefundEvent(native(), recipient, amount);
             }
-        else
-            try
-                aaveV3Pool().supply(
-                    tokenSent,
-                    amount,
-                    recipient,
-                    aaveV3ReferralCode()
-                )
-            {
-                emit AaveV3SupplyDest(tokenSent, recipient, amount);
-            } catch {
-                withdrawTokens(tokenSent, recipient, amount);
-                emit OperationFailedRefundEvent(tokenSent, recipient, amount);
+        else try IJustLendPool(_cToken).mint(amount){
+                uint256 cTokenAmountReceived = getBalance(_cToken, address(this))
+                .sub(cTokenAmountBefore);
+
+                withdrawTokens(_cToken, recipient, cTokenAmountReceived);
+                emit JustLendSupplyDest(native(), recipient, amount);
+        } catch {
+                withdrawTokens(native(), recipient, amount);
+                emit OperationFailedRefundEvent(native(), recipient, amount);
             }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /**
-     * @notice function to supply funds to AaveV3.
+     * @notice function to supply funds to JustLend.
      * @param amount Amount of supply asset to be supplied.
      * @param recipient Recipient of aTokens after funds have been supplied.
      * @param asset Asset to be supplied.
      */
-    function _aaveV3Supply(
+    function _justLendSupply(
         address asset,
         address recipient,
         uint256 amount
     ) private returns (address[] memory tokens, bytes memory logData) {
-        approveToken(asset, address(aaveV3Pool()), amount);
+        uint256 cTokenAmountBefore = getBalance(_cToken, address(this));
 
         if (asset == native())
-            aaveV3WrappedTokenGateway().depositETH{value: amount}(
-                address(0),
-                recipient,
-                aaveV3ReferralCode()
-            );
+            IJustLendPool(_cToken).mint{value: amount}();
         else
-            aaveV3Pool().supply(asset, amount, recipient, aaveV3ReferralCode());
+            IJustLendPool(_cToken).mint(amount);
+
+        uint256 cTokenAmountReceived = getBalance(_cToken, address(this))
+            .sub(cTokenAmountBefore);
+
+        withdrawTokens(_cToken, recipient, cTokenAmountReceived);
 
         tokens = new address[](1);
         tokens[0] = asset;
+        tokens[1] = cToken();
 
         logData = abi.encode(asset, recipient, amount);
     }

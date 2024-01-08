@@ -1,0 +1,20 @@
+{
+  "shasta": {
+    "chainId": "2494104990",
+    "fullNode": "https://api.shasta.trongrid.io",
+    "solidityNode": "https://api.shasta.trongrid.io",
+    "eventServer": "https://api.shasta.trongrid.io"
+  },
+  "nile": {
+    "chainId": "3448148188",
+    "fullNode": "https://api.nileex.io",
+    "solidityNode": "https://api.nileex.io",
+    "eventServer": "https://api.nileex.io"
+  },
+  "mainnet": {
+    "chainId": "728126428",
+    "fullNode": "https://rpc.ankr.com/http/tron",
+    "solidityNode": "https://rpc.ankr.com/http/tron",
+    "eventServer": "https://rpc.ankr.com/http/tron"
+  }
+}
