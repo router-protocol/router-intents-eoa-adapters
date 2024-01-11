@@ -102,6 +102,18 @@ export const DEPLOY_COMPOUND_SUPPLY_ADAPTER = "DEPLOY_COMPOUND_SUPPLY_ADAPTER";
 export const VERIFY_COMPOUND_SUPPLY_ADAPTER = "VERIFY_COMPOUND_SUPPLY_ADAPTER";
 export const DEPLOY_COMPOUND_BORROW_ADAPTER = "DEPLOY_COMPOUND_BORROW_ADAPTER";
 export const VERIFY_COMPOUND_BORROW_ADAPTER = "VERIFY_COMPOUND_BORROW_ADAPTER";
+export const DEPLOY_RADIANT_SUPPLY_ADAPTER = "DEPLOY_RADIANT_SUPPLY_ADAPTER";
+export const VERIFY_RADIANT_SUPPLY_ADAPTER = "VERIFY_RADIANT_SUPPLY_ADAPTER";
+export const DEPLOY_RADIANT_BORROW_ADAPTER = "DEPLOY_RADIANT_BORROW_ADAPTER";
+export const VERIFY_RADIANT_BORROW_ADAPTER = "VERIFY_RADIANT_BORROW_ADAPTER";
+export const DEPLOY_BENQI_SUPPLY_ADAPTER =
+  "DEPLOY_BENQI_SUPPLY_ADAPTER";
+export const VERIFY_BENQI_SUPPLY_ADAPTER =
+  "VERIFY_BENQI_SUPPLY_ADAPTER";
+  export const DEPLOY_SONNE_SUPPLY_ADAPTER =
+  "DEPLOY_SONNE_SUPPLY_ADAPTER";
+export const VERIFY_SONNE_SUPPLY_ADAPTER =
+  "VERIFY_SONNE_SUPPLY_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -190,4 +202,8 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   CompoundBorrow: "CompoundBorrow",
   QuickswapMint: "QuickswapMint",
   PancakeswapMint: "PancakeswapMint",
+  RadiantSupply: "RadiantSupply",
+  RadiantBorrow: "RadiantBorrow",
+  BenqiSupply: "BenqiSupply",
+  SonneSupply: "SonneSupply",
 };

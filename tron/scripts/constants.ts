@@ -9,6 +9,7 @@ export const WETH: { [network: string]: { [chainId: string]: string } } = {
   testnet: {
     "728126428": "0x0000000000000000000000000000000000000000",
     "2494104990": "0x0000000000000000000000000000000000000000",
+    "3448148188": "0x0000000000000000000000000000000000000000",
   },
 };
 
@@ -18,6 +19,7 @@ export const ASSET_FORWARDER: {
   testnet: {
     "728126428": "0x0000000000000000000000000000000000000000",
     "2494104990": "0x97a8f93185d5f535e6a7dc4609eaf2757485c8fd",
+    "3448148188": "0x0000000000000000000000000000000000000000",
   },
 };
 
@@ -25,9 +27,12 @@ export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
   testnet: {
     "728126428": "0x0000000000000000000000000000000000000000",
     "2494104990": "0x0000000000000000000000000000000000000000",
+    "3448148188": "0x0000000000000000000000000000000000000000",
   },
 };
 
 export const CONTRACTS: { [key: string]: string } = {
   JustLendStakeTrx: "JustLendStakeTrx",
+  SunswapMint: "SunswapMint",
+  JustLendSupply: "JustLendSupply"
 };

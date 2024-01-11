@@ -16,4 +16,7 @@ import "./aaveV3";
 import "./compound";
 import "./pancakeswap";
 import "./quickswap";
+import "./radiant";
+import "./benqiL&B";
+import "./sonne";
 import "./BatchTransaction.deploy";
