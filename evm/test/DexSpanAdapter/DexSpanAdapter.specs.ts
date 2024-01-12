@@ -1,19 +1,13 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  NATIVE,
-  WNATIVE,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE } from "../../tasks/constants";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { decodeUnsupportedOperationEvent, getPathfinderData } from "../utils";
+import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 
 const CHAIN_ID = "80001";
@@ -46,10 +40,12 @@ describe("DexSpan Adapter: ", async () => {
     const dexSpanAdapter = await DexSpanAdapter.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS
+      DEXSPAN[env][CHAIN_ID]
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [dexSpanAdapter.address],
+      [true]
     );
 
     return {
@@ -188,39 +184,5 @@ describe("DexSpan Adapter: ", async () => {
     const balAfter = await ethers.provider.getBalance(deployer.address);
 
     expect(balAfter).gt(balBefore);
-  });
-
-  it("Cannot swap using dexspan on dest chain when instruction is received directly on dexspan adapter", async () => {
-    const { dexSpanAdapter, usdt, mockAssetForwarder } = await setupTests();
-
-    await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("1"));
-
-    const amount = "10000000000000";
-    await usdt.approve(mockAssetForwarder.address, amount);
-
-    const { data: swapData } = await getPathfinderData(
-      usdt.address,
-      NATIVE_TOKEN,
-      amount,
-      CHAIN_ID,
-      CHAIN_ID,
-      deployer.address
-    );
-
-    const tx = await mockAssetForwarder.handleMessage(
-      usdt.address,
-      amount,
-      swapData,
-      dexSpanAdapter.address
-    );
-
-    const txReceipt = await tx.wait();
-
-    const { token, refundAddress, refundAmount } =
-      decodeUnsupportedOperationEvent(txReceipt);
-
-    expect(token).eq(usdt.address);
-    expect(refundAddress).eq(DEFAULT_REFUND_ADDRESS);
-    expect(refundAmount).eq(amount);
   });
 });

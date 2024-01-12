@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {IAnkrStakeBsc} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -13,40 +12,20 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking BSC to receive AnkrBSC on Ankr.
  * @notice This contract is only for BSC chain.
  */
-contract AnkrStakeBsc is RouterIntentEoaAdapter, NitroMessageHandler {
+contract AnkrStakeBsc is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _ankrBsc;
-    IAnkrStakeBsc private immutable _ankrPool;
-
-    event AnkrStakeBscDest(
-        address _recipient,
-        uint256 _amount,
-        uint256 _returnAmount
-    );
+    address public immutable ankrBsc;
+    IAnkrStakeBsc public immutable ankrPool;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __ankrBsc,
         address __ankrPool
-    )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-    {
-        _ankrBsc = __ankrBsc;
-        _ankrPool = IAnkrStakeBsc(__ankrPool);
-    }
-
-    function ankrBsc() public view returns (address) {
-        return _ankrBsc;
-    }
-
-    function ankrPool() public view returns (IAnkrStakeBsc) {
-        return _ankrPool;
+    ) RouterIntentEoaAdapter(__native, __wnative, false, address(0)) {
+        ankrBsc = __ankrBsc;
+        ankrPool = IAnkrStakeBsc(__ankrPool);
     }
 
     function name() public pure override returns (string memory) {
@@ -69,7 +48,8 @@ contract AnkrStakeBsc is RouterIntentEoaAdapter, NitroMessageHandler {
                 msg.value == _amount,
                 Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
             );
-        }
+        } else if (_amount == type(uint256).max)
+            _amount = address(this).balance;
 
         bytes memory logData;
 
@@ -79,52 +59,22 @@ contract AnkrStakeBsc is RouterIntentEoaAdapter, NitroMessageHandler {
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        if (tokenSent != native()) {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        try _ankrPool.stakeCerts{value: amount}() {
-            uint256 returnAmount = withdrawTokens(
-                _ankrBsc,
-                recipient,
-                type(uint256).max
-            );
-
-            emit AnkrStakeBscDest(recipient, amount, returnAmount);
-        } catch {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-        }
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _stake(
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        _ankrPool.stakeCerts{value: _amount}();
+        ankrPool.stakeCerts{value: _amount}();
         uint256 returnAmount = withdrawTokens(
-            _ankrBsc,
+            ankrBsc,
             _recipient,
             type(uint256).max
         );
 
         tokens = new address[](2);
         tokens[0] = native();
-        tokens[1] = ankrBsc();
+        tokens[1] = ankrBsc;
 
         logData = abi.encode(_recipient, _amount, returnAmount);
     }

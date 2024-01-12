@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {IMetaPoolStakeEth} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -13,40 +12,20 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking ETH to receive mpETH on MetaPool.
  * @notice This contract is only for Ethereum chain.
  */
-contract MetaPoolStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
+contract MetaPoolStakeEth is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _mpEth;
-    IMetaPoolStakeEth private immutable _metaPoolPool;
-
-    event MetaPoolStakeEthDest(
-        address _recipient,
-        uint256 _amount,
-        uint256 _returnAmount
-    );
+    address public immutable mpEth;
+    IMetaPoolStakeEth public immutable metaPoolPool;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __mpEth,
         address __metaPoolPool
-    )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-    {
-        _mpEth = __mpEth;
-        _metaPoolPool = IMetaPoolStakeEth(__metaPoolPool);
-    }
-
-    function mpEth() public view returns (address) {
-        return _mpEth;
-    }
-
-    function metaPoolPool() public view returns (IMetaPoolStakeEth) {
-        return _metaPoolPool;
+    ) RouterIntentEoaAdapter(__native, __wnative, false, address(0)) {
+        mpEth = __mpEth;
+        metaPoolPool = IMetaPoolStakeEth(__metaPoolPool);
     }
 
     function name() public pure override returns (string memory) {
@@ -69,7 +48,8 @@ contract MetaPoolStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
                 msg.value == _amount,
                 Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
             );
-        }
+        } else if (_amount == type(uint256).max)
+            _amount = address(this).balance;
 
         bytes memory logData;
 
@@ -79,45 +59,19 @@ contract MetaPoolStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        if (tokenSent != native()) {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        try _metaPoolPool.depositETH{value: amount}(recipient) returns (
-            uint256 returnAmount
-        ) {
-            emit MetaPoolStakeEthDest(recipient, amount, returnAmount);
-        } catch {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-        }
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _stake(
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        uint256 _returnAmount = _metaPoolPool.depositETH{value: _amount}(
+        uint256 _returnAmount = metaPoolPool.depositETH{value: _amount}(
             _recipient
         );
 
         tokens = new address[](2);
         tokens[0] = native();
-        tokens[1] = mpEth();
+        tokens[1] = mpEth;
 
         logData = abi.encode(_recipient, _amount, _returnAmount);
     }

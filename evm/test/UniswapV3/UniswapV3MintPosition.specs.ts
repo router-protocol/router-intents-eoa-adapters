@@ -2,11 +2,7 @@ import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV } from "../../tasks/constants";
 import { UniswapV3Mint__factory } from "../../typechain/factories/UniswapV3Mint__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
@@ -53,12 +49,13 @@ describe("UniswapV3Mint Adapter: ", async () => {
       await UniswapV3MintPositionAdapter.deploy(
         NATIVE_TOKEN,
         WNATIVE,
-        deployer.address,
-        mockAssetForwarder.address,
-        DEXSPAN[env][CHAIN_ID],
-        DEFAULT_REFUND_ADDRESS,
         UNISWAP_V3_POSITION_MANAGER
       );
+
+    await batchTransaction.setAdapterWhitelist(
+      [uniswapV3MintPositionAdapter.address],
+      [true]
+    );
 
     const MockToken = await ethers.getContractFactory("MockToken");
     const mockToken = await MockToken.deploy();

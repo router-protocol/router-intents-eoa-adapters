@@ -7,24 +7,34 @@ import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHa
 import {CallLib} from "./CallLib.sol";
 import {IERC20, SafeERC20} from "./utils/SafeERC20.sol";
 import {Errors} from "./Errors.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {EoaExecutor} from "router-intents/contracts/utils/EoaExecutor.sol";
 
 /**
  * @title BatchTransaction
  * @author Shivam Agrawal
  * @notice Batch Transaction Contract for EOAs.
  */
-contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
+contract BatchTransaction is
+    Basic,
+    NitroMessageHandler,
+    AccessControl,
+    ReentrancyGuard
+{
     using SafeERC20 for IERC20;
-
-    address private immutable _native;
-    address private immutable _wnative;
 
     struct RefundData {
         address[] tokens;
     }
 
+    bytes32 public constant SETTER_ROLE = keccak256("SETTER_ROLE");
+
+    address private immutable _native;
+    address private immutable _wnative;
+
     // user -> token array
     mapping(address => RefundData) private tokensToRefund;
+    mapping(address => bool) private adapterWhitelist;
 
     event OperationFailedRefundEvent(
         address token,
@@ -41,6 +51,9 @@ contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
     ) NitroMessageHandler(__assetForwarder, __dexspan) {
         _native = __native;
         _wnative = __wnative;
+
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(SETTER_ROLE, msg.sender);
     }
 
     /**
@@ -55,6 +68,38 @@ contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
      */
     function native() public view virtual override returns (address) {
         return _native;
+    }
+
+    /**
+     * @notice function to check whether an adapter is whitelisted.
+     * @param adapter Address of the adapter.
+     */
+    function isAdapterWhitelisted(address adapter) public view returns (bool) {
+        return adapterWhitelist[adapter];
+    }
+
+    /**
+     * @notice function to set adapter whitelist.
+     * @param adapters Addresses of the adapters.
+     * @param shouldWhitelist Boolean array suggesting whether to whitelist the adapters.
+     */
+    function setAdapterWhitelist(
+        address[] memory adapters,
+        bool[] memory shouldWhitelist
+    ) external onlyRole(SETTER_ROLE) {
+        uint256 len = adapters.length;
+
+        require(
+            len != 0 && len == shouldWhitelist.length,
+            Errors.ARRAY_LENGTH_MISMATCH
+        );
+
+        for (uint i = 0; i < len; ) {
+            adapterWhitelist[adapters[i]] = shouldWhitelist[i];
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     /**
@@ -223,9 +268,10 @@ contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
         uint256 callType,
         bytes memory data
     ) internal {
-        // 0x64ba4bc1 => execute(address precedingAdapter, address succeedingAdapter, bytes data)
+        require(adapterWhitelist[target], Errors.ADAPTER_NOT_WHITELISTED);
+
         bytes memory _calldata = abi.encodeWithSelector(
-            0xf5542f2d,
+            EoaExecutor.execute.selector,
             precedingAdapter,
             succeedingAdapter,
             data
@@ -252,18 +298,21 @@ contract BatchTransaction is Basic, NitroMessageHandler, ReentrancyGuard {
     }
 
     function processRefunds(address user) internal {
-        address[] memory tokens = tokensToRefund[user].tokens;
-        delete tokensToRefund[user].tokens;
-
-        uint256 len = tokens.length;
+        uint256 len = tokensToRefund[user].tokens.length;
 
         for (uint256 i = 0; i < len; ) {
-            withdrawTokens(tokens[i], user, type(uint256).max);
+            withdrawTokens(
+                tokensToRefund[user].tokens[i],
+                user,
+                type(uint256).max
+            );
 
             unchecked {
                 ++i;
             }
         }
+
+        delete tokensToRefund[user];
     }
 
     /**

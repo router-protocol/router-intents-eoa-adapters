@@ -3,9 +3,7 @@ pragma solidity 0.8.18;
 
 import {IDexSpan} from "../../interfaces/IDexSpan.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
-import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
+import {Errors} from "../../Errors.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 
 /**
@@ -13,27 +11,17 @@ import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
  * @author Shivam Agrawal
  * @notice Swapping tokens using DexSpan contract
  */
-contract DexSpanAdapter is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler,
-    DefaultRefundable
-{
+contract DexSpanAdapter is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
+
+    address public immutable dexspan;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
-        address __defaultRefundAddress
-    )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-        DefaultRefundable(__defaultRefundAddress)
-    // solhint-disable-next-line no-empty-blocks
-    {
-
+        address __dexspan
+    ) RouterIntentEoaAdapter(__native, __wnative, false, address(0)) {
+        dexspan = __dexspan;
     }
 
     function name() public pure override returns (string memory) {
@@ -73,30 +61,14 @@ contract DexSpanAdapter is
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory
-    ) external override onlyNitro nonReentrant {
-        withdrawTokens(tokenSent, defaultRefundAddress(), amount);
-        emit UnsupportedOperation(tokenSent, defaultRefundAddress(), amount);
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _swap(
         IDexSpan.SwapParams memory _swapData
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        withdrawTokens(
-            address(_swapData.tokens[0]),
-            dexspan(),
-            _swapData.amount
-        );
+        withdrawTokens(address(_swapData.tokens[0]), dexspan, _swapData.amount);
 
-        IDexSpan(dexspan()).swapInSameChain(
+        IDexSpan(dexspan).swapInSameChain(
             _swapData.tokens,
             _swapData.amount,
             _swapData.minReturn,

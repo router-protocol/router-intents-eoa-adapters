@@ -1,19 +1,12 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  NATIVE,
-  WNATIVE,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE } from "../../tasks/constants";
 import { AnkrStakeMatic__factory } from "../../typechain/factories/AnkrStakeMatic__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 
@@ -49,22 +42,21 @@ describe("AnkrStakeMatic Adapter: ", async () => {
     const dexSpanAdapter = await DexSpanAdapter.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS
+      DEXSPAN[env][CHAIN_ID]
     );
 
     const AnkrStakeMatic = await ethers.getContractFactory("AnkrStakeMatic");
     const ankrStakeMaticAdapter = await AnkrStakeMatic.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       ANKR_TOKEN,
       MATIC_TOKEN,
       ANKR_POOL
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [dexSpanAdapter.address, ankrStakeMaticAdapter.address],
+      [true, true]
     );
 
     return {
@@ -159,7 +151,7 @@ describe("AnkrStakeMatic Adapter: ", async () => {
       targets,
       value,
       callType,
-      data,
+      data
     );
 
     const balAfter = await ethers.provider.getBalance(deployer.address);
@@ -175,7 +167,7 @@ describe("AnkrStakeMatic Adapter: ", async () => {
       ankrStakeMaticAdapter,
       ankrMatic,
       mockAssetForwarder,
-      matic
+      matic,
     } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
@@ -205,36 +197,7 @@ describe("AnkrStakeMatic Adapter: ", async () => {
       MATIC_TOKEN,
       amount,
       assetForwarderData,
-      batchTransaction.address,
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const ankrMaticBalAfter = await ankrMatic.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(ankrMaticBalAfter).gt(ankrMaticBalBefore);
-  });
-
-  it("Can stake MATIC on Ankr on dest chain when instruction is received directly on AnkrStakeMatic adapter", async () => {
-    const { ankrStakeMaticAdapter, ankrMatic, mockAssetForwarder, matic } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    
-    await setUserTokenBalance(matic, deployer, amount);
-    await matic.approve(mockAssetForwarder.address, amount);
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const ankrMaticBalBefore = await ankrMatic.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      MATIC_TOKEN,
-      amount,
-      data,
-      ankrStakeMaticAdapter.address,
+      batchTransaction.address
     );
 
     const balAfter = await ethers.provider.getBalance(deployer.address);

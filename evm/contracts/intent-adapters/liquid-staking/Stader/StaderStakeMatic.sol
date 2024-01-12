@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {IMaticX} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -13,41 +12,23 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking Matic to receive MaticX on Stader.
  * @notice This contract is only for Ethereum chain.
  */
-contract StaderStakeMatic is RouterIntentEoaAdapter, NitroMessageHandler {
+contract StaderStakeMatic is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
 
-    address public immutable _maticx;
-    address public immutable _matic;
-
-    event StaderStakeMaticDest(
-        address _recipient,
-        uint256 _amount,
-        uint256 _receivedMaticX
-    );
+    address public immutable maticx;
+    address public immutable matic;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __maticx,
         address __matic
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
+        RouterIntentEoaAdapter(__native, __wnative, false, address(0))
     // solhint-disable-next-line no-empty-blocks
     {
-        _matic = __matic;
-        _maticx = __maticx;
-    }
-
-    function maticx() public view returns (address) {
-        return _maticx;
-    }
-
-    function matic() public view returns (address) {
-        return _matic;
+        matic = __matic;
+        maticx = __maticx;
     }
 
     function name() public pure override returns (string memory) {
@@ -66,8 +47,9 @@ contract StaderStakeMatic is RouterIntentEoaAdapter, NitroMessageHandler {
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
-            IERC20(_matic).safeTransferFrom(msg.sender, self(), _amount);
-        }
+            IERC20(matic).safeTransferFrom(msg.sender, self(), _amount);
+        } else if (_amount == type(uint256).max)
+            _amount = IERC20(matic).balanceOf(address(this));
 
         bytes memory logData;
 
@@ -77,48 +59,20 @@ contract StaderStakeMatic is RouterIntentEoaAdapter, NitroMessageHandler {
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        if (tokenSent != _matic) {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        IERC20(_matic).safeIncreaseAllowance(_maticx, amount);
-
-        try IMaticX(_maticx).submit(amount) {
-            uint256 receivedMaticX = IERC20(_maticx).balanceOf(address(this));
-            withdrawTokens(_maticx, recipient, receivedMaticX);
-            emit StaderStakeMaticDest(recipient, amount, receivedMaticX);
-        } catch {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-        }
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _stake(
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        IERC20(_matic).safeIncreaseAllowance(_maticx, _amount);
-        IMaticX(_maticx).submit(_amount);
-        uint256 receivedMaticX = IERC20(_maticx).balanceOf(address(this));
-        withdrawTokens(_maticx, _recipient, receivedMaticX);
+        IERC20(matic).safeIncreaseAllowance(maticx, _amount);
+        IMaticX(maticx).submit(_amount);
+        uint256 receivedMaticX = IERC20(maticx).balanceOf(address(this));
+        withdrawTokens(maticx, _recipient, receivedMaticX);
 
         tokens = new address[](2);
-        tokens[0] = _matic;
-        tokens[1] = _maticx;
+        tokens[0] = matic;
+        tokens[1] = maticx;
 
         logData = abi.encode(_recipient, _amount, receivedMaticX);
     }

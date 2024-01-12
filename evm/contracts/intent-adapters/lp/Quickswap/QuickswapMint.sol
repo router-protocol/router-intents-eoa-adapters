@@ -3,9 +3,7 @@ pragma solidity 0.8.18;
 
 import {IQuickswapNonfungiblePositionManager} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
-import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {QuickswapHelpers} from "./QuickswapHelpers.sol";
 
@@ -14,28 +12,15 @@ import {QuickswapHelpers} from "./QuickswapHelpers.sol";
  * @author Yashika Goyal
  * @notice Minting a new position on Quickswap.
  */
-contract QuickswapMint is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler,
-    DefaultRefundable,
-    QuickswapHelpers
-{
+contract QuickswapMint is RouterIntentEoaAdapter, QuickswapHelpers {
     using SafeERC20 for IERC20;
-
-    event QuickswapMintPositionDest();
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
-        address __defaultRefundAddress,
         address __nonFungiblePositionManager
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-        DefaultRefundable(__defaultRefundAddress)
+        RouterIntentEoaAdapter(__native, __wnative, false, address(0))
         QuickswapHelpers(__nonFungiblePositionManager)
     // solhint-disable-next-line no-empty-blocks
     {
@@ -82,6 +67,18 @@ contract QuickswapMint is
                     msg.value == mintParams.amount1Desired,
                     Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
                 );
+        } else {
+            if (mintParams.amount0Desired == type(uint256).max)
+                mintParams.amount0Desired = getBalance(
+                    mintParams.token0,
+                    address(this)
+                );
+
+            if (mintParams.amount1Desired == type(uint256).max)
+                mintParams.amount1Desired = getBalance(
+                    mintParams.token1,
+                    address(this)
+                );
         }
 
         if (mintParams.token0 == native()) {
@@ -95,12 +92,12 @@ contract QuickswapMint is
         }
 
         IERC20(mintParams.token0).safeIncreaseAllowance(
-            address(positionManager()),
+            address(nonFungiblePositionManager),
             mintParams.amount0Desired
         );
 
         IERC20(mintParams.token1).safeIncreaseAllowance(
-            address(positionManager()),
+            address(nonFungiblePositionManager),
             mintParams.amount1Desired
         );
 
@@ -112,24 +109,12 @@ contract QuickswapMint is
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory
-    ) external override onlyNitro nonReentrant {
-        withdrawTokens(tokenSent, defaultRefundAddress(), amount);
-        emit UnsupportedOperation(tokenSent, defaultRefundAddress(), amount);
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _mint(
         IQuickswapNonfungiblePositionManager.MintParams memory mintParams
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        (uint256 tokenId, , , ) = positionManager().mint(mintParams);
+        (uint256 tokenId, , , ) = nonFungiblePositionManager.mint(mintParams);
 
         tokens = new address[](2);
         tokens[0] = mintParams.token0;

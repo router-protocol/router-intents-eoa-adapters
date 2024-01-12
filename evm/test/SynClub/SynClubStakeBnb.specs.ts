@@ -40,11 +40,13 @@ describe("SynClubStakeBnb Adapter: ", async () => {
     const synClubStakeBnbAdapter = await SynClubStakeBnb.deploy(
       NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       SYNCLUB_TOKEN,
       SYNCLUB_POOL
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [synClubStakeBnbAdapter.address],
+      [true]
     );
 
     return {
@@ -149,32 +151,6 @@ describe("SynClubStakeBnb Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      { value: amount }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const snBnbBalAfter = await snBnb.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(snBnbBalAfter).gt(snBnbBalBefore);
-  });
-
-  it("Can stake BNB on SynClub on dest chain when instruction is received directly on SynClubStakeBnb adapter", async () => {
-    const { synClubStakeBnbAdapter, snBnb, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = "100000000000000000";
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const snBnbBalBefore = await snBnb.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      synClubStakeBnbAdapter.address,
       { value: amount }
     );
 

@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {IFraxEthMinter} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -13,49 +12,25 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking ETH to receive fraxETH or stakedFraxETH on Frax.
  * @notice This contract is only for Ethereum chain.
  */
-contract FraxStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
+contract FraxStakeEth is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
 
-    IFraxEthMinter private immutable _fraxEthMinter;
-    address private immutable _fraxEth;
-    address private immutable _stakedFraxEth;
-
-    event FraxStakeEthDest(
-        address _recipient,
-        address token,
-        uint256 _returnAmount
-    );
+    IFraxEthMinter public immutable fraxEthMinter;
+    address public immutable fraxEth;
+    address public immutable stakedFraxEth;
 
     error InvalidTxType();
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __fraxEth,
         address __stakedFraxEth,
         address __fraxEthMinter
-    )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-    {
-        _fraxEth = __fraxEth;
-        _stakedFraxEth = __stakedFraxEth;
-        _fraxEthMinter = IFraxEthMinter(__fraxEthMinter);
-    }
-
-    function fraxEth() public view returns (address) {
-        return _fraxEth;
-    }
-
-    function stakedFraxEth() public view returns (address) {
-        return _stakedFraxEth;
-    }
-
-    function fraxEthMinter() public view returns (IFraxEthMinter) {
-        return _fraxEthMinter;
+    ) RouterIntentEoaAdapter(__native, __wnative, false, address(0)) {
+        fraxEth = __fraxEth;
+        stakedFraxEth = __stakedFraxEth;
+        fraxEthMinter = IFraxEthMinter(__fraxEthMinter);
     }
 
     function name() public pure override returns (string memory) {
@@ -80,7 +55,8 @@ contract FraxStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
                 msg.value == _amount,
                 Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
             );
-        }
+        } else if (_amount == type(uint256).max)
+            _amount = address(this).balance;
 
         bytes memory logData;
 
@@ -88,50 +64,6 @@ contract FraxStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
 
         emit ExecutionEvent(name(), logData);
         return tokens;
-    }
-
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        (address recipient, uint256 txType) = abi.decode(
-            instruction,
-            (address, uint256)
-        );
-
-        if (tokenSent != native()) {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        if (txType == 1) {
-            try _fraxEthMinter.submitAndGive{value: amount}(recipient) {
-                emit FraxStakeEthDest(recipient, _fraxEth, amount);
-            } catch {
-                withdrawTokens(tokenSent, recipient, amount);
-                emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            }
-        } else if (txType == 2) {
-            try
-                _fraxEthMinter.submitAndDeposit{value: amount}(recipient)
-            returns (uint256 _receivedSFrxEth) {
-                emit FraxStakeEthDest(
-                    recipient,
-                    _stakedFraxEth,
-                    _receivedSFrxEth
-                );
-            } catch {
-                withdrawTokens(tokenSent, recipient, amount);
-                emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            }
-        } else {
-            revert InvalidTxType();
-        }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
@@ -151,19 +83,19 @@ contract FraxStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
         uint256 _txType
     ) internal returns (address[] memory tokens, bytes memory logData) {
         if (_txType == 1) {
-            _fraxEthMinter.submitAndGive{value: _amount}(_recipient);
+            fraxEthMinter.submitAndGive{value: _amount}(_recipient);
             tokens = new address[](2);
             tokens[0] = native();
-            tokens[1] = fraxEth();
-            logData = abi.encode(_recipient, _fraxEth, _amount);
+            tokens[1] = fraxEth;
+            logData = abi.encode(_recipient, fraxEth, _amount);
         } else if (_txType == 2) {
-            uint256 _receivedSFrxEth = _fraxEthMinter.submitAndDeposit{
+            uint256 _receivedSFrxEth = fraxEthMinter.submitAndDeposit{
                 value: _amount
             }(_recipient);
             tokens = new address[](2);
             tokens[0] = native();
-            tokens[1] = stakedFraxEth();
-            logData = abi.encode(_recipient, _stakedFraxEth, _receivedSFrxEth);
+            tokens[1] = stakedFraxEth;
+            logData = abi.encode(_recipient, stakedFraxEth, _receivedSFrxEth);
         } else {
             revert InvalidTxType();
         }

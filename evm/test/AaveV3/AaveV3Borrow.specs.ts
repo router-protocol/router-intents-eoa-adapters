@@ -1,11 +1,7 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV } from "../../tasks/constants";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
@@ -51,9 +47,6 @@ describe("AaveV3Borrow Adapter: ", async () => {
     const aaveV3SupplyAdapter = await AaveV3SupplyAdapter.deploy(
       NATIVE_TOKEN,
       WMATIC,
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       AAVE_V3_POOL,
       AAVE_V3_WRAPPED_TOKEN_GATEWAY,
       AAVE_V3_REFERRAL_CODE
@@ -64,10 +57,6 @@ describe("AaveV3Borrow Adapter: ", async () => {
     const aaveV3BorrowAdapter = await AaveV3BorrowAdapter.deploy(
       NATIVE_TOKEN,
       WMATIC,
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
       AAVE_V3_POOL,
       AAVE_V3_WRAPPED_TOKEN_GATEWAY,
       AAVE_V3_REFERRAL_CODE
@@ -82,6 +71,11 @@ describe("AaveV3Borrow Adapter: ", async () => {
       WMATIC,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID]
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [aaveV3BorrowAdapter.address, aaveV3SupplyAdapter.address],
+      [true, true]
     );
 
     const wmatic = TokenInterface__factory.connect(WMATIC, deployer);
@@ -204,38 +198,5 @@ describe("AaveV3Borrow Adapter: ", async () => {
     expect(userBalAfter).gt(0);
     expect(usdcBalBefore).eq(0);
     expect(usdcBalAfter).eq(borrowAmount);
-  });
-
-  it("Cannot borrow funds cross-chain when handleMessage is called directly on adapter", async () => {
-    const { usdc, mockAssetForwarder, aaveV3BorrowAdapter } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    const borrowAmount = "10000";
-    const borrowRateMode = 1; // stable rate
-    const borrowAsset = usdc.address;
-    const borrowOnBehalfOf = deployer.address;
-    const borrowRecipient = deployer.address;
-
-    const aaveV3BorrowData = defaultAbiCoder.encode(
-      ["uint256", "uint256", "address", "address", "address"],
-      [
-        borrowAmount,
-        borrowRateMode,
-        borrowAsset,
-        borrowOnBehalfOf,
-        borrowRecipient,
-      ]
-    );
-
-    expect(
-      await mockAssetForwarder.handleMessage(
-        NATIVE_TOKEN,
-        amount,
-        aaveV3BorrowData,
-        aaveV3BorrowAdapter.address,
-        { value: amount }
-      )
-    ).to.emit("UnsupportedOperation");
   });
 });

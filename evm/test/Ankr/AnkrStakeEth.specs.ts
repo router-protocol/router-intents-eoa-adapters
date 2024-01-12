@@ -1,19 +1,11 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  NATIVE,
-  WNATIVE,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE } from "../../tasks/constants";
 import { AnkrStakeEth__factory } from "../../typechain/factories/AnkrStakeEth__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
-import { BigNumber, Contract, Wallet } from "ethers";
-import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 
@@ -49,21 +41,20 @@ describe("AnkrStakeEth Adapter: ", async () => {
     const dexSpanAdapter = await DexSpanAdapter.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS
+      DEXSPAN[env][CHAIN_ID]
     );
 
     const AnkrStakeEth = await ethers.getContractFactory("AnkrStakeEth");
     const ankrStakeEthAdapter = await AnkrStakeEth.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       ANKR_TOKEN,
       ANKR_POOL
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [dexSpanAdapter.address, ankrStakeEthAdapter.address],
+      [true, true]
     );
 
     return {
@@ -100,32 +91,6 @@ describe("AnkrStakeEth Adapter: ", async () => {
       ],
     });
   });
-
-  const toBytes32 = (bn: BigNumber) => {
-    return ethers.utils.hexlify(ethers.utils.zeroPad(bn.toHexString(), 32));
-  };
-
-  // This works for token when it has balance mapping at slot 0.
-  const setUserTokenBalance = async (
-    contract: Contract,
-    user: Wallet,
-    balance: BigNumber
-  ) => {
-    const index = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256"],
-      [user.address, 0] // key, slot
-    );
-
-    await hardhat.network.provider.request({
-      method: "hardhat_setStorageAt",
-      params: [contract.address, index, toBytes32(balance).toString()],
-    });
-
-    await hardhat.network.provider.request({
-      method: "evm_mine",
-      params: [],
-    });
-  };
 
   it("Can stake on ankr on same chain", async () => {
     const { batchTransaction, ankrStakeEthAdapter, ankrEth } =
@@ -198,32 +163,6 @@ describe("AnkrStakeEth Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      { value: amount }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const ankrEthBalAfter = await ankrEth.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(ankrEthBalAfter).gt(ankrEthBalBefore);
-  });
-
-  it("Can stake ETH on Ankr on dest chain when instruction is received directly on AnkrStakeEth adapter", async () => {
-    const { ankrStakeEthAdapter, ankrEth, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = "100000000000000000";
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const ankrEthBalBefore = await ankrEth.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      ankrStakeEthAdapter.address,
       { value: amount }
     );
 

@@ -1,19 +1,12 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  NATIVE,
-  WNATIVE,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE } from "../../tasks/constants";
 import { LidoStakeMatic__factory } from "../../typechain/factories/LidoStakeMatic__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 
@@ -49,22 +42,21 @@ describe("LidoStakeMatic Adapter: ", async () => {
     const dexSpanAdapter = await DexSpanAdapter.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS
+      DEXSPAN[env][CHAIN_ID]
     );
 
     const LidoStakeMatic = await ethers.getContractFactory("LidoStakeMatic");
     const lidoStakeMaticAdapter = await LidoStakeMatic.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       LIDO_ST_TOKEN,
       MATIC_TOKEN,
       LIDO_REFERRAL_ADDRESS
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [dexSpanAdapter.address, lidoStakeMaticAdapter.address],
+      [true, true]
     );
 
     return {
@@ -170,63 +162,6 @@ describe("LidoStakeMatic Adapter: ", async () => {
     expect(stethBalAfter).gt(stethBalBefore);
   });
 
-  it("Can swap on dexspan and stake on lido on same chain", async () => {
-    // This may fail because the path finder may not give good estimate of minReturn
-    // due to which it may be lower than min amount to stake on lido
-
-    const {
-      batchTransaction,
-      dexSpanAdapter,
-      lidoStakeMaticAdapter,
-      steth,
-      usdt,
-    } = await setupTests();
-
-    await setUserTokenBalance(usdt, deployer, BigNumber.from("10000000000000"));
-
-    const dexSpanAmount = "10000000000000";
-    await usdt.approve(batchTransaction.address, dexSpanAmount);
-
-    const { data: swapData, minReturn } = await getPathfinderData(
-      usdt.address,
-      MATIC_TOKEN,
-      dexSpanAmount,
-      CHAIN_ID,
-      CHAIN_ID,
-      batchTransaction.address
-    );
-
-    const lidoData = defaultAbiCoder.encode(
-      ["address", "uint256"],
-      [deployer.address, minReturn]
-    );
-
-    const tokens = [usdt.address];
-    const amounts = [dexSpanAmount];
-    const targets = [dexSpanAdapter.address, lidoStakeMaticAdapter.address];
-    const data = [swapData, lidoData];
-    const value = [0, 0];
-    const callType = [2, 2];
-
-    const usdtBalBefore = await usdt.balanceOf(deployer.address);
-    const stethBalBefore = await steth.balanceOf(deployer.address);
-
-    await batchTransaction.executeBatchCallsSameChain(
-      tokens,
-      amounts,
-      targets,
-      value,
-      callType,
-      data
-    );
-
-    const usdtBalAfter = await usdt.balanceOf(deployer.address);
-    const stethBalAfter = await steth.balanceOf(deployer.address);
-
-    expect(usdtBalBefore).gt(usdtBalAfter);
-    expect(stethBalAfter).gt(stethBalBefore);
-  });
-
   it("Can stake ETH on Lido on dest chain when instruction is received from BatchTransaction contract", async () => {
     const {
       batchTransaction,
@@ -265,35 +200,6 @@ describe("LidoStakeMatic Adapter: ", async () => {
       assetForwarderData,
       batchTransaction.address,
       { value: amount, gasLimit: 1000000 }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const stethBalAfter = await steth.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(stethBalAfter).gt(stethBalBefore);
-  });
-
-  it("Can stake ETH on Lido on dest chain when instruction is received directly on LidoStakeMatic adapter", async () => {
-    const { lidoStakeMaticAdapter, steth, mockAssetForwarder, matic } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const stethBalBefore = await steth.balanceOf(deployer.address);
-
-    await setUserTokenBalance(matic, deployer, amount);
-    await matic.approve(mockAssetForwarder.address, amount);
-
-    await mockAssetForwarder.handleMessage(
-      MATIC_TOKEN,
-      amount,
-      data,
-      lidoStakeMaticAdapter.address,
-      { value: amount }
     );
 
     const balAfter = await ethers.provider.getBalance(deployer.address);

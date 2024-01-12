@@ -40,11 +40,13 @@ describe("StaderStakeFtm Adapter: ", async () => {
     const staderStakeFtmAdapter = await StaderStakeFtm.deploy(
       NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       STADER_X_TOKEN,
       STADER_POOL
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [staderStakeFtmAdapter.address],
+      [true]
     );
 
     return {
@@ -150,32 +152,6 @@ describe("StaderStakeFtm Adapter: ", async () => {
       assetForwarderData,
       batchTransaction.address,
       { value: amount, gasLimit: 10000000 }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const sftmxBalAfter = await sftmx.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(sftmxBalAfter).gt(sftmxBalBefore);
-  });
-
-  it("Can stake FTM on Stader on dest chain when instruction is received directly on StaderStakeFtm adapter", async () => {
-    const { staderStakeFtmAdapter, sftmx, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const sftmxBalBefore = await sftmx.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      staderStakeFtmAdapter.address,
-      { value: amount, gasLimit: 1000000 }
     );
 
     const balAfter = await ethers.provider.getBalance(deployer.address);

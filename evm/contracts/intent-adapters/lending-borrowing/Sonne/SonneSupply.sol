@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {ISonnePool} from "./interfaces/ISonnePool.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {SafeMath} from "../../../utils/SafeMath.sol";
 
@@ -14,38 +13,25 @@ import {SafeMath} from "../../../utils/SafeMath.sol";
  * @notice Supplying funds on Sonne.
  */
 
-contract SonneSupply is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler
-{
+contract SonneSupply is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    address private immutable _soToken;
-
-    event SonneSupplyDest(address _token, address _recipient, uint256 _amount);
+    address public immutable soToken;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __soToken
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
+        RouterIntentEoaAdapter(__native, __wnative, false, address(0))
     // solhint-disable-next-line no-empty-blocks
     {
-        _soToken = __soToken;
+        soToken = __soToken;
     }
 
     function name() public pure override returns (string memory) {
         return "SonneSupply";
-    }
-
-    function soToken() public view returns (address) {
-        return _soToken;
     }
 
     /**
@@ -63,7 +49,8 @@ contract SonneSupply is
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
             IERC20(_asset).safeTransferFrom(msg.sender, self(), _amount);
-        }
+        } else if (_amount == type(uint256).max)
+            _amount = IERC20(_asset).balanceOf(address(this));
 
         bytes memory logData;
 
@@ -71,37 +58,6 @@ contract SonneSupply is
 
         emit ExecutionEvent(name(), logData);
         return tokens;
-    }
-
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        uint256 soTokenAmountBefore = getBalance(_soToken, address(this));
-
-        if (tokenSent == native()) {
-                withdrawTokens(native(), recipient, amount);
-                emit OperationFailedRefundEvent(native(), recipient, amount);
-            }
-        else {
-            IERC20(tokenSent).safeIncreaseAllowance(_soToken, amount);
-            try ISonnePool(_soToken).mint(amount){
-                uint256 soTokenAmountReceived = getBalance(_soToken, address(this))
-                .sub(soTokenAmountBefore);
-
-                withdrawTokens(_soToken, recipient, soTokenAmountReceived);
-                emit SonneSupplyDest(native(), recipient, amount);
-            } catch {
-                withdrawTokens(native(), recipient, amount);
-                emit OperationFailedRefundEvent(native(), recipient, amount);
-            }
-        }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
@@ -117,18 +73,19 @@ contract SonneSupply is
         address recipient,
         uint256 amount
     ) private returns (address[] memory tokens, bytes memory logData) {
-        uint256 soTokenAmountBefore = getBalance(_soToken, address(this));
-        IERC20(asset).safeIncreaseAllowance(_soToken, amount);
-        ISonnePool(_soToken).mint(amount);
+        uint256 soTokenAmountBefore = getBalance(soToken, address(this));
+        IERC20(asset).safeIncreaseAllowance(soToken, amount);
+        ISonnePool(soToken).mint(amount);
 
-        uint256 soTokenAmountReceived = getBalance(_soToken, address(this))
-            .sub(soTokenAmountBefore);
+        uint256 soTokenAmountReceived = getBalance(soToken, address(this)).sub(
+            soTokenAmountBefore
+        );
 
-        withdrawTokens(_soToken, recipient, soTokenAmountReceived);
+        withdrawTokens(soToken, recipient, soTokenAmountReceived);
 
         tokens = new address[](2);
         tokens[0] = asset;
-        tokens[1] = soToken();
+        tokens[1] = soToken;
 
         logData = abi.encode(asset, recipient, amount);
     }

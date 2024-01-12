@@ -4,8 +4,7 @@ pragma solidity 0.8.18;
 import {CompoundHelpers} from "./CompoundHelpers.sol";
 import {IComet} from "./interfaces/IComet.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {IWETH} from "../../../interfaces/IWETH.sol";
 
@@ -14,31 +13,17 @@ import {IWETH} from "../../../interfaces/IWETH.sol";
  * @author Yashika Goyal
  * @notice Supplying funds on Compound.
  */
-contract CompoundSupply is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler,
-    CompoundHelpers
-{
+contract CompoundSupply is RouterIntentEoaAdapter, CompoundHelpers {
     using SafeERC20 for IERC20;
-
-    event CompoundSupplyDest(
-        address _token,
-        address _recipient,
-        uint256 _amount
-    );
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __usdc,
         address __cUSDCV3Pool,
         address __cWETHV3Pool
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
+        RouterIntentEoaAdapter(__native, __wnative, false, address(0))
         CompoundHelpers(__usdc, __cUSDCV3Pool, __cWETHV3Pool)
     // solhint-disable-next-line no-empty-blocks
     {
@@ -72,7 +57,8 @@ contract CompoundSupply is
                     Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
                 );
             else IERC20(_asset).safeTransferFrom(msg.sender, self(), _amount);
-        }
+        } else if (_amount == type(uint256).max)
+            _amount = getBalance(_asset, address(this));
 
         bytes memory logData;
 
@@ -85,57 +71,6 @@ contract CompoundSupply is
 
         emit ExecutionEvent(name(), logData);
         return tokens;
-    }
-
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        (address recipient, address market) = abi.decode(
-            instruction,
-            (address, address)
-        );
-
-        IComet _cTokenV3Pool;
-
-        if (market == usdc()) {
-            _cTokenV3Pool = cUSDCV3Pool();
-        } else if (market == wnative()) {
-            _cTokenV3Pool = cWETHV3Pool();
-        } else {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        approveToken(tokenSent, address(_cTokenV3Pool), amount);
-        uint256 supplyAmount = amount;
-
-        if (tokenSent == native()) {
-            if (wnative() == _cTokenV3Pool.baseToken()) {
-                if (amount == type(uint256).max)
-                    supplyAmount = _cTokenV3Pool.borrowBalanceOf(msg.sender);
-            }
-            IWETH(wnative()).deposit{value: supplyAmount}();
-            IWETH(wnative()).approve(address(_cTokenV3Pool), supplyAmount);
-
-            try _cTokenV3Pool.supplyTo(recipient, wnative(), supplyAmount) {
-                emit CompoundSupplyDest(native(), recipient, amount);
-            } catch {
-                withdrawTokens(native(), recipient, amount);
-                emit OperationFailedRefundEvent(native(), recipient, amount);
-            }
-        } else
-            try _cTokenV3Pool.supplyTo(recipient, tokenSent, amount) {
-                emit CompoundSupplyDest(tokenSent, recipient, amount);
-            } catch {
-                withdrawTokens(tokenSent, recipient, amount);
-                emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
@@ -155,10 +90,10 @@ contract CompoundSupply is
     ) private returns (address[] memory tokens, bytes memory logData) {
         IComet _cTokenV3Pool;
 
-        if (market == usdc()) {
-            _cTokenV3Pool = cUSDCV3Pool();
+        if (market == usdc) {
+            _cTokenV3Pool = cUSDCV3Pool;
         } else if (market == wnative()) {
-            _cTokenV3Pool = cWETHV3Pool();
+            _cTokenV3Pool = cWETHV3Pool;
         } else revert InvalidSupplyMarket();
 
         approveToken(asset, address(_cTokenV3Pool), amount);

@@ -1,19 +1,11 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  NATIVE,
-  WNATIVE,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE } from "../../tasks/constants";
 import { BenqiStakeAvax__factory } from "../../typechain/factories/BenqiStakeAvax__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
-import { BigNumber, Contract, Wallet } from "ethers";
-import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 
@@ -48,20 +40,19 @@ describe("BenqiStakeAvax Adapter: ", async () => {
     const dexSpanAdapter = await DexSpanAdapter.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS
+      DEXSPAN[env][CHAIN_ID]
     );
 
     const BenqiStakeAvax = await ethers.getContractFactory("BenqiStakeAvax");
     const benqiStakeAvaxAdapter = await BenqiStakeAvax.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      BENQI_TOKEN,
+      BENQI_TOKEN
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [dexSpanAdapter.address, benqiStakeAvaxAdapter.address],
+      [true, true]
     );
 
     return {
@@ -98,32 +89,6 @@ describe("BenqiStakeAvax Adapter: ", async () => {
       ],
     });
   });
-
-  const toBytes32 = (bn: BigNumber) => {
-    return ethers.utils.hexlify(ethers.utils.zeroPad(bn.toHexString(), 32));
-  };
-
-  // This works for token when it has balance mapping at slot 0.
-  const setUserTokenBalance = async (
-    contract: Contract,
-    user: Wallet,
-    balance: BigNumber
-  ) => {
-    const index = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256"],
-      [user.address, 0] // key, slot
-    );
-
-    await hardhat.network.provider.request({
-      method: "hardhat_setStorageAt",
-      params: [contract.address, index, toBytes32(balance).toString()],
-    });
-
-    await hardhat.network.provider.request({
-      method: "evm_mine",
-      params: [],
-    });
-  };
 
   it("Can stake on benqi on same chain", async () => {
     const { batchTransaction, benqiStakeAvaxAdapter, benqiSAvax } =
@@ -196,32 +161,6 @@ describe("BenqiStakeAvax Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      { value: amount }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const benqiSAvaxBalAfter = await benqiSAvax.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(benqiSAvaxBalAfter).gt(benqiSAvaxBalBefore);
-  });
-
-  it("Can stake AVAX on Benqi on dest chain when instruction is received directly on BenqiStakeAvax adapter", async () => {
-    const { benqiStakeAvaxAdapter, benqiSAvax, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const benqiSAvaxBalBefore = await benqiSAvax.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      benqiStakeAvaxAdapter.address,
       { value: amount }
     );
 

@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {AaveV3Helpers} from "./AaveV3Helpers.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -12,27 +11,17 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @author Shivam Agrawal
  * @notice Supplying funds on AaveV3.
  */
-contract AaveV3Supply is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler,
-    AaveV3Helpers
-{
+contract AaveV3Supply is RouterIntentEoaAdapter, AaveV3Helpers {
     using SafeERC20 for IERC20;
-
-    event AaveV3SupplyDest(address _token, address _recipient, uint256 _amount);
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __aaveV3Pool,
         address __aaveV3WrappedTokenGateway,
         uint16 __aaveV3ReferralCode
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
+        RouterIntentEoaAdapter(__native, __wnative, false, address(0))
         AaveV3Helpers(
             __aaveV3Pool,
             __aaveV3WrappedTokenGateway,
@@ -67,7 +56,8 @@ contract AaveV3Supply is
                     Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
                 );
             else IERC20(_asset).safeTransferFrom(msg.sender, self(), _amount);
-        }
+        } else if (_amount == type(uint256).max)
+            _amount = getBalance(_asset, address(this));
 
         bytes memory logData;
 
@@ -75,47 +65,6 @@ contract AaveV3Supply is
 
         emit ExecutionEvent(name(), logData);
         return tokens;
-    }
-
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        approveToken(tokenSent, address(aaveV3Pool()), amount);
-
-        if (tokenSent == native())
-            try
-                aaveV3WrappedTokenGateway().depositETH{value: amount}(
-                    address(0),
-                    recipient,
-                    aaveV3ReferralCode()
-                )
-            {
-                emit AaveV3SupplyDest(native(), recipient, amount);
-            } catch {
-                withdrawTokens(native(), recipient, amount);
-                emit OperationFailedRefundEvent(native(), recipient, amount);
-            }
-        else
-            try
-                aaveV3Pool().supply(
-                    tokenSent,
-                    amount,
-                    recipient,
-                    aaveV3ReferralCode()
-                )
-            {
-                emit AaveV3SupplyDest(tokenSent, recipient, amount);
-            } catch {
-                withdrawTokens(tokenSent, recipient, amount);
-                emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
@@ -131,16 +80,15 @@ contract AaveV3Supply is
         address recipient,
         uint256 amount
     ) private returns (address[] memory tokens, bytes memory logData) {
-        approveToken(asset, address(aaveV3Pool()), amount);
+        approveToken(asset, address(aaveV3Pool), amount);
 
         if (asset == native())
-            aaveV3WrappedTokenGateway().depositETH{value: amount}(
+            aaveV3WrappedTokenGateway.depositETH{value: amount}(
                 address(0),
                 recipient,
-                aaveV3ReferralCode()
+                aaveV3ReferralCode
             );
-        else
-            aaveV3Pool().supply(asset, amount, recipient, aaveV3ReferralCode());
+        else aaveV3Pool.supply(asset, amount, recipient, aaveV3ReferralCode);
 
         tokens = new address[](1);
         tokens[0] = asset;

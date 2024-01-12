@@ -1,23 +1,15 @@
+/* eslint-disable no-unused-vars */
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  NATIVE,
-  WNATIVE,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV } from "../../tasks/constants";
 import { BenqiSupply__factory } from "../../typechain/factories/BenqiSupply__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
-import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 import { zeroAddress } from "ethereumjs-util";
-
 
 const CHAIN_ID = "43114";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -27,14 +19,14 @@ const QI_USDC = "0xBEb5d47A3f720Ec0a390d04b4d41ED7d9688bC7F";
 const USDC = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664";
 
 const QI_ERC20_TOKEN_ABI = [
-    "function transfer(address dst, uint amount) external returns (bool)",
-    "function transferFrom(address src, address dst, uint256 amount) external returns (bool)",
-    "function approve(address spender, uint256 amount) external returns (bool)",
-    "function allowance(address owner, address spender) external view returns (uint)",
-    "function balanceOf(address owner) external view returns (uint)",
-    "function balanceOfUnderlying(address owner) external returns (uint)",
-    "event Approval(address indexed owner, address indexed spender, uint amount)",
-  ];
+  "function transfer(address dst, uint amount) external returns (bool)",
+  "function transferFrom(address src, address dst, uint256 amount) external returns (bool)",
+  "function approve(address spender, uint256 amount) external returns (bool)",
+  "function allowance(address owner, address spender) external view returns (uint)",
+  "function balanceOf(address owner) external view returns (uint)",
+  "function balanceOfUnderlying(address owner) external returns (uint)",
+  "event Approval(address indexed owner, address indexed spender, uint amount)",
+];
 
 describe("Benqi Supply Adapter: ", async () => {
   const [deployer] = waffle.provider.getWallets();
@@ -48,37 +40,34 @@ describe("Benqi Supply Adapter: ", async () => {
     const mockAssetForwarder = await MockAssetForwarder.deploy();
 
     const BatchTransaction = await ethers.getContractFactory(
-        "BatchTransaction"
-      );
-  
-      const batchTransaction = await BatchTransaction.deploy(
-        NATIVE_TOKEN,
-        WAVAX,
-        mockAssetForwarder.address,
-        DEXSPAN[env][CHAIN_ID],
-      );
-
-    const BenqiAdapter = await ethers.getContractFactory(
-      "BenqiSupply"
+      "BatchTransaction"
     );
+
+    const batchTransaction = await BatchTransaction.deploy(
+      NATIVE_TOKEN,
+      WAVAX,
+      mockAssetForwarder.address,
+      DEXSPAN[env][CHAIN_ID]
+    );
+
+    const BenqiAdapter = await ethers.getContractFactory("BenqiSupply");
 
     const benqiAdapter = await BenqiAdapter.deploy(
       NATIVE_TOKEN,
       WAVAX,
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      QI_AVAX,
+      QI_AVAX
     );
 
     const benqiAdapterUSDC = await BenqiAdapter.deploy(
-        NATIVE_TOKEN,
-        WAVAX,
-        deployer.address,
-        mockAssetForwarder.address,
-        DEXSPAN[env][CHAIN_ID],
-        QI_USDC,
-      );
+      NATIVE_TOKEN,
+      WAVAX,
+      QI_USDC
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [benqiAdapter.address, benqiAdapterUSDC.address],
+      [true, true]
+    );
 
     const qiAvax = TokenInterface__factory.connect(QI_AVAX, deployer);
     const qiUsdc = TokenInterface__factory.connect(QI_USDC, deployer);
@@ -191,7 +180,7 @@ describe("Benqi Supply Adapter: ", async () => {
 
     const userBalBefore = await qiUsdc.balanceOf(deployer.address);
     await benqiAdapterUSDC.execute(zeroAddress(), zeroAddress(), data, {
-      gasLimit: 10000000
+      gasLimit: 10000000,
     });
 
     const userBalAfter = await qiUsdc.balanceOf(deployer.address);
@@ -201,12 +190,8 @@ describe("Benqi Supply Adapter: ", async () => {
   });
 
   it("Can supply native tokens cross-chain on Benqi using BatchTransaction flow", async () => {
-    const {
-      benqiAdapter,
-      mockAssetForwarder,
-      qiAvax,
-      batchTransaction,
-    } = await setupTests();
+    const { benqiAdapter, mockAssetForwarder, qiAvax, batchTransaction } =
+      await setupTests();
 
     const amount = ethers.utils.parseEther("1");
 
@@ -240,14 +225,14 @@ describe("Benqi Supply Adapter: ", async () => {
   });
 
   it("Can supply non-native tokens on Benqi using BatchTransaction flow", async () => {
-    const { benqiAdapterUSDC, qiUsdc ,usdc, batchTransaction } =
+    const { benqiAdapterUSDC, qiUsdc, usdc, batchTransaction } =
       await setupTests();
 
-      const amount = ethers.utils.parseEther("1");
+    const amount = ethers.utils.parseEther("1");
 
-      await setUserTokenBalance(usdc, deployer, amount);
-      await usdc.approve(benqiAdapterUSDC.address, amount);
-      expect(await usdc.balanceOf(deployer.address)).eq(amount);
+    await setUserTokenBalance(usdc, deployer, amount);
+    await usdc.approve(benqiAdapterUSDC.address, amount);
+    expect(await usdc.balanceOf(deployer.address)).eq(amount);
 
     await usdc.approve(batchTransaction.address, amount);
 
@@ -271,57 +256,6 @@ describe("Benqi Supply Adapter: ", async () => {
       value,
       callType,
       data
-    );
-
-    const userBalAfter = await qiUsdc.balanceOf(deployer.address);
-
-    expect(userBalBefore).eq(0);
-    expect(userBalAfter).gt(0);
-  });
-
-  it("Can supply native tokens cross-chain on Benqi when handleMessage is called directly on adapter", async () => {
-    const { benqiAdapter, qiAvax, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const instruction = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const userBalBefore = await qiAvax.balanceOf(deployer.address);
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      instruction,
-      benqiAdapter.address,
-      {
-        gasLimit: 10000000,
-        value: amount,
-      }
-    );
-
-    const userBalAfter = await qiAvax.balanceOf(deployer.address);
-
-    expect(userBalBefore).eq(0);
-    expect(userBalAfter).gt(0);
-  });
-
-  it("Can supply non-native tokens cross-chain on Benqi when handleMessage is called directly on adapter", async () => {
-    const { benqiAdapterUSDC, usdc, qiUsdc, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    await setUserTokenBalance(usdc, deployer, amount);
-    await usdc.approve(mockAssetForwarder.address, amount);
-    expect(await usdc.balanceOf(deployer.address)).eq(amount);
-
-    const instruction = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const userBalBefore = await qiUsdc.balanceOf(deployer.address);
-    await mockAssetForwarder.handleMessage(
-      USDC,
-      amount,
-      instruction,
-      benqiAdapterUSDC.address
     );
 
     const userBalAfter = await qiUsdc.balanceOf(deployer.address);

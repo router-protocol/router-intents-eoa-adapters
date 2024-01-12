@@ -5,19 +5,11 @@ import {ISushiswapNonfungiblePositionManager} from "./Interfaces.sol";
 
 contract SushiswapHelpers {
     ISushiswapNonfungiblePositionManager
-        private immutable _nonFungiblePositionManager;
+        public immutable nonFungiblePositionManager;
 
     constructor(address __nonFungiblePositionManager) {
-        _nonFungiblePositionManager = ISushiswapNonfungiblePositionManager(
+        nonFungiblePositionManager = ISushiswapNonfungiblePositionManager(
             __nonFungiblePositionManager
         );
-    }
-
-    function positionManager()
-        public
-        view
-        returns (ISushiswapNonfungiblePositionManager)
-    {
-        return _nonFungiblePositionManager;
     }
 }

@@ -5,19 +5,11 @@ import {IPancakeswapNonfungiblePositionManager} from "./Interfaces.sol";
 
 contract PancakeswapHelpers {
     IPancakeswapNonfungiblePositionManager
-        private immutable _nonFungiblePositionManager;
+        public immutable nonFungiblePositionManager;
 
     constructor(address __nonFungiblePositionManager) {
-        _nonFungiblePositionManager = IPancakeswapNonfungiblePositionManager(
+        nonFungiblePositionManager = IPancakeswapNonfungiblePositionManager(
             __nonFungiblePositionManager
         );
-    }
-
-    function positionManager()
-        public
-        view
-        returns (IPancakeswapNonfungiblePositionManager)
-    {
-        return _nonFungiblePositionManager;
     }
 }

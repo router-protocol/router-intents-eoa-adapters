@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {ILidoStakeMatic} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -14,47 +13,23 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice This contract is for chains other than Polygon where liquid staking for Matic
  * is supported by Lido
  */
-contract LidoStakeMatic is RouterIntentEoaAdapter, NitroMessageHandler {
+contract LidoStakeMatic is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _lidoStMatic;
-    address private immutable _matic;
-    address private immutable _referralId;
-
-    event LidoStakeMaticDest(
-        address _recipient,
-        uint256 _amount,
-        uint256 _receivedStMatic
-    );
+    address public immutable lidoStMatic;
+    address public immutable matic;
+    address public immutable referralId;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __lidoStMatic,
         address __matic,
         address __referralId
-    )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-    {
-        _lidoStMatic = __lidoStMatic;
-        _matic = __matic;
-        _referralId = __referralId;
-    }
-
-    function lidoStMatic() public view returns (address) {
-        return _lidoStMatic;
-    }
-
-    function matic() public view returns (address) {
-        return _matic;
-    }
-
-    function referralId() public view returns (address) {
-        return _referralId;
+    ) RouterIntentEoaAdapter(__native, __wnative, false, address(0)) {
+        lidoStMatic = __lidoStMatic;
+        matic = __matic;
+        referralId = __referralId;
     }
 
     function name() public pure override returns (string memory) {
@@ -73,8 +48,9 @@ contract LidoStakeMatic is RouterIntentEoaAdapter, NitroMessageHandler {
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
-            IERC20(_matic).safeTransferFrom(msg.sender, self(), _amount);
-        }
+            IERC20(matic).safeTransferFrom(msg.sender, self(), _amount);
+        } else if (_amount == type(uint256).max)
+            _amount = IERC20(matic).balanceOf(address(this));
 
         bytes memory logData;
 
@@ -84,54 +60,23 @@ contract LidoStakeMatic is RouterIntentEoaAdapter, NitroMessageHandler {
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        if (tokenSent != matic()) {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        IERC20(_matic).safeIncreaseAllowance(_lidoStMatic, amount);
-        try ILidoStakeMatic(_lidoStMatic).submit(amount, _referralId) {
-            uint256 _receivedStMatic = withdrawTokens(
-                _lidoStMatic,
-                recipient,
-                type(uint256).max
-            );
-
-            emit LidoStakeMaticDest(recipient, amount, _receivedStMatic);
-        } catch {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-        }
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _stake(
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        IERC20(_matic).safeIncreaseAllowance(_lidoStMatic, _amount);
-        ILidoStakeMatic(_lidoStMatic).submit(_amount, _referralId);
+        IERC20(matic).safeIncreaseAllowance(lidoStMatic, _amount);
+        ILidoStakeMatic(lidoStMatic).submit(_amount, referralId);
         uint256 _receivedStMatic = withdrawTokens(
-            _lidoStMatic,
+            lidoStMatic,
             _recipient,
             type(uint256).max
         );
 
         tokens = new address[](2);
-        tokens[0] = native();
-        tokens[1] = lidoStMatic();
+        tokens[0] = matic;
+        tokens[1] = lidoStMatic;
 
         logData = abi.encode(_recipient, _amount, _receivedStMatic);
     }

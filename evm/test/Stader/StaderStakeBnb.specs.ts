@@ -40,11 +40,13 @@ describe("StaderStakeBnb Adapter: ", async () => {
     const staderStakeBnbAdapter = await StaderStakeBnb.deploy(
       NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       STADER_X_TOKEN,
       STADER_POOL
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [staderStakeBnbAdapter.address],
+      [true]
     );
 
     return {
@@ -149,32 +151,6 @@ describe("StaderStakeBnb Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      { value: amount }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const bnbxBalAfter = await bnbx.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(bnbxBalAfter).gt(bnbxBalBefore);
-  });
-
-  it("Can stake BNB on Stader on dest chain when instruction is received directly on StaderStakeBnb adapter", async () => {
-    const { staderStakeBnbAdapter, bnbx, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = "100000000000000000";
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const bnbxBalBefore = await bnbx.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      staderStakeBnbAdapter.address,
       { value: amount }
     );
 

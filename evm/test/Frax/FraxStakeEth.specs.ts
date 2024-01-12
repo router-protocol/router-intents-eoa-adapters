@@ -1,19 +1,11 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  NATIVE,
-  WNATIVE,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE } from "../../tasks/constants";
 import { FraxStakeEth__factory } from "../../typechain/factories/FraxStakeEth__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
-import { BigNumber, Contract, Wallet } from "ethers";
-import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 
@@ -50,22 +42,21 @@ describe("FraxStakeEth Adapter: ", async () => {
     const dexSpanAdapter = await DexSpanAdapter.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS
+      DEXSPAN[env][CHAIN_ID]
     );
 
     const FraxStakeEth = await ethers.getContractFactory("FraxStakeEth");
     const fraxStakeEthAdapter = await FraxStakeEth.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       FRAX_ETH_TOKEN,
       S_FRAX_ETH_TOKEN,
       FRAX_POOL
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [dexSpanAdapter.address, fraxStakeEthAdapter.address],
+      [true, true]
     );
 
     return {
@@ -103,32 +94,6 @@ describe("FraxStakeEth Adapter: ", async () => {
       ],
     });
   });
-
-  const toBytes32 = (bn: BigNumber) => {
-    return ethers.utils.hexlify(ethers.utils.zeroPad(bn.toHexString(), 32));
-  };
-
-  // This works for token when it has balance mapping at slot 0.
-  const setUserTokenBalance = async (
-    contract: Contract,
-    user: Wallet,
-    balance: BigNumber
-  ) => {
-    const index = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256"],
-      [user.address, 0] // key, slot
-    );
-
-    await hardhat.network.provider.request({
-      method: "hardhat_setStorageAt",
-      params: [contract.address, index, toBytes32(balance).toString()],
-    });
-
-    await hardhat.network.provider.request({
-      method: "evm_mine",
-      params: [],
-    });
-  };
 
   it("FRAX_ETH: Can stake on frax on same chain", async () => {
     const { batchTransaction, fraxStakeEthAdapter, fraxEth } =
@@ -184,7 +149,7 @@ describe("FraxStakeEth Adapter: ", async () => {
     const data = [
       defaultAbiCoder.encode(
         ["address", "uint256", "uint256"],
-      [deployer.address, amount, txType]
+        [deployer.address, amount, txType]
       ),
     ];
     const value = [0];
@@ -203,33 +168,6 @@ describe("FraxStakeEth Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      { value: amount }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const fraxEthBalAfter = await fraxEth.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(fraxEthBalAfter).gt(fraxEthBalBefore);
-  });
-
-  it("FRAX_ETH: Can stake ETH on FRAX on dest chain when instruction is received directly on FraxStakeEth adapter", async () => {
-    const { fraxStakeEthAdapter, fraxEth, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = "100000000000000000";
-    const txType = "1";
-
-    const data = defaultAbiCoder.encode(["address", "uint256"], [deployer.address, txType]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const fraxEthBalBefore = await fraxEth.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      fraxStakeEthAdapter.address,
       { value: amount }
     );
 
@@ -294,7 +232,7 @@ describe("FraxStakeEth Adapter: ", async () => {
     const data = [
       defaultAbiCoder.encode(
         ["address", "uint256", "uint256"],
-      [deployer.address, amount, txType]
+        [deployer.address, amount, txType]
       ),
     ];
     const value = [0];
@@ -323,36 +261,8 @@ describe("FraxStakeEth Adapter: ", async () => {
     expect(sFraxEthBalAfter).gt(sFraxEthBalBefore);
   });
 
-  it("SFRAX_ETH: Can stake ETH on FRAX on dest chain when instruction is received directly on FraxStakeEth adapter", async () => {
-    const { fraxStakeEthAdapter, sFraxEth, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = "100000000000000000";
-    const txType = "2";
-
-    const data = defaultAbiCoder.encode(["address", "uint256"], [deployer.address, txType]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const sFraxEthBalBefore = await sFraxEth.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      fraxStakeEthAdapter.address,
-      { value: amount }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const sFraxEthBalAfter = await sFraxEth.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(sFraxEthBalAfter).gt(sFraxEthBalBefore);
-  });
-
   it("CanNOT stake on frax on same chain if invalid txtype", async () => {
-    const { batchTransaction, fraxStakeEthAdapter, sFraxEth } =
-      await setupTests();
+    const { batchTransaction, fraxStakeEthAdapter } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
     const txType = "3";
@@ -369,14 +279,16 @@ describe("FraxStakeEth Adapter: ", async () => {
     const value = [0];
     const callType = [2];
 
-    await expect(batchTransaction.executeBatchCallsSameChain(
-      tokens,
-      amounts,
-      targets,
-      value,
-      callType,
-      data,
-      { value: amount }
-    )).to.be.reverted;
+    await expect(
+      batchTransaction.executeBatchCallsSameChain(
+        tokens,
+        amounts,
+        targets,
+        value,
+        callType,
+        data,
+        { value: amount }
+      )
+    ).to.be.reverted;
   });
 });

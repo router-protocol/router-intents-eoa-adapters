@@ -3,9 +3,7 @@ pragma solidity 0.8.18;
 
 import {AaveV3Helpers} from "./AaveV3Helpers.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
-import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -13,28 +11,17 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @author Shivam Agrawal
  * @notice Borrowing funds on AaveV3.
  */
-contract AaveV3Borrow is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler,
-    DefaultRefundable,
-    AaveV3Helpers
-{
+contract AaveV3Borrow is RouterIntentEoaAdapter, AaveV3Helpers {
     using SafeERC20 for IERC20;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
-        address __defaultRefundAddress,
         address __aaveV3Pool,
         address __aaveV3WrappedTokenGateway,
         uint16 __aaveV3ReferralCode
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-        DefaultRefundable(__defaultRefundAddress)
+        RouterIntentEoaAdapter(__native, __wnative, false, address(0))
         AaveV3Helpers(
             __aaveV3Pool,
             __aaveV3WrappedTokenGateway,
@@ -95,11 +82,11 @@ contract AaveV3Borrow is
         address onBehalfOf,
         address recipient
     ) private returns (address[] memory tokens, bytes memory logData) {
-        aaveV3Pool().borrow(
+        aaveV3Pool.borrow(
             asset,
             amount,
             rateMode,
-            aaveV3ReferralCode(),
+            aaveV3ReferralCode,
             onBehalfOf
         );
 
@@ -109,18 +96,6 @@ contract AaveV3Borrow is
         tokens[0] = asset;
 
         logData = abi.encode(amount, rateMode, asset, onBehalfOf);
-    }
-
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory
-    ) external override onlyNitro nonReentrant {
-        withdrawTokens(tokenSent, defaultRefundAddress(), amount);
-        emit UnsupportedOperation(tokenSent, defaultRefundAddress(), amount);
     }
 
     /**

@@ -1,13 +1,7 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  NATIVE,
-  WNATIVE,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE } from "../../tasks/constants";
 import { LidoStakeEth__factory } from "../../typechain/factories/LidoStakeEth__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
@@ -47,21 +41,20 @@ describe("LidoStakeEth Adapter: ", async () => {
     const dexSpanAdapter = await DexSpanAdapter.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS
+      DEXSPAN[env][CHAIN_ID]
     );
 
     const LidoStakeEth = await ethers.getContractFactory("LidoStakeEth");
     const lidoStakeEthAdapter = await LidoStakeEth.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       LIDO_ST_TOKEN,
       LIDO_REFERRAL_ADDRESS
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [dexSpanAdapter.address, lidoStakeEthAdapter.address],
+      [true, true]
     );
 
     return {
@@ -166,32 +159,6 @@ describe("LidoStakeEth Adapter: ", async () => {
       assetForwarderData,
       batchTransaction.address,
       { value: amount, gasLimit: 1000000 }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const stethBalAfter = await steth.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(stethBalAfter).gt(stethBalBefore);
-  });
-
-  it("Can stake ETH on Lido on dest chain when instruction is received directly on LidoStakeEth adapter", async () => {
-    const { lidoStakeEthAdapter, steth, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const stethBalBefore = await steth.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      lidoStakeEthAdapter.address,
-      { value: amount }
     );
 
     const balAfter = await ethers.provider.getBalance(deployer.address);

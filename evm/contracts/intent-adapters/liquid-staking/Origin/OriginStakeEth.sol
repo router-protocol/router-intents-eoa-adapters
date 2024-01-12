@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {IOriginStakeEth} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -13,40 +12,20 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking ETH to receive OETH on Origin.
  * @notice This contract is only for Ethereum chain.
  */
-contract OriginStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
+contract OriginStakeEth is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
 
-    IOriginStakeEth private immutable _oETHZapper;
-    address private immutable _oETH;
-
-    event OriginStakeEthDest(
-        address _recipient,
-        uint256 _amount,
-        uint256 _receivedOEth
-    );
+    IOriginStakeEth public immutable oETHZapper;
+    address public immutable oETH;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __oETH,
         address __oETHZapper
-    )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-    {
-        _oETHZapper = IOriginStakeEth(__oETHZapper);
-        _oETH = __oETH;
-    }
-
-    function oEth() public view returns (address) {
-        return _oETH;
-    }
-
-    function originPool() public view returns (IOriginStakeEth) {
-        return _oETHZapper;
+    ) RouterIntentEoaAdapter(__native, __wnative, false, address(0)) {
+        oETHZapper = IOriginStakeEth(__oETHZapper);
+        oETH = __oETH;
     }
 
     function name() public pure override returns (string memory) {
@@ -69,7 +48,8 @@ contract OriginStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
                 msg.value == _amount,
                 Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
             );
-        }
+        } else if (_amount == type(uint256).max)
+            _amount = address(this).balance;
 
         bytes memory logData;
 
@@ -79,52 +59,22 @@ contract OriginStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        if (tokenSent != native()) {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        try _oETHZapper.deposit{value: amount}() {
-            uint256 _receivedOEth = withdrawTokens(
-                _oETH,
-                recipient,
-                type(uint256).max
-            );
-
-            emit OriginStakeEthDest(recipient, amount, _receivedOEth);
-        } catch {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-        }
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _stake(
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        _oETHZapper.deposit{value: _amount}();
+        oETHZapper.deposit{value: _amount}();
         uint256 _receivedOEth = withdrawTokens(
-            _oETH,
+            oETH,
             _recipient,
             type(uint256).max
         );
 
         tokens = new address[](2);
         tokens[0] = native();
-        tokens[1] = oEth();
+        tokens[1] = oETH;
 
         logData = abi.encode(_recipient, _amount, _receivedOEth);
     }

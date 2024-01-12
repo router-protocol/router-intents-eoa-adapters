@@ -1,11 +1,7 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import {
-  DEXSPAN,
-  DEFAULT_ENV,
-  DEFAULT_REFUND_ADDRESS,
-} from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV } from "../../tasks/constants";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
@@ -46,28 +42,25 @@ describe("RadiantBorrow Adapter: ", async () => {
     );
     const mockAssetForwarder = await MockAssetForwarder.deploy();
 
-    const RadiantSupplyAdapter = await ethers.getContractFactory("RadiantSupply");
+    const RadiantSupplyAdapter = await ethers.getContractFactory(
+      "RadiantSupply"
+    );
 
     const radiantSupplyAdapter = await RadiantSupplyAdapter.deploy(
       NATIVE_TOKEN,
       WETH,
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       RADIANT_POOL,
       RADIANT_WRAPPED_TOKEN_GATEWAY,
       RADIANT_REFERRAL_CODE
     );
 
-    const RadiantBorrowAdapter = await ethers.getContractFactory("RadiantBorrow");
+    const RadiantBorrowAdapter = await ethers.getContractFactory(
+      "RadiantBorrow"
+    );
 
     const radiantBorrowAdapter = await RadiantBorrowAdapter.deploy(
       NATIVE_TOKEN,
       WETH,
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
-      DEFAULT_REFUND_ADDRESS,
       RADIANT_POOL,
       RADIANT_WRAPPED_TOKEN_GATEWAY,
       RADIANT_REFERRAL_CODE
@@ -82,6 +75,11 @@ describe("RadiantBorrow Adapter: ", async () => {
       WETH,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID]
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [radiantBorrowAdapter.address, radiantSupplyAdapter.address],
+      [true, true]
     );
 
     const weth = TokenInterface__factory.connect(WETH, deployer);
@@ -175,7 +173,10 @@ describe("RadiantBorrow Adapter: ", async () => {
 
     const tokens = [supplyAsset];
     const amounts = [supplyAmount];
-    const targets = [radiantSupplyAdapter.address, radiantBorrowAdapter.address];
+    const targets = [
+      radiantSupplyAdapter.address,
+      radiantBorrowAdapter.address,
+    ];
     const data = [radiantSupplyData, radiantBorrowData];
     const value = [0, 0];
     const callType = [2, 2];
@@ -204,38 +205,5 @@ describe("RadiantBorrow Adapter: ", async () => {
     expect(userBalAfter).gt(0);
     expect(usdcBalBefore).eq(0);
     expect(usdcBalAfter).eq(borrowAmount);
-  });
-
-  it("Cannot borrow funds cross-chain when handleMessage is called directly on adapter", async () => {
-    const { usdc, mockAssetForwarder, radiantBorrowAdapter } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    const borrowAmount = "10000";
-    const borrowRateMode = 2; // variable rate
-    const borrowAsset = usdc.address;
-    const borrowOnBehalfOf = deployer.address;
-    const borrowRecipient = deployer.address;
-
-    const radiantBorrowData = defaultAbiCoder.encode(
-      ["uint256", "uint256", "address", "address", "address"],
-      [
-        borrowAmount,
-        borrowRateMode,
-        borrowAsset,
-        borrowOnBehalfOf,
-        borrowRecipient,
-      ]
-    );
-
-    expect(
-      await mockAssetForwarder.handleMessage(
-        NATIVE_TOKEN,
-        amount,
-        radiantBorrowData,
-        radiantBorrowAdapter.address,
-        { value: amount }
-      )
-    ).to.emit("UnsupportedOperation");
   });
 });

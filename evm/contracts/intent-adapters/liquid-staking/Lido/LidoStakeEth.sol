@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {ILidoStakeEth} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -13,40 +12,20 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking ETH to receive StEth on Lido.
  * @notice This contract is only for Ethereum chain.
  */
-contract LidoStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
+contract LidoStakeEth is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _lidoStETH;
-    address private immutable _referralId;
-
-    event LidoStakeEthDest(
-        address _recipient,
-        uint256 _amount,
-        uint256 _receivedStEth
-    );
+    address public immutable lidoStETH;
+    address public immutable referralId;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __lidoStETH,
         address __referralId
-    )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-    {
-        _lidoStETH = __lidoStETH;
-        _referralId = __referralId;
-    }
-
-    function lidoStEth() public view returns (address) {
-        return _lidoStETH;
-    }
-
-    function referralId() public view returns (address) {
-        return _referralId;
+    ) RouterIntentEoaAdapter(__native, __wnative, false, address(0)) {
+        lidoStETH = __lidoStETH;
+        referralId = __referralId;
     }
 
     function name() public pure override returns (string memory) {
@@ -69,7 +48,8 @@ contract LidoStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
                 msg.value == _amount,
                 Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
             );
-        }
+        } else if (_amount == type(uint256).max)
+            _amount = address(this).balance;
 
         bytes memory logData;
 
@@ -79,52 +59,22 @@ contract LidoStakeEth is RouterIntentEoaAdapter, NitroMessageHandler {
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        if (tokenSent != native()) {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        try ILidoStakeEth(_lidoStETH).submit{value: amount}(_referralId) {
-            uint256 _receivedStEth = withdrawTokens(
-                _lidoStETH,
-                recipient,
-                type(uint256).max
-            );
-
-            emit LidoStakeEthDest(recipient, amount, _receivedStEth);
-        } catch {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-        }
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _stake(
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        ILidoStakeEth(_lidoStETH).submit{value: _amount}(_referralId);
+        ILidoStakeEth(lidoStETH).submit{value: _amount}(referralId);
         uint256 _receivedStEth = withdrawTokens(
-            _lidoStETH,
+            lidoStETH,
             _recipient,
             type(uint256).max
         );
 
         tokens = new address[](2);
         tokens[0] = native();
-        tokens[1] = lidoStEth();
+        tokens[1] = lidoStETH;
 
         logData = abi.encode(_recipient, _amount, _receivedStEth);
     }

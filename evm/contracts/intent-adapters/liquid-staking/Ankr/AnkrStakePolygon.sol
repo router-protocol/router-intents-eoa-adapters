@@ -3,8 +3,7 @@ pragma solidity 0.8.18;
 
 import {IAnkrStakePolygon} from "./Interfaces.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -13,36 +12,20 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @notice Staking MATIC to receive AnkrMatic on Ankr.
  * @notice This contract is only for Polygon chain.
  */
-contract AnkrStakePolygon is RouterIntentEoaAdapter, NitroMessageHandler {
+contract AnkrStakePolygon is RouterIntentEoaAdapter {
     using SafeERC20 for IERC20;
 
-    address private immutable _ankrMatic;
-    IAnkrStakePolygon private immutable _ankrPool;
-
-    event AnkrStakePolygonDest(address _recipient, uint256 _amount);
+    address public immutable ankrMatic;
+    IAnkrStakePolygon public immutable ankrPool;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __ankrMatic,
         address __ankrPool
-    )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-    {
-        _ankrMatic = __ankrMatic;
-        _ankrPool = IAnkrStakePolygon(__ankrPool);
-    }
-
-    function ankrMatic() public view returns (address) {
-        return _ankrMatic;
-    }
-
-    function ankrPool() public view returns (IAnkrStakePolygon) {
-        return _ankrPool;
+    ) RouterIntentEoaAdapter(__native, __wnative, false, address(0)) {
+        ankrMatic = __ankrMatic;
+        ankrPool = IAnkrStakePolygon(__ankrPool);
     }
 
     function name() public pure override returns (string memory) {
@@ -65,7 +48,8 @@ contract AnkrStakePolygon is RouterIntentEoaAdapter, NitroMessageHandler {
                 msg.value == _amount,
                 Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
             );
-        }
+        } else if (_amount == type(uint256).max)
+            _amount = address(this).balance;
 
         bytes memory logData;
 
@@ -75,41 +59,17 @@ contract AnkrStakePolygon is RouterIntentEoaAdapter, NitroMessageHandler {
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        if (tokenSent != native()) {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        try _ankrPool.swapEth{value: amount}(true, amount, recipient) {
-            emit AnkrStakePolygonDest(recipient, amount);
-        } catch {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-        }
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _stake(
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        _ankrPool.swapEth{value: _amount}(true, _amount, _recipient);
+        ankrPool.swapEth{value: _amount}(true, _amount, _recipient);
 
         tokens = new address[](2);
         tokens[0] = native();
-        tokens[1] = ankrMatic();
+        tokens[1] = ankrMatic;
 
         logData = abi.encode(_recipient, _amount);
     }

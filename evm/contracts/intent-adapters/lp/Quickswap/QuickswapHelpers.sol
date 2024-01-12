@@ -5,19 +5,11 @@ import {IQuickswapNonfungiblePositionManager} from "./Interfaces.sol";
 
 contract QuickswapHelpers {
     IQuickswapNonfungiblePositionManager
-        private immutable _nonFungiblePositionManager;
+        public immutable nonFungiblePositionManager;
 
     constructor(address __nonFungiblePositionManager) {
-        _nonFungiblePositionManager = IQuickswapNonfungiblePositionManager(
+        nonFungiblePositionManager = IQuickswapNonfungiblePositionManager(
             __nonFungiblePositionManager
         );
-    }
-
-    function positionManager()
-        public
-        view
-        returns (IQuickswapNonfungiblePositionManager)
-    {
-        return _nonFungiblePositionManager;
     }
 }

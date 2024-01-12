@@ -43,11 +43,13 @@ describe("StaderStakeMatic Adapter: ", async () => {
     const staderStakeMaticAdapter = await StaderStakeMatic.deploy(
       NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       STADER_X_TOKEN,
       MATIC_TOKEN
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [staderStakeMaticAdapter.address],
+      [true]
     );
 
     return {
@@ -180,31 +182,6 @@ describe("StaderStakeMatic Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      { gasLimit: 1000000 }
-    );
-
-    const maticxBalAfter = await maticx.balanceOf(deployer.address);
-
-    expect(maticxBalAfter).gt(maticxBalBefore);
-  });
-
-  it("Can stake MATIC on Stader on dest chain when instruction is received directly on StaderStakeMatic adapter", async () => {
-    const { staderStakeMaticAdapter, maticx, mockAssetForwarder, matic } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const maticxBalBefore = await maticx.balanceOf(deployer.address);
-    await setUserTokenBalance(matic, deployer, amount);
-    await matic.approve(mockAssetForwarder.address, amount);
-
-    await mockAssetForwarder.handleMessage(
-      MATIC_TOKEN,
-      amount,
-      data,
-      staderStakeMaticAdapter.address,
       { gasLimit: 1000000 }
     );
 

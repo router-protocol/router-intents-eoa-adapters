@@ -4,9 +4,7 @@ pragma solidity 0.8.18;
 import {CompoundHelpers} from "./CompoundHelpers.sol";
 import {IComet} from "./interfaces/IComet.sol";
 import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
-import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
@@ -14,28 +12,17 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
  * @author Yashika Goyal
  * @notice Borrowing funds on Compound.
  */
-contract CompoundBorrow is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler,
-    DefaultRefundable,
-    CompoundHelpers
-{
+contract CompoundBorrow is RouterIntentEoaAdapter, CompoundHelpers {
     using SafeERC20 for IERC20;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
-        address __defaultRefundAddress,
         address __usdc,
         address __cUSDCV3Pool,
         address __cWETHV3Pool
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-        DefaultRefundable(__defaultRefundAddress)
+        RouterIntentEoaAdapter(__native, __wnative, false, address(0))
         CompoundHelpers(__usdc, __cUSDCV3Pool, __cWETHV3Pool)
     // solhint-disable-next-line no-empty-blocks
     {
@@ -90,10 +77,10 @@ contract CompoundBorrow is
         address recipient
     ) private returns (address[] memory tokens, bytes memory logData) {
         IComet _cTokenV3Pool;
-        if (asset == usdc()) {
-            _cTokenV3Pool = cUSDCV3Pool();
+        if (asset == usdc) {
+            _cTokenV3Pool = cUSDCV3Pool;
         } else if (asset == wnative()) {
-            _cTokenV3Pool = cWETHV3Pool();
+            _cTokenV3Pool = cWETHV3Pool;
         } else revert InvalidBorrowMarket();
 
         _cTokenV3Pool.withdrawFrom(onBehalfOf, recipient, asset, amount);
@@ -102,18 +89,6 @@ contract CompoundBorrow is
         tokens[0] = asset;
 
         logData = abi.encode(amount, asset, onBehalfOf, recipient);
-    }
-
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory
-    ) external override onlyNitro nonReentrant {
-        withdrawTokens(tokenSent, defaultRefundAddress(), amount);
-        emit UnsupportedOperation(tokenSent, defaultRefundAddress(), amount);
     }
 
     /**

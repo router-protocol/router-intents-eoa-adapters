@@ -42,11 +42,13 @@ describe("StaderStakePolygon Adapter: ", async () => {
     const staderStakePolygonAdapter = await StaderStakePolygon.deploy(
       NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       STADER_X_TOKEN,
       STADER_POOL
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [staderStakePolygonAdapter.address],
+      [true]
     );
 
     return {
@@ -151,32 +153,6 @@ describe("StaderStakePolygon Adapter: ", async () => {
       amount,
       assetForwarderData,
       batchTransaction.address,
-      { value: amount }
-    );
-
-    const balAfter = await ethers.provider.getBalance(deployer.address);
-    const maticxBalAfter = await maticx.balanceOf(deployer.address);
-
-    expect(balAfter).lt(balBefore);
-    expect(maticxBalAfter).gt(maticxBalBefore);
-  });
-
-  it("Can stake MATIC on Stader on dest chain when instruction is received directly on StaderStakePolygon adapter", async () => {
-    const { staderStakePolygonAdapter, maticx, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = "100000000000000000";
-
-    const data = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const balBefore = await ethers.provider.getBalance(deployer.address);
-    const maticxBalBefore = await maticx.balanceOf(deployer.address);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      data,
-      staderStakePolygonAdapter.address,
       { value: amount }
     );
 

@@ -30,14 +30,13 @@ describe("CompoundSupply Adapter: ", async () => {
     );
     const mockAssetForwarder = await MockAssetForwarder.deploy();
 
-    const CompoundSupplyAdapter = await ethers.getContractFactory("CompoundSupply");
+    const CompoundSupplyAdapter = await ethers.getContractFactory(
+      "CompoundSupply"
+    );
 
     const compoundSupplyAdapter = await CompoundSupplyAdapter.deploy(
       NATIVE_TOKEN,
       WETH,
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       USDC,
       COMPOUND_USDC_POOL,
       COMPOUND_WETH_POOL
@@ -54,12 +53,23 @@ describe("CompoundSupply Adapter: ", async () => {
       DEXSPAN[env][CHAIN_ID]
     );
 
+    await batchTransaction.setAdapterWhitelist(
+      [compoundSupplyAdapter.address],
+      [true]
+    );
+
     const weth = TokenInterface__factory.connect(WETH, deployer);
     const cWeth = TokenInterface__factory.connect(C_WETH_ADDRESS, deployer);
     const cUSDC = TokenInterface__factory.connect(C_USDC_ADDRESS, deployer);
     const usdc = TokenInterface__factory.connect(USDC, deployer);
-    const compoundUSDCPool = IComet__factory.connect(COMPOUND_USDC_POOL, deployer);
-    const compoundWETHPool = IComet__factory.connect(COMPOUND_WETH_POOL, deployer);
+    const compoundUSDCPool = IComet__factory.connect(
+      COMPOUND_USDC_POOL,
+      deployer
+    );
+    const compoundWETHPool = IComet__factory.connect(
+      COMPOUND_WETH_POOL,
+      deployer
+    );
 
     const MockToken = await ethers.getContractFactory("MockToken");
     const mockToken = await MockToken.deploy();
@@ -107,8 +117,8 @@ describe("CompoundSupply Adapter: ", async () => {
     const amount = ethers.utils.parseEther("1");
 
     const data = defaultAbiCoder.encode(
-      ["address", "address", "uint256","address"],
-      [NATIVE_TOKEN, deployer.address, amount,WETH]
+      ["address", "address", "uint256", "address"],
+      [NATIVE_TOKEN, deployer.address, amount, WETH]
     );
 
     const userBalBefore = await cWeth.balanceOf(deployer.address);
@@ -124,12 +134,12 @@ describe("CompoundSupply Adapter: ", async () => {
   });
 
   it("Can supply native tokens on Compound usdc market", async () => {
-    const { compoundSupplyAdapter, cWeth,  compoundUSDCPool} = await setupTests();
+    const { compoundSupplyAdapter, compoundUSDCPool } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
 
     const data = defaultAbiCoder.encode(
-      ["address", "address", "uint256","address"],
+      ["address", "address", "uint256", "address"],
       [NATIVE_TOKEN, deployer.address, amount, USDC]
     );
 
@@ -138,9 +148,12 @@ describe("CompoundSupply Adapter: ", async () => {
       value: amount,
     });
 
-    const collateralBal = await compoundUSDCPool.collateralBalanceOf(deployer.address, WETH);
+    const collateralBal = await compoundUSDCPool.collateralBalanceOf(
+      deployer.address,
+      WETH
+    );
 
-    expect(collateralBal).gt(0); 
+    expect(collateralBal).gt(0);
   });
 
   it("Can supply non-native tokens on Compound weth market", async () => {
@@ -167,7 +180,8 @@ describe("CompoundSupply Adapter: ", async () => {
   });
 
   it("Can supply non-native tokens on Compound usdc market", async () => {
-    const { compoundSupplyAdapter, weth, cWeth, compoundUSDCPool } = await setupTests();
+    const { compoundSupplyAdapter, weth, compoundUSDCPool } =
+      await setupTests();
 
     const amount = ethers.utils.parseEther("1");
     await weth.deposit({ value: amount });
@@ -179,13 +193,15 @@ describe("CompoundSupply Adapter: ", async () => {
       [weth.address, deployer.address, amount, USDC]
     );
 
-    const userBalBefore = await cWeth.balanceOf(deployer.address);
     await compoundSupplyAdapter.execute(zeroAddress(), zeroAddress(), data, {
       gasLimit: 10000000,
     });
-    const collateralBal = await compoundUSDCPool.collateralBalanceOf(deployer.address, WETH);
+    const collateralBal = await compoundUSDCPool.collateralBalanceOf(
+      deployer.address,
+      WETH
+    );
 
-    expect(collateralBal).gt(0); 
+    expect(collateralBal).gt(0);
   });
 
   it("Cannot supply unsupported tokens on Compound weth market", async () => {
@@ -225,7 +241,7 @@ describe("CompoundSupply Adapter: ", async () => {
   });
 
   it("Cannot supply tokens on Compound- unsupported market", async () => {
-    const { compoundSupplyAdapter, mockToken } = await setupTests();
+    const { compoundSupplyAdapter } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
 
@@ -238,183 +254,6 @@ describe("CompoundSupply Adapter: ", async () => {
       compoundSupplyAdapter.execute(zeroAddress(), zeroAddress(), data, {
         gasLimit: 10000000,
       })
-    ).to.be.reverted;
-  });
-
-  it("Can supply native tokens cross-chain on Compound weth market when handleMessage is called directly on adapter", async () => {
-    const { compoundSupplyAdapter, cWeth, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const instruction = defaultAbiCoder.encode(["address","address"], [deployer.address, WETH]);
-
-    const userBalBefore = await cWeth.balanceOf(deployer.address);
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      instruction,
-      compoundSupplyAdapter.address,
-      {
-        gasLimit: 10000000,
-        value: amount,
-      }
-    );
-
-    const userBalAfter = await cWeth.balanceOf(deployer.address);
-
-    expect(userBalBefore).eq(0);
-    expect(userBalAfter).gt(0);
-  });
-
-  it("Can supply native tokens cross-chain on Compound usdc market when handleMessage is called directly on adapter", async () => {
-    const { compoundSupplyAdapter, cWeth, mockAssetForwarder, compoundUSDCPool } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const instruction = defaultAbiCoder.encode(["address","address"], [deployer.address, USDC]);
-
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      instruction,
-      compoundSupplyAdapter.address,
-      {
-        gasLimit: 10000000,
-        value: amount,
-      }
-    );
-
-    const collateralBal = await compoundUSDCPool.collateralBalanceOf(deployer.address, WETH);
-
-    expect(collateralBal).gt(0);
-  });
-
-  it("Can supply non-native tokens cross-chain on Compound weth market when handleMessage is called directly on adapter", async () => {
-    const { compoundSupplyAdapter, weth, cWeth, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    await weth.deposit({ value: amount });
-    expect(await weth.balanceOf(deployer.address)).eq(amount);
-
-    await weth.approve(mockAssetForwarder.address, amount);
-
-    const instruction = defaultAbiCoder.encode(["address", "address"], [deployer.address, WETH]);
-
-    const userBalBefore = await cWeth.balanceOf(deployer.address);
-    await mockAssetForwarder.handleMessage(
-      WETH,
-      amount,
-      instruction,
-      compoundSupplyAdapter.address
-    );
-
-    const userBalAfter = await cWeth.balanceOf(deployer.address);
-
-    expect(userBalBefore).eq(0);
-    expect(userBalAfter).gt(0);
-  });
-
-  it("Can supply non-native tokens cross-chain on Compound usdc market when handleMessage is called directly on adapter", async () => {
-    const { compoundSupplyAdapter, weth, cWeth, mockAssetForwarder, compoundUSDCPool } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    await weth.deposit({ value: amount });
-    expect(await weth.balanceOf(deployer.address)).eq(amount);
-
-    await weth.approve(mockAssetForwarder.address, amount);
-
-    const instruction = defaultAbiCoder.encode(["address", "address"], [deployer.address, USDC]);
-
-    await mockAssetForwarder.handleMessage(
-      WETH,
-      amount,
-      instruction,
-      compoundSupplyAdapter.address
-    );
-
-    const collateralBal = await compoundUSDCPool.collateralBalanceOf(deployer.address, WETH);
-
-    expect(collateralBal).gt(0);
-  });
-
-  it("Can get a refund if unsupported token is being supplied cross-chain on Compound wethmarket when handleMessage is called directly on adapter", async () => {
-    const { compoundSupplyAdapter, mockToken, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    await mockToken.approve(mockAssetForwarder.address, amount);
-
-    const instruction = defaultAbiCoder.encode(["address", "address"], [alice.address, WETH]);
-
-    const callerBalBefore = await mockToken.balanceOf(deployer.address);
-    const recipientBalBefore = await mockToken.balanceOf(alice.address);
-
-    expect(
-      await mockAssetForwarder.handleMessage(
-        mockToken.address,
-        amount,
-        instruction,
-        compoundSupplyAdapter.address
-      )
-    ).to.emit("OperationFailedRefundEvent");
-
-    const callerBalAfter = await mockToken.balanceOf(deployer.address);
-    const recipientBalAfter = await mockToken.balanceOf(alice.address);
-
-    expect(callerBalAfter).lt(callerBalBefore);
-    expect(recipientBalAfter).gt(recipientBalBefore);
-  });
-
-  it("Can get a refund if unsupported token is being supplied cross-chain on Compound usdc market when handleMessage is called directly on adapter", async () => {
-    const { compoundSupplyAdapter, mockToken, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    await mockToken.approve(mockAssetForwarder.address, amount);
-
-    const instruction = defaultAbiCoder.encode(["address", "address"], [alice.address, USDC]);
-
-    const callerBalBefore = await mockToken.balanceOf(deployer.address);
-    const recipientBalBefore = await mockToken.balanceOf(alice.address);
-
-    expect(
-      await mockAssetForwarder.handleMessage(
-        mockToken.address,
-        amount,
-        instruction,
-        compoundSupplyAdapter.address
-      )
-    ).to.emit("OperationFailedRefundEvent");
-
-    const callerBalAfter = await mockToken.balanceOf(deployer.address);
-    const recipientBalAfter = await mockToken.balanceOf(alice.address);
-
-    expect(callerBalAfter).lt(callerBalBefore);
-    expect(recipientBalAfter).gt(recipientBalBefore);
-  });
-
-  it("Can get a refund if tried to supply on unsupported market on Compound when handleMessage is called directly on adapter", async () => {
-    const { compoundSupplyAdapter, mockToken, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const instruction = defaultAbiCoder.encode(["address", "address"], [alice.address, NATIVE_TOKEN]);
-
-    const callerBalBefore = await mockToken.balanceOf(deployer.address);
-    const recipientBalBefore = await mockToken.balanceOf(alice.address);
-
-    await expect(
-       mockAssetForwarder.handleMessage(
-        NATIVE_TOKEN,
-        amount,
-        instruction,
-        compoundSupplyAdapter.address
-      )
     ).to.be.reverted;
   });
 
@@ -454,7 +293,7 @@ describe("CompoundSupply Adapter: ", async () => {
   });
 
   it("Can supply native tokens on Compound usdc market using BatchTransaction flow", async () => {
-    const { compoundSupplyAdapter, cWeth, batchTransaction , compoundUSDCPool} =
+    const { compoundSupplyAdapter, batchTransaction, compoundUSDCPool } =
       await setupTests();
 
     const amount = ethers.utils.parseEther("1");
@@ -481,7 +320,10 @@ describe("CompoundSupply Adapter: ", async () => {
       { value: amount }
     );
 
-    const collateralBal = await compoundUSDCPool.collateralBalanceOf(alice.address, WETH);
+    const collateralBal = await compoundUSDCPool.collateralBalanceOf(
+      alice.address,
+      WETH
+    );
 
     expect(collateralBal).gt(0);
   });
@@ -525,7 +367,7 @@ describe("CompoundSupply Adapter: ", async () => {
   });
 
   it("Can supply non-native tokens on Compound usdc market using BatchTransaction flow", async () => {
-    const { compoundSupplyAdapter, weth, cWeth, batchTransaction, compoundUSDCPool } =
+    const { compoundSupplyAdapter, weth, batchTransaction, compoundUSDCPool } =
       await setupTests();
 
     const amount = ethers.utils.parseEther("1");
@@ -555,7 +397,10 @@ describe("CompoundSupply Adapter: ", async () => {
       data
     );
 
-    const collateralBal = await compoundUSDCPool.collateralBalanceOf(alice.address, WETH);
+    const collateralBal = await compoundUSDCPool.collateralBalanceOf(
+      alice.address,
+      WETH
+    );
 
     expect(collateralBal).gt(0);
   });
@@ -569,7 +414,7 @@ describe("CompoundSupply Adapter: ", async () => {
 
     const compoundSupplyData = defaultAbiCoder.encode(
       ["address", "address", "uint256", "address"],
-      [mockToken.address, alice.address, amount , WETH]
+      [mockToken.address, alice.address, amount, WETH]
     );
 
     const tokens = [mockToken.address];
@@ -600,7 +445,7 @@ describe("CompoundSupply Adapter: ", async () => {
 
     const compoundSupplyData = defaultAbiCoder.encode(
       ["address", "address", "uint256", "address"],
-      [mockToken.address, alice.address, amount , USDC]
+      [mockToken.address, alice.address, amount, USDC]
     );
 
     const tokens = [mockToken.address];
@@ -623,8 +468,7 @@ describe("CompoundSupply Adapter: ", async () => {
   });
 
   it("Cannot supply tokens on unsupported market on Compound using BatchTransaction flow", async () => {
-    const { compoundSupplyAdapter, cWeth, batchTransaction , compoundUSDCPool} =
-      await setupTests();
+    const { compoundSupplyAdapter, batchTransaction } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
 
@@ -640,15 +484,17 @@ describe("CompoundSupply Adapter: ", async () => {
     const value = [0];
     const callType = [2];
 
-    await expect(batchTransaction.executeBatchCallsSameChain(
-      tokens,
-      amounts,
-      targets,
-      value,
-      callType,
-      data,
-      { value: amount }
-    )).to.be.reverted;
+    await expect(
+      batchTransaction.executeBatchCallsSameChain(
+        tokens,
+        amounts,
+        targets,
+        value,
+        callType,
+        data,
+        { value: amount }
+      )
+    ).to.be.reverted;
   });
 
   it("Can supply native tokens cross-chain on Compound weth market using BatchTransaction flow", async () => {
@@ -694,9 +540,8 @@ describe("CompoundSupply Adapter: ", async () => {
     const {
       compoundSupplyAdapter,
       mockAssetForwarder,
-      cWeth,
       batchTransaction,
-      compoundUSDCPool
+      compoundUSDCPool,
     } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
@@ -722,8 +567,11 @@ describe("CompoundSupply Adapter: ", async () => {
       batchTransaction.address,
       { value: amount, gasLimit: 10000000 }
     );
-    
-    const collateralBal = await compoundUSDCPool.collateralBalanceOf(alice.address, WETH);
+
+    const collateralBal = await compoundUSDCPool.collateralBalanceOf(
+      alice.address,
+      WETH
+    );
 
     expect(collateralBal).gt(0);
   });
@@ -777,9 +625,8 @@ describe("CompoundSupply Adapter: ", async () => {
       compoundSupplyAdapter,
       mockAssetForwarder,
       weth,
-      cWeth,
       batchTransaction,
-      compoundUSDCPool
+      compoundUSDCPool,
     } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
@@ -810,8 +657,11 @@ describe("CompoundSupply Adapter: ", async () => {
       batchTransaction.address,
       { value: amount, gasLimit: 10000000 }
     );
-    
-    const collateralBal = await compoundUSDCPool.collateralBalanceOf(alice.address, WETH);
+
+    const collateralBal = await compoundUSDCPool.collateralBalanceOf(
+      alice.address,
+      WETH
+    );
 
     expect(collateralBal).gt(0);
   });
@@ -915,7 +765,6 @@ describe("CompoundSupply Adapter: ", async () => {
       compoundSupplyAdapter,
       mockAssetForwarder,
       weth,
-      cWeth,
       batchTransaction,
     } = await setupTests();
 
@@ -941,12 +790,13 @@ describe("CompoundSupply Adapter: ", async () => {
     );
 
     expect(
-        await mockAssetForwarder.handleMessage(
-      weth.address,
-      amount,
-      assetForwarderData,
-      batchTransaction.address,
-      { value: amount, gasLimit: 10000000 }
-    )).to.emit("OperationFailedRefundEvent");
+      await mockAssetForwarder.handleMessage(
+        weth.address,
+        amount,
+        assetForwarderData,
+        batchTransaction.address,
+        { value: amount, gasLimit: 10000000 }
+      )
+    ).to.emit("OperationFailedRefundEvent");
   });
 });

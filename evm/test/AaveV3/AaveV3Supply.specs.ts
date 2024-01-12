@@ -34,9 +34,6 @@ describe("AaveV3Supply Adapter: ", async () => {
     const aaveV3SupplyAdapter = await AaveV3SupplyAdapter.deploy(
       NATIVE_TOKEN,
       WMATIC,
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       AAVE_V3_POOL,
       AAVE_V3_WRAPPED_TOKEN_GATEWAY,
       AAVE_V3_REFERRAL_CODE
@@ -52,6 +49,8 @@ describe("AaveV3Supply Adapter: ", async () => {
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID]
     );
+
+    batchTransaction.setAdapterWhitelist([aaveV3SupplyAdapter.address], [true]);
 
     const wmatic = TokenInterface__factory.connect(WMATIC, deployer);
     const aWmatic = TokenInterface__factory.connect(A_WMATIC_ADDRESS, deployer);
@@ -153,86 +152,6 @@ describe("AaveV3Supply Adapter: ", async () => {
         gasLimit: 10000000,
       })
     ).to.be.reverted;
-  });
-
-  it("Can supply native tokens cross-chain on AaveV3 when handleMessage is called directly on adapter", async () => {
-    const { aaveV3SupplyAdapter, aWmatic, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const instruction = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const userBalBefore = await aWmatic.balanceOf(deployer.address);
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      instruction,
-      aaveV3SupplyAdapter.address,
-      {
-        gasLimit: 10000000,
-        value: amount,
-      }
-    );
-
-    const userBalAfter = await aWmatic.balanceOf(deployer.address);
-
-    expect(userBalBefore).eq(0);
-    expect(userBalAfter).gt(0);
-  });
-
-  it("Can supply non-native tokens cross-chain on AaveV3 when handleMessage is called directly on adapter", async () => {
-    const { aaveV3SupplyAdapter, wmatic, aWmatic, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    await wmatic.deposit({ value: amount });
-    expect(await wmatic.balanceOf(deployer.address)).eq(amount);
-
-    await wmatic.approve(mockAssetForwarder.address, amount);
-
-    const instruction = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const userBalBefore = await aWmatic.balanceOf(deployer.address);
-    await mockAssetForwarder.handleMessage(
-      WMATIC,
-      amount,
-      instruction,
-      aaveV3SupplyAdapter.address
-    );
-
-    const userBalAfter = await aWmatic.balanceOf(deployer.address);
-
-    expect(userBalBefore).eq(0);
-    expect(userBalAfter).gt(0);
-  });
-
-  it("Can get a refund if unsupported token is being supplied cross-chain on AaveV3 when handleMessage is called directly on adapter", async () => {
-    const { aaveV3SupplyAdapter, mockToken, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    await mockToken.approve(mockAssetForwarder.address, amount);
-
-    const instruction = defaultAbiCoder.encode(["address"], [alice.address]);
-
-    const callerBalBefore = await mockToken.balanceOf(deployer.address);
-    const recipientBalBefore = await mockToken.balanceOf(alice.address);
-
-    expect(
-      await mockAssetForwarder.handleMessage(
-        mockToken.address,
-        amount,
-        instruction,
-        aaveV3SupplyAdapter.address
-      )
-    ).to.emit("OperationFailedRefundEvent");
-
-    const callerBalAfter = await mockToken.balanceOf(deployer.address);
-    const recipientBalAfter = await mockToken.balanceOf(alice.address);
-
-    expect(callerBalAfter).lt(callerBalBefore);
-    expect(recipientBalAfter).gt(recipientBalBefore);
   });
 
   it("Can supply native tokens on AaveV3 using BatchTransaction flow", async () => {
