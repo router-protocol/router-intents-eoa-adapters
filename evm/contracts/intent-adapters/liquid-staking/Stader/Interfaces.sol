@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 interface IStaderPool {
     function deposit(address receiver) external payable returns (uint256);

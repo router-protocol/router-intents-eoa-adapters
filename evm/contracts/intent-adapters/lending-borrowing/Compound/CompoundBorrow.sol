@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 import {CompoundHelpers} from "./CompoundHelpers.sol";
 import {IComet} from "./interfaces/IComet.sol";

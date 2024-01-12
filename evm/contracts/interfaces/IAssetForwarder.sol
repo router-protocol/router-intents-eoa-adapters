@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 /// @title Interface for handler contracts that support deposits and deposit executions.
 /// @author Router Protocol.
@@ -39,12 +39,7 @@ interface IAssetForwarder {
         bytes destToken,
         bytes message
     );
-    event FundsPaid(
-        bytes32 messageHash,
-        address forwarder,
-        uint256 nonce,
-        string forwarderRouterAddress
-    );
+    event FundsPaid(bytes32 messageHash, address forwarder, uint256 nonce);
 
     event DepositInfoUpdate(
         address srcToken,
@@ -59,7 +54,6 @@ interface IAssetForwarder {
         bytes32 messageHash,
         address forwarder,
         uint256 nonce,
-        string forwarderRouterAddress,
         bool execFlag,
         bytes execData
     );
@@ -87,6 +81,15 @@ interface IAssetForwarder {
         bytes message;
     }
 
+    struct DepositData {
+        uint256 partnerId;
+        uint256 amount;
+        uint256 destAmount;
+        address srcToken;
+        address refundRecipient;
+        bytes32 destChainIdBytes;
+    }
+
     function iDepositUSDC(
         uint256 partnerId,
         bytes32 destChainIdBytes,
@@ -95,13 +98,9 @@ interface IAssetForwarder {
     ) external payable;
 
     function iDeposit(
-        uint256 partnerId,
-        bytes32 destChainIdBytes,
-        bytes calldata recipient,
-        address srcToken,
-        uint256 amount,
-        uint256 destAmount,
-        bytes calldata destToken
+        DepositData memory depositData,
+        bytes memory destToken,
+        bytes memory recipient
     ) external payable;
 
     function iDepositInfoUpdate(
@@ -112,23 +111,13 @@ interface IAssetForwarder {
     ) external payable;
 
     function iDepositMessage(
-        uint256 partnerId,
-        bytes32 destChainIdBytes,
-        bytes calldata recipient,
-        address srcToken,
-        uint256 amount,
-        uint256 destAmount,
-        bytes calldata destToken,
+        DepositData memory depositData,
+        bytes memory destToken,
+        bytes memory recipient,
         bytes memory message
     ) external payable;
 
-    function iRelay(
-        RelayData memory relayData,
-        string memory forwarderRouterAddress
-    ) external payable;
+    function iRelay(RelayData memory relayData) external payable;
 
-    function iRelayMessage(
-        RelayDataMessage memory relayData,
-        string memory forwarderRouterAddress
-    ) external payable;
+    function iRelayMessage(RelayDataMessage memory relayData) external payable;
 }
