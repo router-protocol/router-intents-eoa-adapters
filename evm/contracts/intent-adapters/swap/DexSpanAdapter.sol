@@ -36,7 +36,7 @@ contract DexSpanAdapter is RouterIntentEoaAdapter {
         address,
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
-        IDexSpan.SwapParams memory swapData = parseInputs(data);
+        IDexSpan.SameChainSwapParams memory swapData = parseInputs(data);
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
@@ -64,7 +64,7 @@ contract DexSpanAdapter is RouterIntentEoaAdapter {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _swap(
-        IDexSpan.SwapParams memory _swapData
+        IDexSpan.SameChainSwapParams memory _swapData
     ) internal returns (address[] memory tokens, bytes memory logData) {
         withdrawTokens(address(_swapData.tokens[0]), dexspan, _swapData.amount);
 
@@ -92,7 +92,12 @@ contract DexSpanAdapter is RouterIntentEoaAdapter {
      */
     function parseInputs(
         bytes memory data
-    ) public pure returns (IDexSpan.SwapParams memory swapData) {
-        swapData = abi.decode(data, (IDexSpan.SwapParams));
+    ) public pure returns (IDexSpan.SameChainSwapParams memory) {
+        IDexSpan.SameChainSwapParams memory swapData = abi.decode(
+            data,
+            (IDexSpan.SameChainSwapParams)
+        );
+
+        return swapData;
     }
 }

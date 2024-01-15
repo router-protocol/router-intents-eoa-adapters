@@ -120,4 +120,6 @@ interface IAssetForwarder {
     function iRelay(RelayData memory relayData) external payable;
 
     function iRelayMessage(RelayDataMessage memory relayData) external payable;
+
+    function usdc() external view returns (address);
 }

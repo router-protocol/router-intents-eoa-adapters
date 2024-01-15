@@ -4,13 +4,24 @@ pragma solidity ^0.8.18;
 import {IERC20} from "../utils/SafeERC20.sol";
 
 interface IDexSpan {
-    struct SwapParams {
+    struct SameChainSwapParams {
         IERC20[] tokens;
         uint256 amount;
         uint256 minReturn;
         uint256[] flags;
         bytes[] dataTx;
         address recipient;
+    }
+
+    struct SwapParams {
+        IERC20[] tokens;
+        uint256 amount;
+        uint256 minReturn;
+        uint256[] flags;
+        bytes[] dataTx;
+        bool isWrapper;
+        address recipient;
+        bytes destToken;
     }
 
     function swapInSameChain(
@@ -23,4 +34,15 @@ interface IDexSpan {
         address recipient,
         uint256 widgetID
     ) external payable returns (uint256 returnAmount);
+
+    function swapAndDeposit(
+        uint256 partnerId,
+        bytes32 destChainIdBytes,
+        bytes calldata recipient,
+        uint256 destAmount,
+        bytes memory message,
+        bool isMessage,
+        SwapParams memory swapData,
+        address refundRecipient
+    ) external payable;
 }

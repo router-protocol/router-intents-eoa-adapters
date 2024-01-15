@@ -18,4 +18,5 @@ import "./sushiswap";
 import "./swell";
 import "./synClub";
 import "./uniswapV3";
+import "./nitro";
 import "./BatchTransaction.deploy";

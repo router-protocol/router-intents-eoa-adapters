@@ -16,4 +16,5 @@ library Errors {
     string public constant ADAPTER_NOT_WHITELISTED = "7"; // 'Adapter not whitelisted'
     string public constant INVALID_BRIDGE_ADDRESS = "8"; // 'Bridge address neither asset forwarder nor dexspan'
     string public constant BRIDGE_CALL_FAILED = "9"; // 'Bridge call failed'
+    string public constant INVALID_BRDIGE_TX_TYPE = "10"; // 'Bridge tx type cannot be greater than 3'
 }

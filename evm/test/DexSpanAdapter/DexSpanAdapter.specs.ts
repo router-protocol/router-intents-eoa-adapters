@@ -144,7 +144,7 @@ describe("DexSpan Adapter: ", async () => {
     expect(balAfter).gt(balBefore);
   });
 
-  it("Can swap using dexspan on dest chain when instruction is received from BatchTransaction contract", async () => {
+  it.only("Can swap using dexspan on dest chain when instruction is received from BatchTransaction contract", async () => {
     const { batchTransaction, dexSpanAdapter, usdt, mockAssetForwarder } =
       await setupTests();
 

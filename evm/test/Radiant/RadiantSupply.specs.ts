@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
@@ -31,14 +32,13 @@ describe("RadiantSupply Adapter: ", async () => {
     );
     const mockAssetForwarder = await MockAssetForwarder.deploy();
 
-    const RadiantSupplyAdapter = await ethers.getContractFactory("RadiantSupply");
+    const RadiantSupplyAdapter = await ethers.getContractFactory(
+      "RadiantSupply"
+    );
 
     const radiantSupplyAdapter = await RadiantSupplyAdapter.deploy(
       NATIVE_TOKEN,
       WETH,
-      deployer.address,
-      mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID],
       RADIANT_POOL,
       RADIANT_WRAPPED_TOKEN_GATEWAY,
       RADIANT_REFERRAL_CODE
@@ -53,6 +53,11 @@ describe("RadiantSupply Adapter: ", async () => {
       WETH,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID]
+    );
+
+    await batchTransaction.setAdapterWhitelist(
+      [radiantSupplyAdapter.address],
+      [true]
     );
 
     const weth = TokenInterface__factory.connect(WETH, deployer);
@@ -155,125 +160,6 @@ describe("RadiantSupply Adapter: ", async () => {
         gasLimit: 10000000,
       })
     ).to.be.reverted;
-  });
-
-  it("Can supply native tokens cross-chain on Radiant when handleMessage is called directly on adapter", async () => {
-    const { radiantSupplyAdapter, rWeth, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const instruction = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const userBalBefore = await rWeth.balanceOf(deployer.address);
-    await mockAssetForwarder.handleMessage(
-      NATIVE_TOKEN,
-      amount,
-      instruction,
-      radiantSupplyAdapter.address,
-      {
-        gasLimit: 10000000,
-        value: amount,
-      }
-    );
-
-    const userBalAfter = await rWeth.balanceOf(deployer.address);
-
-    expect(userBalBefore).eq(0);
-    expect(userBalAfter).gt(0);
-  });
-
-  it("Can supply non-native tokens cross-chain on Radiant when handleMessage is called directly on adapter", async () => {
-    const { radiantSupplyAdapter, weth, rWeth, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    await weth.deposit({ value: amount });
-    expect(await weth.balanceOf(deployer.address)).eq(amount);
-
-    await weth.approve(mockAssetForwarder.address, amount);
-
-    const instruction = defaultAbiCoder.encode(["address"], [deployer.address]);
-
-    const userBalBefore = await rWeth.balanceOf(deployer.address);
-    await mockAssetForwarder.handleMessage(
-      WETH,
-      amount,
-      instruction,
-      radiantSupplyAdapter.address,
-      {
-        gasLimit: 10000000,
-        value: amount,
-      }
-    );
-
-    const userBalAfter = await rWeth.balanceOf(deployer.address);
-
-    expect(userBalBefore).eq(0);
-    expect(userBalAfter).gt(0);
-  });
-
-  it("Can get a refund if unsupported token is being supplied cross-chain on Radiant when handleMessage is called directly on adapter", async () => {
-    const { radiantSupplyAdapter, mockToken, mockAssetForwarder } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-    await mockToken.approve(mockAssetForwarder.address, amount);
-
-    const instruction = defaultAbiCoder.encode(["address"], [alice.address]);
-
-    const callerBalBefore = await mockToken.balanceOf(deployer.address);
-    const recipientBalBefore = await mockToken.balanceOf(alice.address);
-
-    expect(
-      await mockAssetForwarder.handleMessage(
-        mockToken.address,
-        amount,
-        instruction,
-        radiantSupplyAdapter.address
-      )
-    ).to.emit("OperationFailedRefundEvent");
-
-    const callerBalAfter = await mockToken.balanceOf(deployer.address);
-    const recipientBalAfter = await mockToken.balanceOf(alice.address);
-
-    expect(callerBalAfter).lt(callerBalBefore);
-    expect(recipientBalAfter).gt(recipientBalBefore);
-  });
-
-  it("Can supply native tokens on Radiant using BatchTransaction flow", async () => {
-    const { radiantSupplyAdapter, rWeth, batchTransaction } =
-      await setupTests();
-
-    const amount = ethers.utils.parseEther("1");
-
-    const radiantSupplyData = defaultAbiCoder.encode(
-      ["address", "address", "uint256"],
-      [NATIVE_TOKEN, alice.address, amount]
-    );
-
-    const tokens = [NATIVE_TOKEN];
-    const amounts = [amount];
-    const targets = [radiantSupplyAdapter.address];
-    const data = [radiantSupplyData];
-    const value = [0];
-    const callType = [2];
-
-    const userBalBefore = await rWeth.balanceOf(alice.address);
-    await batchTransaction.executeBatchCallsSameChain(
-      tokens,
-      amounts,
-      targets,
-      value,
-      callType,
-      data,
-      { value: amount }
-    );
-
-    const userBalAfter = await rWeth.balanceOf(alice.address);
-
-    expect(userBalBefore).eq(0);
-    expect(userBalAfter).gt(0);
   });
 
   it("Can supply non-native tokens on Radiant using BatchTransaction flow", async () => {

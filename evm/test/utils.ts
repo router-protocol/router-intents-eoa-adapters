@@ -33,7 +33,7 @@ export const getPathfinderData = async (
   }
 
   const swapParamsIface =
-    "tuple(address[] tokens,uint256 amount,uint256 minReturn,uint256[] flags,bytes[] dataTx, address recipient) SwapParams";
+    "tuple(address[] tokens,uint256 amount,uint256 minReturn,uint256[] flags,bytes[] dataTx,address recipient) SwapParams";
 
   const data = defaultAbiCoder.encode(
     [swapParamsIface],

@@ -2,6 +2,8 @@
 pragma solidity ^0.8.18;
 
 import {IERC20, SafeERC20} from "../utils/SafeERC20.sol";
+import {IAssetForwarder} from "../interfaces/IAssetForwarder.sol";
+import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
 
 contract MockAssetForwarder {
     using SafeERC20 for IERC20;
@@ -11,22 +13,37 @@ contract MockAssetForwarder {
     error ExecutionFailed();
 
     function iDeposit(
-        uint256,
-        bytes32,
-        bytes calldata,
-        address srcToken,
-        uint256 amount,
-        uint256,
-        bytes calldata
+        IAssetForwarder.DepositData memory depositData,
+        bytes memory destToken,
+        bytes memory recipient
     ) external payable {
-        if (srcToken != ETH) {
-            IERC20(srcToken).safeTransferFrom(
+        if (depositData.srcToken != ETH) {
+            IERC20(depositData.srcToken).safeTransferFrom(
                 msg.sender,
                 address(this),
-                amount
+                depositData.amount
             );
         } else {
-            if (msg.value != amount) {
+            if (msg.value != depositData.amount) {
+                revert InvalidAmount();
+            }
+        }
+    }
+
+    function iDepositMessage(
+        IAssetForwarder.DepositData memory depositData,
+        bytes memory destToken,
+        bytes memory recipient,
+        bytes memory message
+    ) external payable {
+        if (depositData.srcToken != ETH) {
+            IERC20(depositData.srcToken).safeTransferFrom(
+                msg.sender,
+                address(this),
+                depositData.amount
+            );
+        } else {
+            if (msg.value != depositData.amount) {
                 revert InvalidAmount();
             }
         }
@@ -49,7 +66,12 @@ contract MockAssetForwarder {
 
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = recipient.call(
-            abi.encodeWithSelector(0xd00a2d5f, tokenSent, amount, instruction)
+            abi.encodeWithSelector(
+                NitroMessageHandler.handleMessage.selector,
+                tokenSent,
+                amount,
+                instruction
+            )
         );
 
         if (!success) {

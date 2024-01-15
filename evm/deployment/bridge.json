@@ -1,1 +1,16 @@
-{}
+{
+  "testnet": {
+    "5": [
+      {
+        "name": "NitroAdapter",
+        "address": "0xEa327E14e57470Ec5506D2d2E67a472999D4F25E"
+      }
+    ],
+    "80001": [
+      {
+        "name": "NitroAdapter",
+        "address": "0xd85de097dc4476C90Ca300961bf2aE6f74677Cd6"
+      }
+    ]
+  }
+}
