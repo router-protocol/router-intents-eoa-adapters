@@ -1,1 +1,34 @@
-{}
+{
+  "mainnet": {
+    "56": [
+      {
+        "name": "AnkrStakeBsc",
+        "address": "0x13a36EdcfB274B2810fD586f35aDF61BDaf82031"
+      },
+      {
+        "name": "StaderStakeBnb",
+        "address": "0x4Ab7044Ce9a9a6AdB21203dEf44BC61D82A045F7"
+      }
+    ],
+    "137": [
+      {
+        "name": "StaderStakePolygon",
+        "address": "0xEa327E14e57470Ec5506D2d2E67a472999D4F25E"
+      },
+      {
+        "name": "AnkrStakePolygon",
+        "address": "0x46f8d21ae57FD55D12DC34E605dc2D5eCFEA983C"
+      }
+    ],
+    "43114": [
+      {
+        "name": "BenqiStakeAvax",
+        "address": "0x13a36EdcfB274B2810fD586f35aDF61BDaf82031"
+      },
+      {
+        "name": "AnkrStakeAvax",
+        "address": "0x4Ab7044Ce9a9a6AdB21203dEf44BC61D82A045F7"
+      }
+    ]
+  }
+}

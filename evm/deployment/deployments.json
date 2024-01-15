@@ -19,5 +19,12 @@
       "BatchTransaction": "0x4c5CfbD2967E399bcf2f326647F50FBDEEa1323A",
       "AaveV3Borrow": "0x7a0DbcF70CAd57515B34d971A6eB545336ae7375"
     }
+  },
+  "mainnet": {
+    "56": { "BatchTransaction": "0xB92F28DCaADcddCA33295a75A3F3524dc66Ae3cC" },
+    "137": { "BatchTransaction": "0x91C80577d618955e2c4048De65456C0dF6Eae420" },
+    "43114": {
+      "BatchTransaction": "0xB92F28DCaADcddCA33295a75A3F3524dc66Ae3cC"
+    }
   }
 }
