@@ -56,6 +56,10 @@ export const DEPLOY_ANKR_STAKE_MATIC_ADAPTER =
   "DEPLOY_ANKR_STAKE_MATIC_ADAPTER";
 export const VERIFY_ANKR_STAKE_MATIC_ADAPTER =
   "VERIFY_ANKR_STAKE_MATIC_ADAPTER";
+export const DEPLOY_MANTLE_STAKE_ETH_ADAPTER =
+  "DEPLOY_MANTLE_STAKE_ETH_ADAPTER";
+export const VERIFY_MANTLE_STAKE_ETH_ADAPTER =
+  "VERIFY_MANTLE_STAKE_ETH_ADAPTER";
 export const DEPLOY_ORIGIN_STAKE_ETH_ADAPTER =
   "DEPLOY_ORIGIN_STAKE_ETH_ADAPTER";
 export const VERIFY_ORIGIN_STAKE_ETH_ADAPTER =
@@ -239,4 +243,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   BenqiSupply: "BenqiSupply",
   SonneSupply: "SonneSupply",
   NitroAdapter: "NitroAdapter",
+  MantleStakeEth: "MantleStakeEth",
 };

@@ -7,6 +7,7 @@ import "./dexspan";
 import "./frax";
 import "./lido";
 import "./metaPool";
+import "./mantle";
 import "./origin";
 import "./pancakeswap";
 import "./quickswap";

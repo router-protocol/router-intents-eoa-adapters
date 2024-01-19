@@ -30,5 +30,13 @@
         "address": "0x4Ab7044Ce9a9a6AdB21203dEf44BC61D82A045F7"
       }
     ]
+  },
+  "testnet": {
+    "5": [
+      {
+        "name": "MantleStakeEth",
+        "address": "0x30af208F872557c2dc92cBF88ff28f8d8dCcD80c"
+      }
+    ]
   }
 }
