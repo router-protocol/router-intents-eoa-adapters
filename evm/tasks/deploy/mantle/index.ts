@@ -1,1 +1,1 @@
-import "./MantleStakeEth.specs";
+import "./MantleStakeEth.deploy";
