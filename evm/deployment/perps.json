@@ -1,0 +1,10 @@
+{
+  "mainnet": {
+    "42161": [
+      {
+        "name": "ParifiOpenPosition",
+        "address": "0x74aabFDC3483eA47383ac61E195C454271491563"
+      }
+    ]
+  }
+}

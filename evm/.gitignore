@@ -1,0 +1,19 @@
+node_modules
+.env
+.idea
+
+coverage
+coverage.json
+typechain
+gas-report.txt
+docs
+
+#Hardhat files
+cache
+artifacts
+artifacts-zk
+cache-zk
+
+#ignore .DS_Store recursively
+.DS_Store
+.certora_internal
