@@ -39,4 +39,6 @@ import "./baseSwap";
 import "./kimV2";
 import "./kimV4";
 import "./penpie";
+import "./swapModeV2";
+import "./lynex";
 import "./BatchTransaction.deploy";

@@ -168,6 +168,10 @@ export const DEPLOY_PENDLE_MINT_ADAPTER = "DEPLOY_PENDLE_MINT_ADAPTER";
 export const VERIFY_PENDLE_MINT_ADAPTER = "VERIFY_PENDLE_MINT_ADAPTER";
 export const DEPLOY_SWAPMODE_MINT_ADAPTER = "DEPLOY_SWAPMODE_MINT_ADAPTER";
 export const VERIFY_SWAPMODE_MINT_ADAPTER = "VERIFY_SWAPMODE_MINT_ADAPTER";
+export const DEPLOY_SWAPMODE_V2_MINT_ADAPTER =
+  "DEPLOY_SWAPMODE_V2_MINT_ADAPTER";
+export const VERIFY_SWAPMODE_V2_MINT_ADAPTER =
+  "VERIFY_SWAPMODE_V2_MINT_ADAPTER";
 export const DEPLOY_SHARED_STAKE_ETH_ADAPTER =
   "DEPLOY_SHARED_STAKE_ETH_ADAPTER";
 export const VERIFY_SHARED_STAKE_ETH_ADAPTER =
@@ -357,6 +361,7 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   StakeStoneStakeEth: "StakeStoneStakeEth",
   PendleMint: "PendleMint",
   SwapModeMint: "SwapModeMint",
+  SwapModeV2Mint: "SwapModeV2Mint",
   SharedStakeEth: "SharedStakeEth",
   BaseSwapMint: "BaseSwapMint",
   KimV2Mint: "KimV2Mint",
