@@ -16,4 +16,5 @@ export const RPC: { [networkId: string]: string } = {
   "421614": "https://public.stackup.sh/api/v1/node/arbitrum-sepolia",
   "34443": "https://mode.drpc.org",
   "11155111": "https://rpc2.sepolia.org",
+  "10242": "https://rpc.arthera.net",
 };

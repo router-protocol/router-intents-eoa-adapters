@@ -41,4 +41,6 @@ import "./kimV4";
 import "./penpie";
 import "./swapModeV2";
 import "./lynex";
+import "./thena";
+import "./thirdFy";
 import "./BatchTransaction.deploy";
