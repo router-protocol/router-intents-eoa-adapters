@@ -1,0 +1,1 @@
+import "./ThirdFyMint.deploy";

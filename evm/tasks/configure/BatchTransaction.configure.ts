@@ -78,6 +78,20 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
 
   console.log(`Setting liquid staking Adapters on ${contractName} complete`);
 
+  const stakingDeployments = getDeployments(
+    ContractType.Staking
+  ) as IDeploymentAdapters;
+
+  if (stakingDeployments[env] && stakingDeployments[env][network]) {
+    len = stakingDeployments[env][network].length;
+    for (let i = 0; i < len; i++) {
+      shouldWhitelist.push(true);
+      adapters.push(stakingDeployments[env][network][i].address);
+    }
+  }
+
+  console.log(`Setting staking Adapters on ${contractName} complete`);
+
   const lendingBorrowingDeployments = getDeployments(
     ContractType.LendingBorrowing
   ) as IDeploymentAdapters;
