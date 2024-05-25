@@ -8,9 +8,6 @@ import { TokenInterface__factory } from "../../typechain/factories/TokenInterfac
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
-import { IUniswapV3NonfungiblePositionManager__factory } from "../../typechain/factories/IUniswapV3NonfungiblePositionManager__factory";
-import { BigNumber, Contract, Wallet } from "ethers";
-import { decodeExecutionEvent } from "../utils";
 import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "34443";

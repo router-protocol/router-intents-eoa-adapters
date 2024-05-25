@@ -42,12 +42,6 @@
         "address": "0x57f41EfeaB626B0B529A54532Dc31f4A3A7e0f25"
       }
     ],
-    "10242": [
-      {
-        "name": "ThirdFySwap",
-        "address": "0x6C39Ef688ae7f246D9a1AF65689EFbd933722489"
-      }
-    ],
     "34443": [
       {
         "name": "DexSpanAdapter",
@@ -70,6 +64,12 @@
       {
         "name": "DexSpanAdapter",
         "address": "0x0bF29AbE25E74948A5956b04a44A3B4b63D33150"
+      }
+    ],
+    "81457": [
+      {
+        "name": "DexSpanAdapter",
+        "address": "0x710b200D4109B2fe9Aa6D13da6A3539ce1CFD39D"
       }
     ],
     "534352": [
