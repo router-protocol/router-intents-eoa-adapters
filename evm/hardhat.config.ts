@@ -101,6 +101,14 @@ const config: HardhatUserConfig = {
           ? [process.env.PRIVATE_KEY]
           : [""],
     },
+    blast: {
+      url: process.env.BLAST_MAINNET_URL || "https://rpc.blast.io",
+      chainId: 81457,
+      accounts:
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
+          : [""],
+    },
     holesky: {
       url: process.env.HOLESKY_URL || "",
       chainId: 17000,
@@ -403,6 +411,7 @@ const config: HardhatUserConfig = {
       manta: process.env.ETHERSCAN_API_KEY || "",
       mode: process.env.ETHERSCAN_API_KEY || "",
       zkSync: "UWXM66JSY25DSV1NQQBB5J3ZX6H4AA56NN",
+      blast: process.env.BLASTSCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -467,6 +476,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorer.mode.network/api",
           browserURL: "https://explorer.mode.network",
+        },
+      },
+      {
+        network: "blast",
+        chainId: 81457,
+        urls: {
+          apiURL: "https://api.blastscan.io/api",
+          browserURL: "https://blastscan.io/",
         },
       },
     ],
