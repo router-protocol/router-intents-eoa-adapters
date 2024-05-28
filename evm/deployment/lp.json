@@ -48,6 +48,10 @@
       {
         "name": "ThrusterV2Mint",
         "address": "0x298e2AD30BA8FFaa573814A48929c71824ebC3b9"
+      },
+      {
+        "name": "ThrusterV3Mint",
+        "address": "0xe2f77e7B44C02BE634ef5f318c9359571074186C"
       }
     ]
   }
