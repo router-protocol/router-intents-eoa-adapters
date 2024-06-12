@@ -5,7 +5,7 @@ import { NATIVE } from "../tasks/constants";
 import { ContractReceipt, ethers, Wallet } from "ethers";
 
 const PATH_FINDER_API_URL =
-  "https://api-beta.pathfinder.routerprotocol.com/api";
+  "https://api-beta.pathfinder.routerprotocol.com/api/v2";
 
 export const getPathfinderData = async (
   fromTokenAddress: string,
@@ -59,7 +59,7 @@ export const getPathfinderData = async (
 };
 
 const getQuote = async (params: any) => {
-  const endpoint = "v2/quote";
+  const endpoint = "quote";
   const quoteUrl = `${PATH_FINDER_API_URL}/${endpoint}`;
 
   try {
@@ -79,12 +79,12 @@ export const getTransaction = async (params: any) => {
     toTokenChainId: params.toTokenChainId,
   });
 
-  const txEndpoint = "v2/transaction";
+  const txEndpoint = "transaction";
   const txUrl = `${PATH_FINDER_API_URL}/${txEndpoint}`;
   const txParams = {
     ...quote,
     senderAddress: params.senderAddress,
-    receiverAddress: params.receiverAddress,
+    receiverAddress: params.receiverAddress ?? params.senderAddress,
   };
 
   const txData = await axios.post(txUrl, txParams);
