@@ -20,4 +20,5 @@ export const RPC: { [networkId: string]: string } = {
   "10242": "https://rpc.arthera.net",
   "238": "https://rpc.arthera.net",
   "81457": "https://rpc.blast.io",
+  "84532": "https://sepolia.base.org",
 };

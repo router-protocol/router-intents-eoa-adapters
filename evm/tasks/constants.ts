@@ -206,6 +206,10 @@ export const DEPLOY_THRUSTER_V3_MINT_ADAPTER =
   "DEPLOY_THRUSTER_V3_MINT_ADAPTER";
 export const VERIFY_THRUSTER_V3_MINT_ADAPTER =
   "VERIFY_THRUSTER_V3_MINT_ADAPTER";
+export const DEPLOY_MAVERICK_V2_MINT_ADAPTER =
+  "DEPLOY_MAVERICK_V2_MINT_ADAPTER";
+export const VERIFY_MAVERICK_V2_MINT_ADAPTER =
+  "VERIFY_MAVERICK_V2_MINT_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -349,6 +353,7 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
     "10242": "0x69D349E2009Af35206EFc3937BaD6817424729F7",
     "81457": "0x4300000000000000000000000000000000000004",
     "10242": "0x0000000000000000000000000000000000000000",
+    "84532": "0x4200000000000000000000000000000000000006",
   },
 };
 
@@ -427,4 +432,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   XfaiMint: "XfaiMint",
   ThrusterV2Mint: "ThrusterV2Mint",
   ThrusterV3Mint: "ThrusterV3Mint",
+  MaverickV2Mint: "MaverickV2Mint",
 };
