@@ -45,5 +45,6 @@ import "./thena";
 import "./thirdFy";
 import "./thrusterV2";
 import "./thrusterV3";
+import "./maverickV2";
 
 import "./BatchTransaction.deploy";

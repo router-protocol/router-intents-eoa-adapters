@@ -8,17 +8,6 @@ enum OrderType {
     DECREASE_POSITION // Decrease position by removing collateral and/or decreasing position size
 }
 
-struct Transaction {
-    address fromAddress;
-    address toAddress;
-    uint256 txValue;
-    uint256 minGas;
-    uint256 maxGasPrice;
-    uint256 userNonce;
-    uint256 txDeadline;
-    bytes txData;
-}
-
 struct Order {
     bytes32 marketId; // keccak256 hash of asset symbol + vaultAddress
     address userAddress; // User that signed/submitted the order
@@ -35,7 +24,7 @@ struct Order {
 }
 
 interface IParifiOrderManager {
-    function createNewPosition(Order memory _order) external;
+    function createNewPosition(Order memory _order, bool isRelayed) external;
 
     function getOrderIdForUser(
         address userAddress
@@ -48,17 +37,4 @@ interface IParifiOrderManager {
 
 interface IParifiDataFabric {
     function getDepositToken(bytes32 marketId) external view returns (address);
-}
-
-interface IParifiForwarder {
-    function execute(
-        Transaction calldata transaction,
-        bytes calldata signature,
-        address feeToken
-    ) external payable returns (bool, bytes memory);
-
-    function verify(
-        Transaction calldata transaction,
-        bytes calldata signature
-    ) external view returns (bool);
 }
