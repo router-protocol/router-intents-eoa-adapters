@@ -34,6 +34,12 @@
         "address": "0x1047770a9eb317667fAa472Ed2579E6f8dA086c6"
       }
     ],
+    "42161": [
+      {
+        "name": "MaverickV2Mint",
+        "address": "0x3D83031304f1b66391298A58273F716c1273774A"
+      }
+    ],
     "59144": [
       {
         "name": "VelocoreMint",
