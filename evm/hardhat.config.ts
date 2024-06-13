@@ -421,6 +421,7 @@ const config: HardhatUserConfig = {
       zkSync: "UWXM66JSY25DSV1NQQBB5J3ZX6H4AA56NN",
       arthera: process.env.ETHERSCAN_API_KEY || "",
       blast: process.env.BLASTSCAN_API_KEY || "",
+      arthera: process.env.ETHERSCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -501,6 +502,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.blastscan.io/api",
           browserURL: "https://blastscan.io/",
+        },
+      },
+      {
+        network: "arthera",
+        chainId: 10242,
+        urls: {
+          apiURL: "https://explorer.arthera.net/api",
+          browserURL: "https://explorer.arthera.net/",
         },
       },
     ],
