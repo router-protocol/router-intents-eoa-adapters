@@ -43,4 +43,5 @@ import "./swapModeV2";
 import "./lynex";
 import "./thena";
 import "./thirdFy";
+import "./assetBridge";
 import "./BatchTransaction.deploy";

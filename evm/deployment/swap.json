@@ -42,6 +42,12 @@
         "address": "0x57f41EfeaB626B0B529A54532Dc31f4A3A7e0f25"
       }
     ],
+    "10242": [
+      {
+        "name": "ThirdFySwap",
+        "address": "0x6C39Ef688ae7f246D9a1AF65689EFbd933722489"
+      }
+    ],
     "34443": [
       {
         "name": "DexSpanAdapter",
