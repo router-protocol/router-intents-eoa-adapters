@@ -74,10 +74,16 @@ contract LynexGamma is
                 );
         } else {
             if (depositParams.depositA == type(uint256).max)
-                depositParams.depositA = getBalance(depositParams.tokenA, address(this));
+                depositParams.depositA = getBalance(
+                    depositParams.tokenA,
+                    address(this)
+                );
 
             if (depositParams.depositB == type(uint256).max)
-                depositParams.depositB = getBalance(depositParams.tokenB, address(this));
+                depositParams.depositB = getBalance(
+                    depositParams.tokenB,
+                    address(this)
+                );
         }
 
         if (depositParams.tokenA == native()) {
@@ -90,12 +96,18 @@ contract LynexGamma is
             depositParams.tokenB = wnative();
         }
 
-        if(depositParams.tokenA == token0) {
-            require(depositParams.tokenB == token1, "LynexGamma: Token mismatch");
+        if (depositParams.tokenA == token0) {
+            require(
+                depositParams.tokenB == token1,
+                "LynexGamma: Token mismatch"
+            );
         }
 
-        if(depositParams.tokenA == token1) {
-            require(depositParams.tokenB == token0, "LynexGamma: Token mismatch");
+        if (depositParams.tokenA == token1) {
+            require(
+                depositParams.tokenB == token0,
+                "LynexGamma: Token mismatch"
+            );
             depositParams.depositB = amount0;
             depositParams.depositA = amount1;
         }
@@ -128,7 +140,6 @@ contract LynexGamma is
     function _mint(
         ILynexGamma.LynexDepositData memory _depositParams
     ) internal returns (uint256 shares) {
-
         uint256 userBalBefore = IHypervisor(_depositParams.pos).balanceOf(
             _depositParams.to
         );
@@ -141,9 +152,9 @@ contract LynexGamma is
             _depositParams.minIn
         );
 
-        uint256 balanceReceived = (IHypervisor(_depositParams.pos).balanceOf(
-            _depositParams.to
-        )) - userBalBefore;
+        uint256 balanceReceived = (
+            IHypervisor(_depositParams.pos).balanceOf(_depositParams.to)
+        ) - userBalBefore;
 
         if (balanceReceived == 0) revert("Liquidity Token not received");
     }
