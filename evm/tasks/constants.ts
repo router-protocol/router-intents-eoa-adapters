@@ -194,6 +194,8 @@ export const DEPLOY_ASSET_BRIDGE_ADAPTER = "DEPLOY_ASSET_BRIDGE_ADAPTER";
 export const VERIFY_ASSET_BRIDGE_ADAPTER = "VERIFY_ASSET_BRIDGE_ADAPTER";
 export const DEPLOY_THIRDFY_SWAP_ADAPTER = "DEPLOY_THIRDFY_SWAP_ADAPTER";
 export const VERIFY_THIRDFY_SWAP_ADAPTER = "VERIFY_THIRDFY_SWAP_ADAPTER";
+export const DEPLOY_LYNEX_GAMMA_ADAPTER = "DEPLOY_LYNEX_GAMMA_ADAPTER";
+export const VERIFY_LYNEX_GAMMA_ADAPTER = "VERIFY_LYNEX_GAMMA_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -407,4 +409,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ThirdFyMint: "ThirdFyMint",
   AssetBridgeAdapter: "AssetBridgeAdapter",
   ThirdFySwap: "ThirdFySwap",
+  LynexGamma: "LynexGamma",
 };
