@@ -47,5 +47,6 @@ import "./thrusterV2";
 import "./thrusterV3";
 import "./maverickV2";
 
+import "./xfai";
 import "./assetBridge";
 import "./BatchTransaction.deploy";
