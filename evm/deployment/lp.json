@@ -48,6 +48,10 @@
       {
         "name": "LynexMint",
         "address": "0x78677dFa2e882783199b6Dc61dD2eB7D7Dd5d253"
+      },
+      {
+        "name": "XfaiMint",
+        "address": "0x2DdFbf2527384b84c335EAe9C79Ac85fd46ED8f3"
       }
     ],
     "81457": [
