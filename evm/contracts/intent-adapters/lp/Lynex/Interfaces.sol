@@ -6,8 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 interface ILynexGamma{
 
     struct LynexDepositData {
-        uint256 deposit0;
-        uint256 deposit1;
+        address tokenA;
+        address tokenB;
+        uint256 depositA;
+        uint256 depositB;
         address to;
         address pos;
         uint256[4] minIn;

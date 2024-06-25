@@ -41,9 +41,7 @@ describe("LynexGamma Adapter: ", async () => {
       DEXSPAN[env][CHAIN_ID]
     );
 
-    const LynexGammaAdapter = await ethers.getContractFactory(
-      "LynexGamma"
-    );
+    const LynexGammaAdapter = await ethers.getContractFactory("LynexGamma");
     const lynexGammaAdapter = await LynexGammaAdapter.deploy(
       NATIVE_TOKEN,
       WNATIVE,
@@ -59,15 +57,9 @@ describe("LynexGamma Adapter: ", async () => {
     const mockToken = await MockToken.deploy();
     await mockToken.mint(deployer.address, ethers.utils.parseEther("10000"));
 
-    const a_usdc_weth = IHypervisor__factory.connect(
-      A_USDC_WETH,
-      deployer
-    );
+    const a_usdc_weth = IHypervisor__factory.connect(A_USDC_WETH, deployer);
 
-    const a_weeth_weth = IHypervisor__factory.connect(
-      A_WEETH_WETH,
-      deployer
-    );
+    const a_weeth_weth = IHypervisor__factory.connect(A_WEETH_WETH, deployer);
 
     return {
       batchTransaction: BatchTransaction__factory.connect(
@@ -86,7 +78,7 @@ describe("LynexGamma Adapter: ", async () => {
       usdc: TokenInterface__factory.connect(USDC, deployer),
       wnative: IWETH__factory.connect(WNATIVE, deployer),
       a_usdc_weth,
-      a_weeth_weth
+      a_weeth_weth,
     };
   };
 
@@ -97,21 +89,21 @@ describe("LynexGamma Adapter: ", async () => {
         {
           forking: {
             jsonRpcUrl: RPC[CHAIN_ID],
-            blockNumber: 5578967
+            blockNumber: 5578967,
           },
         },
       ],
     });
   });
 
-  it.only("Can mint a new position on Lynex weth/usdc and receiver gets aUSDC/WETH", async () => {
+  it("Can mint a new position on Lynex weth/usdc and receiver gets aUSDC/WETH", async () => {
     const {
       batchTransaction,
       lynexGammaAdapter,
       usdc,
       wnative,
       a_usdc_weth,
-      a_weeth_weth
+      a_weeth_weth,
     } = await setupTests();
 
     await wnative.deposit({ value: ethers.utils.parseEther("0.1") });
@@ -142,33 +134,29 @@ describe("LynexGamma Adapter: ", async () => {
     const deposit1 = "320210142310047";
 
     const mintParams = {
-      deposit0,
-      deposit1,
+      tokenA: token0,
+      tokenB: token1,
+      depositA: deposit0,
+      depositB: deposit1,
       to: user.address,
       pos: A_USDC_WETH,
-      minIn: [0,0,0,0]
+      minIn: [0, 0, 0, 0],
     };
 
     const mintParamsIface =
-      "tuple(uint256 deposit0, uint256 deposit1, address to, address pos, uint256[4] minIn) LynexDepositData";
+      "tuple(address tokenA, address tokenB, uint256 depositA, uint256 depositB, address to, address pos, uint256[4] minIn) LynexDepositData";
 
     const lynexData = defaultAbiCoder.encode([mintParamsIface], [mintParams]);
 
-    const tokens = [token0, token1];
-    const amounts = [mintParams.deposit0, mintParams.deposit1];
+    const tokens = [mintParams.tokenA, mintParams.tokenB];
+    const amounts = [mintParams.depositA, mintParams.depositB];
 
-    if (token0 === wnative.address) {
-      await wnative.approve(
-        batchTransaction.address,
-        mintParams.deposit0
-      );
-      await usdc.approve(batchTransaction.address, mintParams.deposit1);
+    if (mintParams.tokenA === wnative.address) {
+      await wnative.approve(batchTransaction.address, mintParams.depositA);
+      await usdc.approve(batchTransaction.address, mintParams.depositB);
     } else {
-      await usdc.approve(batchTransaction.address, mintParams.deposit0);
-      await wnative.approve(
-        batchTransaction.address,
-        mintParams.deposit1
-      );
+      await usdc.approve(batchTransaction.address, mintParams.depositA);
+      await wnative.approve(batchTransaction.address, mintParams.depositB);
     }
 
     const lpBalBefore = await a_usdc_weth.balanceOf(deployer.address);
@@ -181,9 +169,187 @@ describe("LynexGamma Adapter: ", async () => {
       [0],
       [2],
       [lynexData],
-      {gasLimit: 10000000}
+      { gasLimit: 10000000 }
     );
-    
+
+    const txReceipt = await tx.wait();
+
+    const { data: LynexGammaExecutionEventData } =
+      decodeExecutionEvent(txReceipt);
+
+    const LynexGammaEventData = defaultAbiCoder.decode(
+      [mintParamsIface, "uint256"],
+      LynexGammaExecutionEventData
+    );
+
+    const lpBalAfter = await a_usdc_weth.balanceOf(deployer.address);
+    const lpBalEvent = LynexGammaEventData[1];
+    expect(lpBalAfter).eq(lpBalEvent);
+
+    expect(lpBalAfter).gt(lpBalBefore);
+  });
+
+  it("Can mint a new position on Lynex weth/usdc and receiver gets aUSDC/WETH", async () => {
+    const {
+      batchTransaction,
+      lynexGammaAdapter,
+      usdc,
+      wnative,
+      a_usdc_weth,
+      a_weeth_weth,
+    } = await setupTests();
+
+    await wnative.deposit({ value: ethers.utils.parseEther("0.1") });
+    // await setUserTokenBalance(usdc, deployer, ethers.utils.parseEther("1"));
+
+    const txn = await getTransaction({
+      fromTokenAddress: NATIVE_TOKEN,
+      toTokenAddress: USDC,
+      amount: ethers.utils.parseEther("0.1").toString(),
+      fromTokenChainId: CHAIN_ID,
+      toTokenChainId: CHAIN_ID,
+      senderAddress: deployer.address,
+      receiverAddress: deployer.address,
+    });
+
+    await deployer.sendTransaction({
+      to: txn.to,
+      value: txn.value,
+      data: txn.data,
+    });
+    const usdcBal = await usdc.balanceOf(deployer.address);
+    expect(usdcBal).gt(0);
+
+    const user = deployer;
+    const token0 = await a_usdc_weth.token0();
+    const token1 = await a_usdc_weth.token1();
+    const deposit0 = "1800000";
+    const deposit1 = "320210142310047";
+
+    const mintParams = {
+      tokenA: token1,
+      tokenB: token0,
+      depositA: deposit1,
+      depositB: deposit0,
+      to: user.address,
+      pos: A_USDC_WETH,
+      minIn: [0, 0, 0, 0],
+    };
+
+    const mintParamsIface =
+      "tuple(address tokenA, address tokenB, uint256 depositA, uint256 depositB, address to, address pos, uint256[4] minIn) LynexDepositData";
+
+    const lynexData = defaultAbiCoder.encode([mintParamsIface], [mintParams]);
+
+    const tokens = [mintParams.tokenA, mintParams.tokenB];
+    const amounts = [mintParams.depositA, mintParams.depositB];
+
+    if (mintParams.tokenA === wnative.address) {
+      await wnative.approve(batchTransaction.address, mintParams.depositA);
+      await usdc.approve(batchTransaction.address, mintParams.depositB);
+    } else {
+      await usdc.approve(batchTransaction.address, mintParams.depositA);
+      await wnative.approve(batchTransaction.address, mintParams.depositB);
+    }
+
+    const lpBalBefore = await a_usdc_weth.balanceOf(deployer.address);
+
+    const tx = await batchTransaction.executeBatchCallsSameChain(
+      0,
+      tokens,
+      amounts,
+      [lynexGammaAdapter.address],
+      [0],
+      [2],
+      [lynexData],
+      { gasLimit: 10000000 }
+    );
+
+    const txReceipt = await tx.wait();
+
+    const { data: LynexGammaExecutionEventData } =
+      decodeExecutionEvent(txReceipt);
+
+    const LynexGammaEventData = defaultAbiCoder.decode(
+      [mintParamsIface, "uint256"],
+      LynexGammaExecutionEventData
+    );
+
+    const lpBalAfter = await a_usdc_weth.balanceOf(deployer.address);
+    const lpBalEvent = LynexGammaEventData[1];
+    expect(lpBalAfter).eq(lpBalEvent);
+
+    expect(lpBalAfter).gt(lpBalBefore);
+  });
+
+  it("Can mint a new position on Lynex weth/usdc and receiver gets aUSDC/WETH if one of the tokens is native", async () => {
+    const {
+      batchTransaction,
+      lynexGammaAdapter,
+      usdc,
+      wnative,
+      a_usdc_weth,
+      a_weeth_weth,
+    } = await setupTests();
+
+    await wnative.deposit({ value: ethers.utils.parseEther("0.1") });
+    // await setUserTokenBalance(usdc, deployer, ethers.utils.parseEther("1"));
+
+    const txn = await getTransaction({
+      fromTokenAddress: NATIVE_TOKEN,
+      toTokenAddress: USDC,
+      amount: ethers.utils.parseEther("0.1").toString(),
+      fromTokenChainId: CHAIN_ID,
+      toTokenChainId: CHAIN_ID,
+      senderAddress: deployer.address,
+      receiverAddress: deployer.address,
+    });
+
+    await deployer.sendTransaction({
+      to: txn.to,
+      value: txn.value,
+      data: txn.data,
+    });
+    const usdcBal = await usdc.balanceOf(deployer.address);
+    expect(usdcBal).gt(0);
+
+    const user = deployer;
+    const deposit0 = "1800000";
+    const deposit1 = "320210142310047";
+
+    const mintParams = {
+      tokenA: NATIVE_TOKEN,
+      tokenB: USDC,
+      depositA: deposit1,
+      depositB: deposit0,
+      to: user.address,
+      pos: A_USDC_WETH,
+      minIn: [0, 0, 0, 0],
+    };
+
+    const mintParamsIface =
+      "tuple(address tokenA, address tokenB, uint256 depositA, uint256 depositB, address to, address pos, uint256[4] minIn) LynexDepositData";
+
+    const lynexData = defaultAbiCoder.encode([mintParamsIface], [mintParams]);
+
+    const tokens = [mintParams.tokenA, mintParams.tokenB];
+    const amounts = [mintParams.depositA, mintParams.depositB];
+
+    await usdc.approve(batchTransaction.address, mintParams.depositB);
+
+    const lpBalBefore = await a_usdc_weth.balanceOf(deployer.address);
+
+    const tx = await batchTransaction.executeBatchCallsSameChain(
+      0,
+      tokens,
+      amounts,
+      [lynexGammaAdapter.address],
+      [0],
+      [2],
+      [lynexData],
+      { gasLimit: 10000000, value: mintParams.depositA }
+    );
+
     const txReceipt = await tx.wait();
 
     const { data: LynexGammaExecutionEventData } =
