@@ -45,57 +45,69 @@ contract LynexGamma is
 
         address token0 = address(IHypervisor(depositParams.pos).token0());
         address token1 = address(IHypervisor(depositParams.pos).token1());
+        uint256 amount0 = depositParams.depositA;
+        uint256 amount1 = depositParams.depositB;
 
         if (address(this) == self()) {
-            if (token0 != native())
-                IERC20(token0).safeTransferFrom(
+            if (depositParams.tokenA != native())
+                IERC20(depositParams.tokenA).safeTransferFrom(
                     msg.sender,
                     self(),
-                    depositParams.deposit0
+                    depositParams.depositA
                 );
             else
                 require(
-                    msg.value == depositParams.deposit0,
+                    msg.value == depositParams.depositA,
                     Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
                 );
 
-            if (token1 != native())
-                IERC20(token1).safeTransferFrom(
+            if (depositParams.tokenB != native())
+                IERC20(depositParams.tokenB).safeTransferFrom(
                     msg.sender,
                     self(),
-                    depositParams.deposit1
+                    depositParams.depositB
                 );
             else
                 require(
-                    msg.value == depositParams.deposit1,
+                    msg.value == depositParams.depositB,
                     Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
                 );
         } else {
-            if (depositParams.deposit0 == type(uint256).max)
-                depositParams.deposit0 = getBalance(token0, address(this));
+            if (depositParams.depositA == type(uint256).max)
+                depositParams.depositA = getBalance(depositParams.tokenA, address(this));
 
-            if (depositParams.deposit1 == type(uint256).max)
-                depositParams.deposit1 = getBalance(token1, address(this));
+            if (depositParams.depositB == type(uint256).max)
+                depositParams.depositB = getBalance(depositParams.tokenB, address(this));
         }
 
-        if (token0 == native()) {
-            convertNativeToWnative(depositParams.deposit0);
-            token0 = wnative();
+        if (depositParams.tokenA == native()) {
+            convertNativeToWnative(depositParams.depositA);
+            depositParams.tokenA = wnative();
         }
 
-        if (token1 == native()) {
-            convertNativeToWnative(depositParams.deposit1);
-            token1 = wnative();
+        if (depositParams.tokenB == native()) {
+            convertNativeToWnative(depositParams.depositB);
+            depositParams.tokenB = wnative();
+        }
+
+        if(depositParams.tokenA == token0) {
+            require(depositParams.tokenB == token1, "LynexGamma: Token mismatch");
+        }
+
+        if(depositParams.tokenA == token1) {
+            require(depositParams.tokenB == token0, "LynexGamma: Token mismatch");
+            depositParams.depositB = amount0;
+            depositParams.depositA = amount1;
         }
 
         IERC20(token0).safeIncreaseAllowance(
             depositParams.pos,
-            depositParams.deposit0
+            depositParams.depositA
         );
 
         IERC20(token1).safeIncreaseAllowance(
             depositParams.pos,
-            depositParams.deposit1
+            depositParams.depositB
         );
 
         uint256 shares = _mint(depositParams);
@@ -122,8 +134,8 @@ contract LynexGamma is
         );
 
         (shares) = lynexGamma.deposit(
-            _depositParams.deposit0,
-            _depositParams.deposit1,
+            _depositParams.depositA,
+            _depositParams.depositB,
             _depositParams.to,
             _depositParams.pos,
             _depositParams.minIn
