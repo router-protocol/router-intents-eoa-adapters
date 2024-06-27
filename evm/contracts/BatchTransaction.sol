@@ -9,13 +9,19 @@ import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {EoaExecutorWithDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {BaseAdapter} from "@routerprotocol/intents-core/contracts/BaseAdapter.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /**
  * @title BatchTransaction
  * @author Shivam Agrawal
  * @notice Batch Transaction Contract for EOAs.
  */
-contract BatchTransaction is Basic, AccessControl, ReentrancyGuard {
+contract BatchTransaction is
+    Basic,
+    AccessControl,
+    ReentrancyGuard,
+    IERC721Receiver
+{
     using SafeERC20 for IERC20;
 
     struct RefundData {
@@ -478,5 +484,14 @@ contract BatchTransaction is Basic, AccessControl, ReentrancyGuard {
                 msg.sender == _assetBridge,
             Errors.ONLY_NITRO
         );
+    }
+
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 }

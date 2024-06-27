@@ -120,6 +120,19 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
   }
   console.log(`Setting Bridge Adapters on ${contractName} complete`);
 
+  const perpDeployments = getDeployments(
+    ContractType.Perpetuals
+  ) as IDeploymentAdapters;
+
+  if (perpDeployments[env] && perpDeployments[env][network]) {
+    len = perpDeployments[env][network].length;
+    for (let i = 0; i < len; i++) {
+      shouldWhitelist.push(true);
+      adapters.push(perpDeployments[env][network][i].address);
+    }
+  }
+  console.log(`Setting Perp Adapters on ${contractName} complete`);
+
   if (adapters.length === 0) {
     console.log("Adapters length zero: ", adapters);
     return;
