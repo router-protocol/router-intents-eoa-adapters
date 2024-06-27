@@ -17,8 +17,8 @@ import {
 } from "../../utils";
 import { MAVERICK_V2_REWARDS_ROUTER } from "./constants";
 
-const contractName: string = CONTRACT_NAME.ParifiOpenPosition;
-const contractType = ContractType.Perpetuals;
+const contractName: string = CONTRACT_NAME.MaverickV2Mint;
+const contractType = ContractType.LP;
 
 task(DEPLOY_MAVERICK_V2_MINT_ADAPTER)
   .addFlag("verify", "pass true to verify the contract")
