@@ -15,7 +15,7 @@ import "hardhat-dependency-compiler";
 // import "@matterlabs/hardhat-zksync-verify";
 // import "@matterlabs/hardhat-zksync-upgradable";
 
-import "./tasks";
+// import "./tasks";
 
 dotenv.config();
 
