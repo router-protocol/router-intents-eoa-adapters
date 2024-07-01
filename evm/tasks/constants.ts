@@ -217,7 +217,7 @@ export const ASSET_FORWARDER: {
     "17000": "0x31b9834930109d5feac3115ae5d3c6d62fac3270",
     "11155111": "0xf550605cb56fbba5c0f0e01174cf4e707ce0c9ca",
     "534351": "0x94C1aee83563342e7139A5eF9dd05561B81cae8e",
-    "10243": ""
+    "10243": "",
   },
   mainnet: {
     "1": "0xc21e4ebd1d92036cb467b53fe3258f219d909eb9",
@@ -234,7 +234,7 @@ export const ASSET_FORWARDER: {
     "324": "0x8b6f1c18c866f37e6ea98aa539e0c117e70178a2",
     "169": "0x21c1e74caadf990e237920d5515955a024031109",
     "34443": "0xc21e4ebd1d92036cb467b53fe3258f219d909eb9",
-    "10242": "0x0000000000000000000000000000000000000000"
+    "10242": "0x0000000000000000000000000000000000000000",
   },
 };
 
@@ -276,7 +276,7 @@ export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
     "17000": "0x0000000000000000000000000000000000000000",
     "11155111": "0x0000000000000000000000000000000000000000",
     "534351": "0x0000000000000000000000000000000000000000",
-    "10243": ""
+    "10243": "",
   },
   mainnet: {
     "1": "0x6c45e28a76977a96e263f84f95912b47f927b687",
@@ -315,7 +315,7 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
     "17000": "0x94373a4919B3240D86eA41593D5eBa789FEF3848",
     "11155111": "0xf550605cb56fbba5c0f0e01174cf4e707ce0c9ca",
     "534351": "0x5300000000000000000000000000000000000004",
-    "10243": ""
+    "10243": "",
   },
   mainnet: {
     "1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -336,7 +336,7 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
     "324": "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
     "169": "0x0Dc808adcE2099A9F62AA87D9670745AbA741746",
     "34443": "0x4200000000000000000000000000000000000006",
-    "10242": "0x69D349E2009Af35206EFc3937BaD6817424729F7"
+    "10242": "0x69D349E2009Af35206EFc3937BaD6817424729F7",
   },
 };
 
@@ -412,5 +412,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   AssetBridgeAdapter: "AssetBridgeAdapter",
   ThirdFySwap: "ThirdFySwap",
   LynexGamma: "LynexGamma",
-  XfaiMint: "XfaiMint"
+  XfaiMint: "XfaiMint",
 };

@@ -28,6 +28,7 @@ contract BatchTransaction is Basic, AccessControl, ReentrancyGuard {
     address private immutable _wnative;
     address private _assetForwarder;
     address private _dexspan;
+    address private _assetBridge;
 
     // user -> token array
     mapping(address => RefundData) private tokensToRefund;
@@ -45,12 +46,14 @@ contract BatchTransaction is Basic, AccessControl, ReentrancyGuard {
         address __native,
         address __wnative,
         address __assetForwarder,
-        address __dexspan
+        address __dexspan,
+        address __assetBridge
     ) {
         _native = __native;
         _wnative = __wnative;
         _assetForwarder = __assetForwarder;
         _dexspan = __dexspan;
+        _assetBridge = __assetBridge;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(SETTER_ROLE, msg.sender);
@@ -85,6 +88,13 @@ contract BatchTransaction is Basic, AccessControl, ReentrancyGuard {
     }
 
     /**
+     * @notice function to return the address of AssetBridge.
+     */
+    function assetBridge() public view virtual returns (address) {
+        return _assetBridge;
+    }
+
+    /**
      * @notice function to check whether an adapter is whitelisted.
      * @param adapter Address of the adapter.
      */
@@ -108,6 +118,16 @@ contract BatchTransaction is Basic, AccessControl, ReentrancyGuard {
         address __assetForwarder
     ) external onlyRole(SETTER_ROLE) {
         _assetForwarder = __assetForwarder;
+    }
+
+    /**
+     * @notice function to set assetForwarder address.
+     * @param __assetBridge Address of the assetBridge.
+     */
+    function setAssetBridge(
+        address __assetBridge
+    ) external onlyRole(SETTER_ROLE) {
+        _assetBridge = __assetBridge;
     }
 
     /**
@@ -453,7 +473,9 @@ contract BatchTransaction is Basic, AccessControl, ReentrancyGuard {
 
     function _onlyNitro() private view {
         require(
-            msg.sender == _assetForwarder || msg.sender == _dexspan,
+            msg.sender == _assetForwarder ||
+                msg.sender == _dexspan ||
+                msg.sender == _assetBridge,
             Errors.ONLY_NITRO
         );
     }
