@@ -430,5 +430,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   AssetBridgeAdapter: "AssetBridgeAdapter",
   ThirdFySwap: "ThirdFySwap",
   LynexGamma: "LynexGamma",
-  XfaiMint: "XfaiMint"
+  XfaiMint: "XfaiMint",
 };

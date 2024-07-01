@@ -1,5 +1,6 @@
 import { HardhatRuntimeEnvironment, TaskArguments } from "hardhat/types";
 import {
+  ASSET_BRIDGE,
   ASSET_FORWARDER,
   CONTRACT_NAME,
   DEFAULT_ENV,
@@ -38,7 +39,8 @@ task(DEPLOY_BATCH_TRANSACTION)
       NATIVE,
       WNATIVE[env][network],
       ASSET_FORWARDER[env][network],
-      DEXSPAN[env][network]
+      DEXSPAN[env][network],
+      ASSET_BRIDGE[env][network]
     );
     await instance.deployed();
 
@@ -79,6 +81,7 @@ task(VERIFY_BATCH_TRANSACTION).setAction(async function (
       WNATIVE[env][network],
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
+      ASSET_BRIDGE[env][network],
     ],
   });
 
