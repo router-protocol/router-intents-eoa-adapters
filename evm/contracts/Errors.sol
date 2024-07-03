@@ -22,4 +22,5 @@ library Errors {
     string public constant ZERO_AMOUNT_RECEIVED = "13"; // 'Zero amount received'
     string public constant INVALID_TX_TYPE = "14"; // 'Invalid txType value'
     string public constant INVALID_REQUEST = "15"; // 'Invalid Request'
+    string public constant INVALID_ASSET_BRDIGE_TX_TYPE = "16"; // 'Asset Bridge tx type cannot be greater than 1'
 }

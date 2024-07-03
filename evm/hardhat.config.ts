@@ -250,6 +250,14 @@ const config: HardhatUserConfig = {
           : [""],
       chainId: 34443,
     },
+    arthera: {
+      url: process.env.ARTHERA_URL || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
+          : [""],
+      chainId: 10242,
+    },
     zkevm: {
       url: process.env.ZKEVM_MAINNET_URL || "https://zkevm-rpc.com",
       chainId: 1101,
@@ -412,6 +420,7 @@ const config: HardhatUserConfig = {
       mode: process.env.ETHERSCAN_API_KEY || "",
       zkSync: "UWXM66JSY25DSV1NQQBB5J3ZX6H4AA56NN",
       blast: process.env.BLASTSCAN_API_KEY || "",
+      arthera: process.env.ETHERSCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -484,6 +493,30 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.blastscan.io/api",
           browserURL: "https://blastscan.io/",
+        },
+      },
+      {
+        network: "arthera",
+        chainId: 10242,
+        urls: {
+          apiURL: "https://explorer.arthera.net/api",
+          browserURL: "https://explorer.arthera.net/",
+        },
+      },
+      {
+        network: "blast",
+        chainId: 81457,
+        urls: {
+          apiURL: "https://api.blastscan.io/api",
+          browserURL: "https://blastscan.io/",
+        },
+      },
+      {
+        network: "arthera",
+        chainId: 10242,
+        urls: {
+          apiURL: "https://explorer.arthera.net/api",
+          browserURL: "https://explorer.arthera.net/",
         },
       },
     ],

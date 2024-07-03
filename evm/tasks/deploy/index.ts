@@ -43,6 +43,8 @@ import "./swapModeV2";
 import "./lynex";
 import "./thena";
 import "./thirdFy";
+import "./xfai";
+import "./assetBridge";
 import "./thrusterV2";
 import "./thrusterV3";
 import "./maverickV2";
