@@ -421,8 +421,6 @@ const config: HardhatUserConfig = {
       zkSync: "UWXM66JSY25DSV1NQQBB5J3ZX6H4AA56NN",
       blast: process.env.BLASTSCAN_API_KEY || "",
       arthera: process.env.ETHERSCAN_API_KEY || "",
-      blast: process.env.BLASTSCAN_API_KEY || "",
-      arthera: process.env.ETHERSCAN_API_KEY || "",
     },
     customChains: [
       {

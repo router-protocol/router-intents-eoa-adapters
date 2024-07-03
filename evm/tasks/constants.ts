@@ -432,4 +432,7 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ThirdFySwap: "ThirdFySwap",
   LynexGamma: "LynexGamma",
   XfaiMint: "XfaiMint",
+  ThrusterV2Mint: "ThrusterV2Mint",
+  ThrusterV3Mint: "ThrusterV3Mint",
+  MaverickV2Mint: "MaverickV2Mint",
 };
