@@ -9,6 +9,7 @@ import { BatchTransaction__factory } from "../../typechain/factories/BatchTransa
 import { IAssetForwarder__factory } from "../../typechain/factories/IAssetForwarder__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import axios from "axios";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "42161";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -44,7 +45,8 @@ describe("Nitro Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE_TOKEN,
       actualAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const NitroAdapter = await ethers.getContractFactory("NitroAdapter");
@@ -118,6 +120,7 @@ describe("Nitro Adapter: ", async () => {
     const data = [nitroData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const assetForwarderBalBefore = await wnative.balanceOf(
       actualAssetForwarder.address
@@ -127,6 +130,7 @@ describe("Nitro Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -171,6 +175,7 @@ describe("Nitro Adapter: ", async () => {
     const data = [nitroData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const assetForwarderBalBefore = await wnative.balanceOf(
       actualAssetForwarder.address
@@ -180,6 +185,7 @@ describe("Nitro Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -226,6 +232,7 @@ describe("Nitro Adapter: ", async () => {
     const data = [nitroData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const assetForwarderBalBefore = await wnative.balanceOf(
       actualAssetForwarder.address
@@ -235,6 +242,7 @@ describe("Nitro Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -280,6 +288,7 @@ describe("Nitro Adapter: ", async () => {
     const data = [nitroData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const assetForwarderBalBefore = await wnative.balanceOf(
       actualAssetForwarder.address
@@ -289,6 +298,7 @@ describe("Nitro Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -363,11 +373,13 @@ describe("Nitro Adapter: ", async () => {
     const data = [nitroData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

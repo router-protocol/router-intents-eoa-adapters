@@ -162,3 +162,13 @@ interface IHypervisor {
 
     function toggleDirectDeposit() external;
 }
+
+interface ILynexClearing {
+
+  function getDepositAmount(
+    address pos,
+    address token,
+    uint256 _deposit
+  ) external view returns (uint256 amountStart, uint256 amountEnd);
+
+}

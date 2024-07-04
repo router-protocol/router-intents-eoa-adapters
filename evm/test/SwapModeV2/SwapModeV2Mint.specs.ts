@@ -9,6 +9,7 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { MaxUint256 } from "@ethersproject/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "34443";
 const USDC = "0xd988097fb8612cc24eec14542bc03424c656005f";
@@ -48,7 +49,8 @@ describe("SwapModeV2Mint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const SwapModeV2MintPositionAdapter = await ethers.getContractFactory(
@@ -162,6 +164,10 @@ describe("SwapModeV2Mint Adapter: ", async () => {
 
     const tokens = [mintParams.tokenA, mintParams.tokenB];
     const amounts = [mintParams.amountADesired, mintParams.amountBDesired];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     await usdc.approve(batchTransaction.address, usdcBal);
     await usdt.approve(batchTransaction.address, usdtBal);
@@ -173,6 +179,7 @@ describe("SwapModeV2Mint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [swapModeV2MintPositionAdapter.address],
       [0],
       [2],

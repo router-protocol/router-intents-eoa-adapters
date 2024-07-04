@@ -9,6 +9,7 @@ import { CompoundBorrow__factory } from "../../typechain/factories/CompoundBorro
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { CompoundSupply__factory } from "../../typechain/factories/CompoundSupply__factory";
 import { IComet__factory } from "../../typechain/factories/IComet__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "5";
 const COMPOUND_USDC_POOL = "0x3EE77595A8459e93C2888b13aDB354017B198188";
@@ -62,7 +63,8 @@ describe("CompoundBorrow Adapter: ", async () => {
       NATIVE_TOKEN,
       WETH,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -166,6 +168,8 @@ describe("CompoundBorrow Adapter: ", async () => {
     const value = [0, 0];
     const callType = [2, 2];
 
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+
     await compoundWETHPool.allow(batchTransaction.address, true);
 
     const userBalBefore = await cWeth.balanceOf(deployer.address);
@@ -174,6 +178,7 @@ describe("CompoundBorrow Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -227,6 +232,7 @@ describe("CompoundBorrow Adapter: ", async () => {
     const data = [compoundSupplyData, compoundBorrowData];
     const value = [0, 0];
     const callType = [2, 2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await compoundUSDCPool.allow(batchTransaction.address, true);
 
@@ -235,6 +241,7 @@ describe("CompoundBorrow Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

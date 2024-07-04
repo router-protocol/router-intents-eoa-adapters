@@ -9,6 +9,7 @@ import { LendleBorrow__factory } from "../../typechain/factories/LendleBorrow__f
 import { ILendingPool__factory } from "../../typechain/factories/ILendingPool__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { LendleSupply__factory } from "../../typechain/factories/LendleSupply__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "5000";
 const LENDLE_POOL = "0xCFa5aE7c2CE8Fadc6426C1ff872cA45378Fb7cF3";
@@ -42,9 +43,7 @@ describe("LendleBorrow Adapter: ", async () => {
     );
     const mockAssetForwarder = await MockAssetForwarder.deploy();
 
-    const LendleSupplyAdapter = await ethers.getContractFactory(
-      "LendleSupply"
-    );
+    const LendleSupplyAdapter = await ethers.getContractFactory("LendleSupply");
 
     const lendleSupplyAdapter = await LendleSupplyAdapter.deploy(
       NATIVE_TOKEN,
@@ -54,9 +53,7 @@ describe("LendleBorrow Adapter: ", async () => {
       LENDLE_REFERRAL_CODE
     );
 
-    const LendleBorrowAdapter = await ethers.getContractFactory(
-      "LendleBorrow"
-    );
+    const LendleBorrowAdapter = await ethers.getContractFactory("LendleBorrow");
 
     const lendleBorrowAdapter = await LendleBorrowAdapter.deploy(
       NATIVE_TOKEN,
@@ -173,13 +170,14 @@ describe("LendleBorrow Adapter: ", async () => {
 
     const tokens = [supplyAsset];
     const amounts = [supplyAmount];
-    const targets = [
-      lendleSupplyAdapter.address,
-      lendleBorrowAdapter.address,
-    ];
+    const targets = [lendleSupplyAdapter.address, lendleBorrowAdapter.address];
     const data = [lendleSupplyData, lendleBorrowData];
     const value = [0, 0];
     const callType = [2, 2];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     await usdtVariableDebtToken.approveDelegation(
       batchTransaction.address,
@@ -192,6 +190,7 @@ describe("LendleBorrow Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

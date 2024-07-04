@@ -8,6 +8,8 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+import { zeroAddress } from "ethereumjs-util";
+import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "56";
 const ANKR_TOKEN = "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827";
@@ -16,7 +18,7 @@ const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const USDT = "0x55d398326f99059ff775485246999027b3197955";
 
 describe("AnkrStakeBsc Adapter: ", async () => {
-  const [deployer] = waffle.provider.getWallets();
+  const [deployer, alice] = waffle.provider.getWallets();
 
   const setupTests = async () => {
     let env = process.env.ENV;
@@ -34,7 +36,8 @@ describe("AnkrStakeBsc Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -100,11 +103,14 @@ describe("AnkrStakeBsc Adapter: ", async () => {
 
     const ankrData = defaultAbiCoder.encode(
       ["address", "uint256"],
-      [deployer.address, amount]
+      [deployer.address, MaxUint256]
     );
 
     const tokens = [NATIVE_TOKEN];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [ankrStakeBscAdapter.address];
     const data = [ankrData];
     const value = [0];
@@ -117,6 +123,7 @@ describe("AnkrStakeBsc Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -129,6 +136,76 @@ describe("AnkrStakeBsc Adapter: ", async () => {
 
     expect(balBefore).gt(balAfter);
     expect(ankrEthBalAfter).gt(ankrEthBalBefore);
+  });
+
+  it("Fee cannot be greater than 5%", async () => {
+    const { batchTransaction, ankrStakeBscAdapter, ankrEth } =
+      await setupTests();
+
+    const amount = ethers.utils.parseEther("1");
+
+    const ankrData = defaultAbiCoder.encode(
+      ["address", "uint256"],
+      [deployer.address, MaxUint256]
+    );
+
+    const tokens = [NATIVE_TOKEN];
+    const amounts = [amount];
+    const feeInfo = [{ fee: amount.mul(5).div(10), recipient: alice.address }];
+    const targets = [ankrStakeBscAdapter.address];
+    const data = [ankrData];
+    const value = [0];
+    const callType = [2];
+
+    await expect(
+      batchTransaction.executeBatchCallsSameChain(
+        0,
+        tokens,
+        amounts,
+        feeInfo,
+        targets,
+        value,
+        callType,
+        data,
+        { value: amount }
+      )
+    ).to.be.revertedWith("17");
+  });
+
+  it("Fee recipient cannot be address 0 if fee is non-zero", async () => {
+    const { batchTransaction, ankrStakeBscAdapter, ankrEth } =
+      await setupTests();
+
+    const amount = ethers.utils.parseEther("1");
+
+    const ankrData = defaultAbiCoder.encode(
+      ["address", "uint256"],
+      [deployer.address, MaxUint256]
+    );
+
+    const tokens = [NATIVE_TOKEN];
+    const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: zeroAddress() },
+    ];
+    const targets = [ankrStakeBscAdapter.address];
+    const data = [ankrData];
+    const value = [0];
+    const callType = [2];
+
+    await expect(
+      batchTransaction.executeBatchCallsSameChain(
+        0,
+        tokens,
+        amounts,
+        feeInfo,
+        targets,
+        value,
+        callType,
+        data,
+        { value: amount }
+      )
+    ).to.be.revertedWith("18");
   });
 
   it("Can stake BSC on Ankr on dest chain when instruction is received from BatchTransaction contract", async () => {

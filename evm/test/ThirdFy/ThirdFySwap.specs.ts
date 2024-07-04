@@ -11,6 +11,7 @@ import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { IThirdFySwapRouter__factory } from "../../typechain/factories/IThirdFySwapRouter__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
 import { decodeExecutionEvent } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "10242";
 const THIRD_FY_SWAP_ROUTER = "0xd265f57c36AC60d3F7931eC5c7396966F0C246A7";
@@ -22,61 +23,61 @@ const WNATIVE = "0x69D349E2009Af35206EFc3937BaD6817424729F7";
 
 const SWAP_ROUTER_ABI = [
   {
-    "inputs": [
-        {
-            "components": [
-                {
-                    "internalType": "address",
-                    "name": "tokenIn",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "tokenOut",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "recipient",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "deadline",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amountIn",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amountOutMinimum",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint160",
-                    "name": "limitSqrtPrice",
-                    "type": "uint160"
-                }
-            ],
-            "internalType": "struct ISwapRouter.ExactInputSingleParams",
-            "name": "params",
-            "type": "tuple"
-        }
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "tokenIn",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amountIn",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amountOutMinimum",
+            type: "uint256",
+          },
+          {
+            internalType: "uint160",
+            name: "limitSqrtPrice",
+            type: "uint160",
+          },
+        ],
+        internalType: "struct ISwapRouter.ExactInputSingleParams",
+        name: "params",
+        type: "tuple",
+      },
     ],
-    "name": "exactInputSingleSupportingFeeOnTransferTokens",
-    "outputs": [
-        {
-            "internalType": "uint256",
-            "name": "amountOut",
-            "type": "uint256"
-        }
+    name: "exactInputSingleSupportingFeeOnTransferTokens",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amountOut",
+        type: "uint256",
+      },
     ],
-    "stateMutability": "payable",
-    "type": "function"
-}
+    stateMutability: "payable",
+    type: "function",
+  },
 ];
 
 describe("ThirdFySwap Adapter: ", async () => {
@@ -95,18 +96,21 @@ describe("ThirdFySwap Adapter: ", async () => {
       "BatchTransaction"
     );
 
-    const swapRouter = new ethers.Contract(THIRD_FY_SWAP_ROUTER, SWAP_ROUTER_ABI, deployer);
+    const swapRouter = new ethers.Contract(
+      THIRD_FY_SWAP_ROUTER,
+      SWAP_ROUTER_ABI,
+      deployer
+    );
 
     const batchTransaction = await BatchTransaction.deploy(
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
-    const ThirdFySwapAdapter = await ethers.getContractFactory(
-      "ThirdFySwap"
-    );
+    const ThirdFySwapAdapter = await ethers.getContractFactory("ThirdFySwap");
     const thirdFySwapAdapter = await ThirdFySwapAdapter.deploy(
       NATIVE_TOKEN,
       WNATIVE,
@@ -193,13 +197,13 @@ describe("ThirdFySwap Adapter: ", async () => {
       swapRouter,
       less,
       usdt,
-      wnative
+      wnative,
     } = await setupTests();
 
     await wnative.deposit({ value: ethers.utils.parseEther("10") });
 
     await setUserTokenBalance(usdt, deployer, BigNumber.from("1000000000"));
-    
+
     const usdtBal = await usdt.balanceOf(deployer.address);
     expect(usdtBal).gt(0);
 
@@ -209,21 +213,23 @@ describe("ThirdFySwap Adapter: ", async () => {
     const amountIn = usdtBal.div(2).toString();
 
     const swapParams = {
-        tokenIn: usdt.address,
-        tokenOut: less.address,
-        recipient: deployer.address,
-        deadline: ethers.constants.MaxUint256,
-        amountIn: amountIn,
-        amountOutMinimum: "0",
-        limitSqrtPrice: "0"
-      };
-      
-    const swapParamsIface = "tuple(address tokenIn, address tokenOut, address recipient, uint256 deadline, uint256 amountIn, uint256 amountOutMinimum, uint160 limitSqrtPrice) ExactInputSingleParams";
+      tokenIn: usdt.address,
+      tokenOut: less.address,
+      recipient: deployer.address,
+      deadline: ethers.constants.MaxUint256,
+      amountIn: amountIn,
+      amountOutMinimum: "0",
+      limitSqrtPrice: "0",
+    };
+
+    const swapParamsIface =
+      "tuple(address tokenIn, address tokenOut, address recipient, uint256 deadline, uint256 amountIn, uint256 amountOutMinimum, uint160 limitSqrtPrice) ExactInputSingleParams";
 
     const thirdFyData = defaultAbiCoder.encode([swapParamsIface], [swapParams]);
 
     const tokens = [swapParams.tokenIn];
     const amounts = [swapParams.amountIn];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await usdt.approve(batchTransaction.address, "500000000");
 
@@ -231,6 +237,7 @@ describe("ThirdFySwap Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [thirdFySwapAdapter.address],
       [0],
       [2],

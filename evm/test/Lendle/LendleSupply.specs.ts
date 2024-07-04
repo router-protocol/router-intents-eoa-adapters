@@ -48,7 +48,8 @@ describe("LendleSupply Adapter: ", async () => {
       NATIVE_TOKEN,
       WETH,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -179,12 +180,14 @@ describe("LendleSupply Adapter: ", async () => {
     const data = [lendleSupplyData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const userBalBefore = await lWeth.balanceOf(alice.address);
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -215,12 +218,14 @@ describe("LendleSupply Adapter: ", async () => {
     const data = [lendleSupplyData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await expect(
       batchTransaction.executeBatchCallsSameChain(
         0,
         tokens,
         amounts,
+        feeInfo,
         targets,
         value,
         callType,

@@ -52,7 +52,8 @@ describe("RadiantSupply Adapter: ", async () => {
       NATIVE_TOKEN,
       WETH,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -183,12 +184,14 @@ describe("RadiantSupply Adapter: ", async () => {
     const data = [radiantSupplyData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const userBalBefore = await rWeth.balanceOf(alice.address);
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -219,12 +222,14 @@ describe("RadiantSupply Adapter: ", async () => {
     const data = [radiantSupplyData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await expect(
       batchTransaction.executeBatchCallsSameChain(
         0,
         tokens,
         amounts,
+        feeInfo,
         targets,
         value,
         callType,

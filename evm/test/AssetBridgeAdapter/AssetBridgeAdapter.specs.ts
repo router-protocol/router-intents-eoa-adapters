@@ -1,7 +1,12 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import { DEXSPAN, DEFAULT_ENV, ASSET_BRIDGE, ASSET_FORWARDER } from "../../tasks/constants";
+import {
+  DEXSPAN,
+  DEFAULT_ENV,
+  ASSET_BRIDGE,
+  ASSET_FORWARDER,
+} from "../../tasks/constants";
 import { AssetBridgeAdapter__factory } from "../../typechain/factories/AssetBridgeAdapter__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
@@ -11,6 +16,7 @@ import { IAssetBridge__factory } from "../../typechain/factories/IAssetBridge__f
 import { defaultAbiCoder } from "ethers/lib/utils";
 import axios from "axios";
 import { getTransaction } from "../utils";
+import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "42161";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -23,11 +29,11 @@ const ETH_CHAIN_ID_BYTES =
 const TRANSFER_PAYLOAD_TUPLE =
   "tuple(bytes32 destChainIdBytes, address srcTokenAddress, uint256 srcTokenAmount, bytes recipient, uint256 partnerId)";
 
-const SWAP_TRANSFER_PAYLOAD_TUPLE = 
-  "tuple(bytes32 destChainIdBytes, address[] tokens, uint256[] flags, bytes[] dataTx, uint256 srcTokenAmount, uint256 minToAmount, bytes recipient, uint256 partnerId)"
+const SWAP_TRANSFER_PAYLOAD_TUPLE =
+  "tuple(bytes32 destChainIdBytes, address[] tokens, uint256[] flags, bytes[] dataTx, uint256 srcTokenAmount, uint256 minToAmount, bytes recipient, uint256 partnerId)";
 
 describe("Asset Bridge Adapter: ", async () => {
-  const [deployer] = waffle.provider.getWallets();
+  const [deployer, alice] = waffle.provider.getWallets();
 
   const setupTests = async () => {
     let env = process.env.ENV;
@@ -37,7 +43,7 @@ describe("Asset Bridge Adapter: ", async () => {
       ASSET_FORWARDER[env][CHAIN_ID],
       deployer
     );
-    
+
     const actualAssetBridge = IAssetBridge__factory.connect(
       ASSET_BRIDGE[env][CHAIN_ID],
       deployer
@@ -51,17 +57,23 @@ describe("Asset Bridge Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE_TOKEN,
       actualAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      ASSET_BRIDGE[env][CHAIN_ID]
     );
 
-    const AssetBridgeAdapter = await ethers.getContractFactory("AssetBridgeAdapter");
+    const AssetBridgeAdapter = await ethers.getContractFactory(
+      "AssetBridgeAdapter"
+    );
     const assetBridgeAdapter = await AssetBridgeAdapter.deploy(
       NATIVE_TOKEN,
       WNATIVE_TOKEN,
-      actualAssetBridge.address,
+      actualAssetBridge.address
     );
 
-    await batchTransaction.setAdapterWhitelist([assetBridgeAdapter.address], [true]);
+    await batchTransaction.setAdapterWhitelist(
+      [assetBridgeAdapter.address],
+      [true]
+    );
 
     return {
       batchTransaction: BatchTransaction__factory.connect(
@@ -96,8 +108,13 @@ describe("Asset Bridge Adapter: ", async () => {
   });
 
   it("Can send reserved tokens from source chain to dest chain using asset bridge adapter", async () => {
-    const { batchTransaction, assetBridgeAdapter, actualAssetBridge, wnative, pepe } =
-    await setupTests();
+    const {
+      batchTransaction,
+      assetBridgeAdapter,
+      actualAssetBridge,
+      wnative,
+      pepe,
+    } = await setupTests();
 
     await wnative.deposit({ value: ethers.utils.parseEther("0.1") });
 
@@ -127,7 +144,7 @@ describe("Asset Bridge Adapter: ", async () => {
     const transferPayloadData = {
       destChainIdBytes: ETH_CHAIN_ID_BYTES,
       srcTokenAddress: PEPE_TOKEN,
-      srcTokenAmount: amount,
+      srcTokenAmount: MaxUint256,
       recipient: deployer.address,
       partnerId: 1,
     };
@@ -141,6 +158,9 @@ describe("Asset Bridge Adapter: ", async () => {
 
     const tokens = [PEPE_TOKEN];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [assetBridgeAdapter.address];
     const data = [assetbridgeData];
     const value = [0];
@@ -156,25 +176,29 @@ describe("Asset Bridge Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
       data,
-      { 
-        gasLimit: 10000000
-       }
+      {
+        gasLimit: 10000000,
+      }
     );
 
-    const assetBridgeBalAfter = await pepe.balanceOf(
-      actualAssetBridge.address
-    );
+    const assetBridgeBalAfter = await pepe.balanceOf(actualAssetBridge.address);
 
     expect(assetBridgeBalAfter).gt(assetBridgeBalBefore);
   });
 
   it("Can send reserved tokens with instruction from source chain to dest chain using asset bridge adapter", async () => {
-    const { batchTransaction, assetBridgeAdapter, actualAssetBridge, wnative, pepe } =
-    await setupTests();
+    const {
+      batchTransaction,
+      assetBridgeAdapter,
+      actualAssetBridge,
+      wnative,
+      pepe,
+    } = await setupTests();
 
     await wnative.deposit({ value: ethers.utils.parseEther("0.1") });
 
@@ -204,7 +228,7 @@ describe("Asset Bridge Adapter: ", async () => {
     const transferPayloadData = {
       destChainIdBytes: ETH_CHAIN_ID_BYTES,
       srcTokenAddress: PEPE_TOKEN,
-      srcTokenAmount: amount,
+      srcTokenAmount: MaxUint256,
       recipient: deployer.address,
       partnerId: 1,
     };
@@ -218,6 +242,9 @@ describe("Asset Bridge Adapter: ", async () => {
 
     const tokens = [PEPE_TOKEN];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [assetBridgeAdapter.address];
     const data = [assetbridgeData];
     const value = [0];
@@ -233,25 +260,29 @@ describe("Asset Bridge Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
       data,
-      { 
-        gasLimit: 10000000
-       }
+      {
+        gasLimit: 10000000,
+      }
     );
 
-    const assetBridgeBalAfter = await pepe.balanceOf(
-      actualAssetBridge.address
-    );
+    const assetBridgeBalAfter = await pepe.balanceOf(actualAssetBridge.address);
 
     expect(assetBridgeBalAfter).gt(assetBridgeBalBefore);
   });
 
   it("Can swap and deposit reserved tokens without instruction from source chain to dest chain using asset bridge adapter", async () => {
-    const { batchTransaction, assetBridgeAdapter, wnative, actualAssetBridge, pepe } =
-      await setupTests();
+    const {
+      batchTransaction,
+      assetBridgeAdapter,
+      wnative,
+      actualAssetBridge,
+      pepe,
+    } = await setupTests();
 
     const amount = ethers.utils.parseEther("1");
     // await wnative.deposit({ value: amount });
@@ -264,7 +295,7 @@ describe("Asset Bridge Adapter: ", async () => {
       amount,
       fromTokenChainId: CHAIN_ID,
       toTokenChainId: "1",
-    };  
+    };
     const { data: quoteData } = await axios.get(api, { params });
 
     const swapTransferPayloadData = {
@@ -272,7 +303,7 @@ describe("Asset Bridge Adapter: ", async () => {
       tokens: quoteData.source.path,
       flags: quoteData.source.flags,
       dataTx: quoteData.source.dataTx,
-      srcTokenAmount: amount,
+      srcTokenAmount: MaxUint256,
       minToAmount: 0,
       recipient: deployer.address,
       partnerId: 1,
@@ -289,6 +320,9 @@ describe("Asset Bridge Adapter: ", async () => {
 
     const tokens = [NATIVE_TOKEN];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [assetBridgeAdapter.address];
     const data = [assetbridgeData];
     const value = [0];
@@ -302,18 +336,18 @@ describe("Asset Bridge Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
       data,
-      { 
+      {
         value: amount,
-        gasLimit: 10000000 }
+        gasLimit: 10000000,
+      }
     );
 
-    const assetBridgeBalAfter = await pepe.balanceOf(
-      actualAssetBridge.address
-    );
+    const assetBridgeBalAfter = await pepe.balanceOf(actualAssetBridge.address);
 
     expect(assetBridgeBalAfter).gt(assetBridgeBalBefore);
   });

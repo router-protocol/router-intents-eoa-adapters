@@ -8,6 +8,8 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+import { zeroAddress } from "ethereumjs-util";
+import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "43114";
 const BENQI_TOKEN = "0x2b2C81e08f1Af8835a78Bb2A90AE924ACE0eA4bE";
@@ -15,7 +17,7 @@ const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const USDT = "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7";
 
 describe("BenqiStakeAvax Adapter: ", async () => {
-  const [deployer] = waffle.provider.getWallets();
+  const [deployer, alice] = waffle.provider.getWallets();
 
   const setupTests = async () => {
     let env = process.env.ENV;
@@ -33,7 +35,8 @@ describe("BenqiStakeAvax Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -98,11 +101,14 @@ describe("BenqiStakeAvax Adapter: ", async () => {
 
     const benqiData = defaultAbiCoder.encode(
       ["address", "uint256"],
-      [deployer.address, amount]
+      [deployer.address, MaxUint256]
     );
 
     const tokens = [NATIVE_TOKEN];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [benqiStakeAvaxAdapter.address];
     const data = [benqiData];
     const value = [0];
@@ -115,6 +121,7 @@ describe("BenqiStakeAvax Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

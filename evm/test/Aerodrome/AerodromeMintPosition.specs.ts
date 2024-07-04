@@ -12,6 +12,8 @@ import { IAerodromeRouter__factory } from "../../typechain/factories/IAerodromeR
 import { BigNumber, Contract, Wallet } from "ethers";
 import { getTransaction } from "../utils";
 import { AERODROME_ROUTER } from "../../tasks/deploy/aerodrome/constants";
+import { zeroAddress } from "ethereumjs-util";
+import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "8453";
 const USDC = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
@@ -20,7 +22,7 @@ const WNATIVE = "0x4200000000000000000000000000000000000006";
 const USDC_WETH_POOL = "0xcDAC0d6c6C59727a65F871236188350531885C43";
 
 describe("AerodromeMint Adapter: ", async () => {
-  const [deployer] = waffle.provider.getWallets();
+  const [deployer, alice] = waffle.provider.getWallets();
 
   const setupTests = async () => {
     let env = process.env.ENV;
@@ -38,7 +40,8 @@ describe("AerodromeMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const AerodromeMintPositionAdapter = await ethers.getContractFactory(
@@ -132,7 +135,6 @@ describe("AerodromeMint Adapter: ", async () => {
     const {
       batchTransaction,
       aerodromeMintPositionAdapter,
-      router,
       usdc,
       wnative,
       usdc_weth_pool,
@@ -199,7 +201,18 @@ describe("AerodromeMint Adapter: ", async () => {
     );
 
     const tokens = [mintParams.tokenA, mintParams.tokenB];
-    const amounts = [mintParams.amountADesired, mintParams.amountBDesired];
+    const amounts = [ethers.constants.MaxUint256, ethers.constants.MaxUint256];
+
+    const feeInfo = [
+      {
+        fee: BigNumber.from(mintParams.amountADesired).mul(5).div(1000),
+        recipient: alice.address,
+      },
+      {
+        fee: BigNumber.from(mintParams.amountBDesired).mul(5).div(1000),
+        recipient: alice.address,
+      },
+    ];
 
     if (mintParams.tokenA === wnative.address) {
       await wnative.approve(
@@ -221,6 +234,7 @@ describe("AerodromeMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [aerodromeMintPositionAdapter.address],
       [0],
       [2],
@@ -236,7 +250,6 @@ describe("AerodromeMint Adapter: ", async () => {
     const {
       batchTransaction,
       aerodromeMintPositionAdapter,
-      router,
       usdc,
       wnative,
       usdc_weth_pool,
@@ -303,7 +316,17 @@ describe("AerodromeMint Adapter: ", async () => {
     );
 
     const tokens = [mintParams.tokenA, mintParams.tokenB];
-    const amounts = [mintParams.amountADesired, mintParams.amountBDesired];
+    const amounts = [MaxUint256, MaxUint256];
+    const feeInfo = [
+      {
+        fee: BigNumber.from(mintParams.amountADesired).mul(5).div(1000),
+        recipient: alice.address,
+      },
+      {
+        fee: BigNumber.from(mintParams.amountBDesired).mul(5).div(1000),
+        recipient: alice.address,
+      },
+    ];
 
     if (mintParams.tokenA === wnative.address) {
       await wnative.approve(
@@ -325,12 +348,13 @@ describe("AerodromeMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [aerodromeMintPositionAdapter.address],
       [0],
       [2],
       [aerodromeData]
     );
-
+ 
     const lpBalAfter = await usdc_weth_pool.balanceOf(deployer.address);
 
     expect(lpBalAfter).gt(lpBalBefore);

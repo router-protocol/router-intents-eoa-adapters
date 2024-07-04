@@ -15,6 +15,7 @@ import {
   SCROLL_MESSAGING_QUEUE,
   LIDO_SCROLL_GATEWAY,
 } from "../../tasks/deploy/lido/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "11155111";
 const LIDO_REFERRAL_ADDRESS = "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84";
@@ -38,7 +39,8 @@ describe("LidoStakeEthTestnet Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      mockAssetForwarder.address
+      mockAssetForwarder.address,
+      zeroAddress()
     );
 
     const LidoStakeEth = await ethers.getContractFactory("LidoStakeEthTestnet");
@@ -106,6 +108,7 @@ describe("LidoStakeEthTestnet Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const stethBalBefore = await steth.balanceOf(deployer.address);
@@ -114,6 +117,7 @@ describe("LidoStakeEthTestnet Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -192,6 +196,7 @@ describe("LidoStakeEthTestnet Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const wstEthBalBefore = await wstEth.balanceOf(
       LIDO_OPTIMISM_GATEWAY[CHAIN_ID]
@@ -201,6 +206,7 @@ describe("LidoStakeEthTestnet Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -247,6 +253,7 @@ describe("LidoStakeEthTestnet Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const LIDO_L1_SCROLL_GATEWAY = "0xF22B24fa7c3168f30b17fd97b71bdd3162DDe029";
 
@@ -256,6 +263,7 @@ describe("LidoStakeEthTestnet Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

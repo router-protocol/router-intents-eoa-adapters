@@ -13,6 +13,7 @@ import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { IParifiOrderManager__factory } from "../../typechain/factories/IParifiOrderManager__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { getTransaction } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "42161";
 const WETH_MARKET_ID =
@@ -43,7 +44,8 @@ describe("Parifi Open Position Adapter: ", async () => {
       NATIVE,
       WETH,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const ParifiOpenPosition = await ethers.getContractFactory(
@@ -148,6 +150,7 @@ describe("Parifi Open Position Adapter: ", async () => {
     const data = [parifiData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const orderManager = IParifiOrderManager__factory.connect(
       PARIFI_ORDER_MANAGER[CHAIN_ID],
@@ -161,6 +164,7 @@ describe("Parifi Open Position Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

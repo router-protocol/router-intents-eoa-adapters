@@ -47,7 +47,8 @@ describe("AaveV3Supply Adapter: ", async () => {
       NATIVE_TOKEN,
       WMATIC,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     batchTransaction.setAdapterWhitelist([aaveV3SupplyAdapter.address], [true]);
@@ -167,6 +168,9 @@ describe("AaveV3Supply Adapter: ", async () => {
 
     const tokens = [NATIVE_TOKEN];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [aaveV3SupplyAdapter.address];
     const data = [aaveV3SupplyData];
     const value = [0];
@@ -177,6 +181,7 @@ describe("AaveV3Supply Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -207,6 +212,9 @@ describe("AaveV3Supply Adapter: ", async () => {
 
     const tokens = [WMATIC];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [aaveV3SupplyAdapter.address];
     const data = [aaveV3SupplyData];
     const value = [0];
@@ -217,6 +225,7 @@ describe("AaveV3Supply Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -243,6 +252,10 @@ describe("AaveV3Supply Adapter: ", async () => {
 
     const tokens = [mockToken.address];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
+
     const targets = [aaveV3SupplyAdapter.address];
     const data = [aaveV3SupplyData];
     const value = [0];
@@ -253,6 +266,7 @@ describe("AaveV3Supply Adapter: ", async () => {
         0,
         tokens,
         amounts,
+        feeInfo,
         targets,
         value,
         callType,

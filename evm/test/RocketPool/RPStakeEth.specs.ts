@@ -9,6 +9,7 @@
 // import { getPathfinderData } from "../utils";
 // import { defaultAbiCoder } from "ethers/lib/utils";
 // import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+// import { zeroAddress } from "ethereumjs-util";
 
 // const CHAIN_ID = "5";
 // const R_ETH_TOKEN = "0x178E141a0E3b34152f73Ff610437A7bf9B83267A";
@@ -35,7 +36,8 @@
 //       NATIVE,
 //       WNATIVE[env][CHAIN_ID],
 //       mockAssetForwarder.address,
-//       DEXSPAN[env][CHAIN_ID]
+//       DEXSPAN[env][CHAIN_ID],
+//       zeroAddress()
 //     );
 
 //     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -113,6 +115,7 @@
 //     const data = [swapData];
 //     const value = [0];
 //     const callType = [2];
+//     const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
 //     const balBefore = await ethers.provider.getBalance(deployer.address);
 //     const rpEthBalBefore = await rpEth.balanceOf(deployer.address);
@@ -121,6 +124,7 @@
 //       0,
 //       tokens,
 //       amounts,
+//       feeInfo,
 //       targets,
 //       value,
 //       callType,

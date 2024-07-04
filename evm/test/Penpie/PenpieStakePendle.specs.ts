@@ -14,6 +14,7 @@ import {
   M_PENDLE_RECEIPT_TOKEN,
   PENDLE_TOKEN,
 } from "../../tasks/deploy/penpie/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "42161";
 const UNIVERSAL_ROUTER = "0x5E325eDA8064b456f4781070C0738d849c824258";
@@ -47,7 +48,8 @@ describe("PenpieStakePendle Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -149,6 +151,8 @@ describe("PenpieStakePendle Adapter: ", async () => {
     const data = [penpieData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+
     await pendle.approve(batchTransaction.address, pendleBalance);
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
@@ -160,6 +164,7 @@ describe("PenpieStakePendle Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

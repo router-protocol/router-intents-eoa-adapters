@@ -9,6 +9,7 @@ import { AaveV3Borrow__factory } from "../../typechain/factories/AaveV3Borrow__f
 import { IPoolV3__factory } from "../../typechain/factories/IPoolV3__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { AaveV3Supply__factory } from "../../typechain/factories/AaveV3Supply__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "80001";
 const AAVE_V3_POOL = "0xcC6114B983E4Ed2737E9BD3961c9924e6216c704";
@@ -32,7 +33,7 @@ const AAVE_DEBT_TOKEN_ABI = [
 ];
 
 describe("AaveV3Borrow Adapter: ", async () => {
-  const [deployer] = waffle.provider.getWallets();
+  const [deployer, alice] = waffle.provider.getWallets();
 
   const setupTests = async () => {
     let env = process.env.ENV;
@@ -70,7 +71,8 @@ describe("AaveV3Borrow Adapter: ", async () => {
       NATIVE_TOKEN,
       WMATIC,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -169,6 +171,9 @@ describe("AaveV3Borrow Adapter: ", async () => {
 
     const tokens = [supplyAsset];
     const amounts = [supplyAmount];
+    const feeInfo = [
+      { fee: supplyAmount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [aaveV3SupplyAdapter.address, aaveV3BorrowAdapter.address];
     const data = [aaveV3SupplyData, aaveV3BorrowData];
     const value = [0, 0];
@@ -179,12 +184,15 @@ describe("AaveV3Borrow Adapter: ", async () => {
       borrowAmount
     );
 
+    const aliceBalBefore = await ethers.provider.getBalance(alice.address);
+
     const userBalBefore = await aWmatic.balanceOf(deployer.address);
     const usdcBalBefore = await usdc.balanceOf(deployer.address);
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -194,6 +202,10 @@ describe("AaveV3Borrow Adapter: ", async () => {
 
     const userBalAfter = await aWmatic.balanceOf(deployer.address);
     const usdcBalAfter = await usdc.balanceOf(deployer.address);
+
+    const aliceBalAfter = await ethers.provider.getBalance(alice.address);
+
+    expect(aliceBalAfter.sub(aliceBalBefore)).eq(feeInfo[0].fee);
 
     expect(userBalBefore).eq(0);
     expect(userBalAfter).gt(0);

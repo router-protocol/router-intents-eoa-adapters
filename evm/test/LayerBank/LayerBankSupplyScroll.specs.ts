@@ -50,7 +50,8 @@ describe("LayerBank Supply Adapter: ", async () => {
       NATIVE_TOKEN,
       WETH,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const LayerBankAdapter = await ethers.getContractFactory(
@@ -270,12 +271,14 @@ describe("LayerBank Supply Adapter: ", async () => {
     const data = [layerBankSupplyData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const userBalBefore = await lUsdc.balanceOf(deployer.address);
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

@@ -23,4 +23,6 @@ library Errors {
     string public constant INVALID_TX_TYPE = "14"; // 'Invalid txType value'
     string public constant INVALID_REQUEST = "15"; // 'Invalid Request'
     string public constant INVALID_ASSET_BRDIGE_TX_TYPE = "16"; // 'Asset Bridge tx type cannot be greater than 1'
+    string public constant FEE_EXCEEDS_MAX_BIPS = "17"; // 'Fee passed exceeds max bips fee'
+    string public constant FEE_RECIPIENT_CANNOT_BE_ZERO_ADDRESS = "18"; // 'Fee recipient cannot be address(0)'
 }

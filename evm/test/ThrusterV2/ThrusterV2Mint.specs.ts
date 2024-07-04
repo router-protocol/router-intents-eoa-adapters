@@ -13,6 +13,7 @@ import {
   THRUSTER_V2_ROUTER_FEE_ONE,
   THRUSTER_V2_ROUTER_FEE_POINT_THREE,
 } from "../../tasks/deploy/thrusterV2/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "81457";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -57,7 +58,8 @@ describe("ThrusterV2Mint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const ThrusterV2MintAdapter = await ethers.getContractFactory(
@@ -171,6 +173,10 @@ describe("ThrusterV2Mint Adapter: ", async () => {
 
     const tokens = [mintParams.tokenA, mintParams.tokenB];
     const amounts = [mintParams.amountADesired, mintParams.amountBDesired];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     await wnative.approve(batchTransaction.address, wnativeBal);
     await usdb.approve(batchTransaction.address, usdbBal);
@@ -182,6 +188,7 @@ describe("ThrusterV2Mint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [thrusterV2MintAdapter.address],
       [0],
       [2],
@@ -246,6 +253,10 @@ describe("ThrusterV2Mint Adapter: ", async () => {
 
     const tokens = [mintParams.tokenA, mintParams.tokenB];
     const amounts = [mintParams.amountADesired, mintParams.amountBDesired];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     await wnative.approve(batchTransaction.address, wnativeBal);
     await pacMoon.approve(batchTransaction.address, pacMoonBal);
@@ -257,6 +268,7 @@ describe("ThrusterV2Mint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [thrusterV2MintAdapter.address],
       [0],
       [2],

@@ -10,6 +10,7 @@ import { BatchTransaction__factory } from "../../typechain/factories/BatchTransa
 import { BigNumber, Contract, Wallet } from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { zeroAddress } from "ethereumjs-util";
+import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "43114";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -29,7 +30,7 @@ const QI_ERC20_TOKEN_ABI = [
 ];
 
 describe("Benqi Supply Adapter: ", async () => {
-  const [deployer] = waffle.provider.getWallets();
+  const [deployer, alice] = waffle.provider.getWallets();
 
   const setupTests = async () => {
     let env = process.env.ENV;
@@ -47,7 +48,8 @@ describe("Benqi Supply Adapter: ", async () => {
       NATIVE_TOKEN,
       WAVAX,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const BenqiAdapter = await ethers.getContractFactory("BenqiSupply");
@@ -229,6 +231,9 @@ describe("Benqi Supply Adapter: ", async () => {
       await setupTests();
 
     const amount = ethers.utils.parseEther("1");
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
 
     await setUserTokenBalance(usdc, deployer, amount);
     await usdc.approve(benqiAdapterUSDC.address, amount);
@@ -238,7 +243,7 @@ describe("Benqi Supply Adapter: ", async () => {
 
     const benqiSupplyData = defaultAbiCoder.encode(
       ["address", "address", "uint256"],
-      [USDC, deployer.address, amount]
+      [USDC, deployer.address, MaxUint256]
     );
 
     const tokens = [USDC];
@@ -253,6 +258,7 @@ describe("Benqi Supply Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

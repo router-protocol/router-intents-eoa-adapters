@@ -17,15 +17,15 @@ const WETH = "0x4200000000000000000000000000000000000006";
 const SO_USDT = "0x5Ff29E4470799b982408130EFAaBdeeAE7f66a10";
 const USDT = "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58";
 
-const QI_ERC20_TOKEN_ABI = [
-  "function transfer(address dst, uint amount) external returns (bool)",
-  "function transferFrom(address src, address dst, uint256 amount) external returns (bool)",
-  "function approve(address spender, uint256 amount) external returns (bool)",
-  "function allowance(address owner, address spender) external view returns (uint)",
-  "function balanceOf(address owner) external view returns (uint)",
-  "function balanceOfUnderlying(address owner) external returns (uint)",
-  "event Approval(address indexed owner, address indexed spender, uint amount)",
-];
+// const QI_ERC20_TOKEN_ABI = [
+//   "function transfer(address dst, uint amount) external returns (bool)",
+//   "function transferFrom(address src, address dst, uint256 amount) external returns (bool)",
+//   "function approve(address spender, uint256 amount) external returns (bool)",
+//   "function allowance(address owner, address spender) external view returns (uint)",
+//   "function balanceOf(address owner) external view returns (uint)",
+//   "function balanceOfUnderlying(address owner) external returns (uint)",
+//   "event Approval(address indexed owner, address indexed spender, uint amount)",
+// ];
 
 describe("Sonne Supply Adapter: ", async () => {
   const [deployer] = waffle.provider.getWallets();
@@ -46,7 +46,8 @@ describe("Sonne Supply Adapter: ", async () => {
       NATIVE_TOKEN,
       WETH,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const SonneAdapter = await ethers.getContractFactory("SonneSupply");
@@ -211,12 +212,14 @@ describe("Sonne Supply Adapter: ", async () => {
     const data = [sonneSupplyData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const userBalBefore = await soUsdt.balanceOf(deployer.address);
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

@@ -6,6 +6,7 @@ import { ParifiFairsale__factory } from "../../typechain/factories/ParifiFairsal
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "421614";
 const USDC = "0x3EF9d22C43ccE024405bc4a96580b9aE86e85121";
@@ -31,7 +32,8 @@ describe("Parifi Fairsale Adapter: ", async () => {
       WETH,
       mockAssetForwarder.address,
       //   DEXSPAN[env][CHAIN_ID]
-      mockAssetForwarder.address
+      mockAssetForwarder.address,
+      zeroAddress()
     );
 
     const TestParifiFairsale = await ethers.getContractFactory(
@@ -122,6 +124,7 @@ describe("Parifi Fairsale Adapter: ", async () => {
     const data = [parifiData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const userContributionBefore = await parifiFairsaleContract.contributions(
       deployer.address
@@ -131,6 +134,7 @@ describe("Parifi Fairsale Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

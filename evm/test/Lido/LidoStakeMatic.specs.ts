@@ -9,6 +9,7 @@ import { BatchTransaction__factory } from "../../typechain/factories/BatchTransa
 import { BigNumber, Contract, Wallet } from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "5";
 const LIDO_ST_TOKEN = "0x9A7c69A167160C507602ecB3Df4911e8E98e1279";
@@ -35,7 +36,8 @@ describe("LidoStakeMatic Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -138,6 +140,7 @@ describe("LidoStakeMatic Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await setUserTokenBalance(matic, deployer, amount);
     await matic.approve(batchTransaction.address, amount);
@@ -149,6 +152,7 @@ describe("LidoStakeMatic Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
