@@ -13,6 +13,7 @@ import { getMintData } from "./utils";
 import { decodeExecutionEvent } from "../utils";
 import { THRUSTER_NON_FUNGIBLE_POSITION_MANAGER } from "../../tasks/deploy/thrusterV3/constants";
 import { THRUSTER_V2_ROUTER_FEE_POINT_THREE } from "../../tasks/deploy/thrusterV2/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "81457";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -49,7 +50,8 @@ describe("ThrusterV3Mint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const ThrusterV3MintPositionAdapter = await ethers.getContractFactory(
@@ -154,6 +156,10 @@ describe("ThrusterV3Mint Adapter: ", async () => {
 
     const tokens = [mintParams.token0, mintParams.token1];
     const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     if (mintParams.token0 === wnative.address) {
       await wnative.approve(
@@ -173,6 +179,7 @@ describe("ThrusterV3Mint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [thrusterV3MintPositionAdapter.address],
       [0],
       [2],

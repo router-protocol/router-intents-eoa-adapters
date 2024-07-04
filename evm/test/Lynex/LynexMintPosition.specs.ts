@@ -10,6 +10,7 @@ import { BatchTransaction__factory } from "../../typechain/factories/BatchTransa
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { getTransaction } from "../utils";
 import { LYNEX_ROUTER } from "../../tasks/deploy/lynex/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "59144";
 const USDC = "0x176211869cA2b568f2A7D4EE941E073a821EE1ff";
@@ -36,7 +37,8 @@ describe("LynexMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const LynexMintPositionAdapter = await ethers.getContractFactory(
@@ -178,12 +180,18 @@ describe("LynexMint Adapter: ", async () => {
       );
     }
 
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
+
     const lpBalBefore = await usdc_weth_pool.balanceOf(deployer.address);
 
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       [lynexMintPositionAdapter.address],
       [0],
       [2],
@@ -278,12 +286,18 @@ describe("LynexMint Adapter: ", async () => {
       );
     }
 
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
+
     const lpBalBefore = await usdc_weth_pool.balanceOf(deployer.address);
 
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       [lynexMintPositionAdapter.address],
       [0],
       [2],

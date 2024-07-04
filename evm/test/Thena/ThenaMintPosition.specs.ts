@@ -11,6 +11,7 @@ import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { IThenaNonfungiblePositionManager__factory } from "../../typechain/factories/IThenaNonfungiblePositionManager__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
 import { decodeExecutionEvent } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "56";
 const THENA_POSITION_MANAGER = "0xa51ADb08Cbe6Ae398046A23bec013979816B77Ab";
@@ -21,61 +22,61 @@ const SWAP_ROUTER = "0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0";
 
 const SWAP_ROUTER_ABI = [
   {
-    "inputs": [
-        {
-            "components": [
-                {
-                    "internalType": "address",
-                    "name": "tokenIn",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "tokenOut",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "recipient",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "deadline",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amountIn",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amountOutMinimum",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint160",
-                    "name": "limitSqrtPrice",
-                    "type": "uint160"
-                }
-            ],
-            "internalType": "struct ISwapRouter.ExactInputSingleParams",
-            "name": "params",
-            "type": "tuple"
-        }
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "tokenIn",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amountIn",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amountOutMinimum",
+            type: "uint256",
+          },
+          {
+            internalType: "uint160",
+            name: "limitSqrtPrice",
+            type: "uint160",
+          },
+        ],
+        internalType: "struct ISwapRouter.ExactInputSingleParams",
+        name: "params",
+        type: "tuple",
+      },
     ],
-    "name": "exactInputSingleSupportingFeeOnTransferTokens",
-    "outputs": [
-        {
-            "internalType": "uint256",
-            "name": "amountOut",
-            "type": "uint256"
-        }
+    name: "exactInputSingleSupportingFeeOnTransferTokens",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amountOut",
+        type: "uint256",
+      },
     ],
-    "stateMutability": "payable",
-    "type": "function"
-}
+    stateMutability: "payable",
+    type: "function",
+  },
 ];
 
 describe("ThenaMint Adapter: ", async () => {
@@ -104,7 +105,8 @@ describe("ThenaMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const ThenaMintPositionAdapter = await ethers.getContractFactory(
@@ -201,17 +203,15 @@ describe("ThenaMint Adapter: ", async () => {
     await wnative.deposit({ value: ethers.utils.parseEther("10") });
     await wnative.approve(SWAP_ROUTER, ethers.utils.parseEther("5"));
 
-    await swapRouter.exactInputSingleSupportingFeeOnTransferTokens(
-      {
-        tokenIn: wnative.address,
-        tokenOut: usdt.address,
-        recipient: deployer.address,
-        deadline: ethers.constants.MaxUint256,
-        amountIn: ethers.utils.parseEther("0.1"),
-        amountOutMinimum: "0",
-        limitSqrtPrice: "0"
-      }
-    );
+    await swapRouter.exactInputSingleSupportingFeeOnTransferTokens({
+      tokenIn: wnative.address,
+      tokenOut: usdt.address,
+      recipient: deployer.address,
+      deadline: ethers.constants.MaxUint256,
+      amountIn: ethers.utils.parseEther("0.1"),
+      amountOutMinimum: "0",
+      limitSqrtPrice: "0",
+    });
 
     const usdtBal = await usdt.balanceOf(deployer.address);
     expect(usdtBal).gt(0);
@@ -243,23 +243,34 @@ describe("ThenaMint Adapter: ", async () => {
 
     const tokens = [mintParams.token0, mintParams.token1];
     const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     if (mintParams.token0 === wnative.address) {
-      await wnative.approve(batchTransaction.address, mintParams.amount0Desired);
+      await wnative.approve(
+        batchTransaction.address,
+        mintParams.amount0Desired
+      );
       await usdt.approve(batchTransaction.address, mintParams.amount1Desired);
     } else {
       await usdt.approve(batchTransaction.address, mintParams.amount0Desired);
-      await wnative.approve(batchTransaction.address, mintParams.amount1Desired);
+      await wnative.approve(
+        batchTransaction.address,
+        mintParams.amount1Desired
+      );
     }
 
     const tx = await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       [thenaMintPositionAdapter.address],
       [0],
       [2],
-      [thenaData],
+      [thenaData]
     );
     const txReceipt = await tx.wait();
 

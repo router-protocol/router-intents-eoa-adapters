@@ -8,6 +8,8 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+import { zeroAddress } from "ethereumjs-util";
+import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "43114";
 const ANKR_TOKEN = "0xc3344870d52688874b06d844E0C36cc39FC727F6";
@@ -16,7 +18,7 @@ const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const USDT = "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7";
 
 describe("AnkrStakeAvax Adapter: ", async () => {
-  const [deployer] = waffle.provider.getWallets();
+  const [deployer, alice] = waffle.provider.getWallets();
 
   const setupTests = async () => {
     let env = process.env.ENV;
@@ -34,7 +36,8 @@ describe("AnkrStakeAvax Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -100,11 +103,14 @@ describe("AnkrStakeAvax Adapter: ", async () => {
 
     const ankrData = defaultAbiCoder.encode(
       ["address", "uint256"],
-      [deployer.address, amount]
+      [deployer.address, MaxUint256]
     );
 
     const tokens = [NATIVE_TOKEN];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [ankrStakeAvaxAdapter.address];
     const data = [ankrData];
     const value = [0];
@@ -117,6 +123,7 @@ describe("AnkrStakeAvax Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -145,7 +152,7 @@ describe("AnkrStakeAvax Adapter: ", async () => {
     const data = [
       defaultAbiCoder.encode(
         ["address", "uint256"],
-        [deployer.address, amount]
+        [deployer.address, MaxUint256]
       ),
     ];
     const value = [0];

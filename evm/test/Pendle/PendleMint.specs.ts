@@ -12,6 +12,7 @@ import { IPendleRouter__factory } from "../../typechain/factories/IPendleRouter_
 import { BigNumber, Contract, Wallet } from "ethers";
 import { getTransaction } from "../utils";
 import { PENDLE_ROUTER } from "../../tasks/deploy/pendle/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "1";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -39,7 +40,8 @@ describe("PendleMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const PendleMintPositionAdapter = await ethers.getContractFactory(
@@ -230,6 +232,7 @@ describe("PendleMint Adapter: ", async () => {
 
     const tokens = [mintParams.input.tokenIn];
     const amounts = [mintParams.input.netTokenIn];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await rsEth.approve(batchTransaction.address, mintParams.input.netTokenIn);
 
@@ -239,6 +242,7 @@ describe("PendleMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [pendleMintPositionAdapter.address],
       [0],
       [2],

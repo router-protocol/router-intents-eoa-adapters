@@ -7,6 +7,7 @@ import { TokenInterface__factory } from "../../typechain/factories/TokenInterfac
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "56";
 const SYNCLUB_TOKEN = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
@@ -33,7 +34,8 @@ describe("SynClubStakeBnb Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const SynClubStakeBnb = await ethers.getContractFactory("SynClubStakeBnb");
@@ -97,6 +99,7 @@ describe("SynClubStakeBnb Adapter: ", async () => {
     const data = [synClubData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const snBnbBalBefore = await snBnb.balanceOf(deployer.address);
@@ -105,6 +108,7 @@ describe("SynClubStakeBnb Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

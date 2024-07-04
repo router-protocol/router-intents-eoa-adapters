@@ -6,6 +6,7 @@ import {Basic} from "@routerprotocol/intents-core/contracts/common/Basic.sol";
 import {CallLib} from "@routerprotocol/intents-core/contracts/utils/CallLib.sol";
 import {IERC20, SafeERC20} from "@routerprotocol/intents-core/contracts/utils/SafeERC20.sol";
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
+import {Errors as IntentErrors} from "./Errors.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {EoaExecutorWithDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {BaseAdapter} from "@routerprotocol/intents-core/contracts/BaseAdapter.sol";
@@ -26,6 +27,11 @@ contract BatchTransaction is
 
     struct RefundData {
         address[] tokens;
+    }
+
+    struct FeeInfo {
+        uint96 fee;
+        address recipient;
     }
 
     bytes32 public constant SETTER_ROLE = keccak256("SETTER_ROLE");
@@ -165,6 +171,7 @@ contract BatchTransaction is
      * @param appId Application Id
      * @param tokens Addresses of the tokens to fetch from the user
      * @param amounts amounts of the tokens to fetch from the user
+     * @param feeInfos feeInfo for the tokens
      * @param target Addresses of the contracts to call
      * @param value Amounts of native tokens to send along with the transactions
      * @param callType Type of call. 1: call, 2: delegatecall
@@ -174,18 +181,36 @@ contract BatchTransaction is
         uint256 appId,
         address[] calldata tokens,
         uint256[] calldata amounts,
+        FeeInfo[] calldata feeInfos,
         address[] calldata target,
         uint256[] calldata value,
         uint256[] calldata callType,
         bytes[] calldata data
-    ) external payable {
+    ) external payable nonReentrant {
         uint256 tokensLength = tokens.length;
-        require(tokensLength == amounts.length, Errors.ARRAY_LENGTH_MISMATCH);
+        require(
+            tokensLength == amounts.length && tokensLength == feeInfos.length,
+            Errors.ARRAY_LENGTH_MISMATCH
+        );
         uint256 totalValue = 0;
 
         for (uint256 i = 0; i < tokensLength; ) {
             totalValue += _pullTokens(tokens[i], amounts[i]);
             tokensToRefund[msg.sender].tokens.push(tokens[i]);
+
+            if (feeInfos[i].fee != 0) {
+                if (feeInfos[i].fee > (amounts[i] * 500) / 10000)
+                    revert(IntentErrors.FEE_EXCEEDS_MAX_BIPS);
+
+                if (feeInfos[i].recipient == address(0))
+                    revert(IntentErrors.FEE_RECIPIENT_CANNOT_BE_ZERO_ADDRESS);
+
+                withdrawTokens(
+                    tokens[i],
+                    feeInfos[i].recipient,
+                    uint256(feeInfos[i].fee)
+                );
+            }
 
             unchecked {
                 ++i;

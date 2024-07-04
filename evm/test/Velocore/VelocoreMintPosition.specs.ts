@@ -15,6 +15,7 @@ import {
   VELOCORE_TOKEN,
   VELOCORE_VAULT,
 } from "../../tasks/deploy/velocore/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "59144";
 const USDC = "0x176211869cA2b568f2A7D4EE941E073a821EE1ff";
@@ -41,7 +42,8 @@ describe("VelocoreMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const VelocoreMintPositionAdapter = await ethers.getContractFactory(
@@ -190,6 +192,10 @@ describe("VelocoreMint Adapter: ", async () => {
 
     const tokens = [mintParams.tokenA, mintParams.tokenB];
     const amounts = [mintParams.amountADesired, mintParams.amountBDesired];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     let value = "0";
 
@@ -207,6 +213,7 @@ describe("VelocoreMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [velocoreMintPositionAdapter.address],
       [0],
       [2],

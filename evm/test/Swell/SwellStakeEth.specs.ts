@@ -8,6 +8,7 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "1";
 const SW_TOKEN = "0xf951E335afb289353dc249e82926178EaC7DEd78";
@@ -33,7 +34,8 @@ describe("SwellStakeEth Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -107,6 +109,7 @@ describe("SwellStakeEth Adapter: ", async () => {
     const data = [swellData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const swEthBalBefore = await swEth.balanceOf(deployer.address);
@@ -115,6 +118,7 @@ describe("SwellStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

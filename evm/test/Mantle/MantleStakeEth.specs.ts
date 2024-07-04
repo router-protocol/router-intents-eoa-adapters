@@ -8,6 +8,7 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "1";
 const METH = "0xd5F7838F5C461fefF7FE49ea5ebaF7728bB0ADfa";
@@ -33,7 +34,8 @@ describe("MantleStakeEth Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -107,6 +109,7 @@ describe("MantleStakeEth Adapter: ", async () => {
     const data = [mantleData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const mEthBalBefore = await mEth.balanceOf(deployer.address);
@@ -115,6 +118,7 @@ describe("MantleStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

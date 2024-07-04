@@ -8,6 +8,7 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "1";
 const FRAX_ETH_TOKEN = "0x5E8422345238F34275888049021821E8E08CAa1f";
@@ -35,7 +36,8 @@ describe("FraxStakeEth Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -113,6 +115,7 @@ describe("FraxStakeEth Adapter: ", async () => {
     const data = [fraxData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const fraxEthBalBefore = await fraxEth.balanceOf(deployer.address);
@@ -121,6 +124,7 @@ describe("FraxStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -197,6 +201,7 @@ describe("FraxStakeEth Adapter: ", async () => {
     const data = [fraxData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const sFraxEthBalBefore = await sFraxEth.balanceOf(deployer.address);
@@ -205,6 +210,7 @@ describe("FraxStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -280,12 +286,14 @@ describe("FraxStakeEth Adapter: ", async () => {
     const data = [fraxData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await expect(
       batchTransaction.executeBatchCallsSameChain(
         0,
         tokens,
         amounts,
+        feeInfo,
         targets,
         value,
         callType,

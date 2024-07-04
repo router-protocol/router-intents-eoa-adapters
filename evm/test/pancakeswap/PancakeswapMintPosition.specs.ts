@@ -11,7 +11,8 @@ import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { IPancakeswapNonfungiblePositionManager__factory } from "../../typechain/factories/IPancakeswapNonfungiblePositionManager__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
 import { getPancakeswapData } from "./utils";
-import { decodeExecutionEvent, getTransaction } from "../utils";
+import { decodeExecutionEvent } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "56";
 const PANCAKESWAP_V3_POSITION_MANAGER =
@@ -24,61 +25,61 @@ const THENA_SWAP_ROUTER = "0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0";
 
 const SWAP_ROUTER_ABI = [
   {
-    "inputs": [
-        {
-            "components": [
-                {
-                    "internalType": "address",
-                    "name": "tokenIn",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "tokenOut",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "recipient",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "deadline",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amountIn",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amountOutMinimum",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint160",
-                    "name": "limitSqrtPrice",
-                    "type": "uint160"
-                }
-            ],
-            "internalType": "struct ISwapRouter.ExactInputSingleParams",
-            "name": "params",
-            "type": "tuple"
-        }
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "tokenIn",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amountIn",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amountOutMinimum",
+            type: "uint256",
+          },
+          {
+            internalType: "uint160",
+            name: "limitSqrtPrice",
+            type: "uint160",
+          },
+        ],
+        internalType: "struct ISwapRouter.ExactInputSingleParams",
+        name: "params",
+        type: "tuple",
+      },
     ],
-    "name": "exactInputSingleSupportingFeeOnTransferTokens",
-    "outputs": [
-        {
-            "internalType": "uint256",
-            "name": "amountOut",
-            "type": "uint256"
-        }
+    name: "exactInputSingleSupportingFeeOnTransferTokens",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amountOut",
+        type: "uint256",
+      },
     ],
-    "stateMutability": "payable",
-    "type": "function"
-}
+    stateMutability: "payable",
+    type: "function",
+  },
 ];
 
 describe("PancakeswapMint Adapter: ", async () => {
@@ -107,7 +108,8 @@ describe("PancakeswapMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const PancakeswapMintPositionAdapter = await ethers.getContractFactory(
@@ -151,7 +153,6 @@ describe("PancakeswapMint Adapter: ", async () => {
       ),
       swapRouter,
       usdc: TokenInterface__factory.connect(USDC, deployer),
-
     };
   };
 
@@ -201,7 +202,7 @@ describe("PancakeswapMint Adapter: ", async () => {
       positionManager,
       usdt,
       wnative,
-      swapRouter
+      swapRouter,
     } = await setupTests();
 
     await wnative.deposit({ value: ethers.utils.parseEther("10") });
@@ -209,17 +210,15 @@ describe("PancakeswapMint Adapter: ", async () => {
 
     await wnative.approve(THENA_SWAP_ROUTER, ethers.utils.parseEther("5"));
 
-    await swapRouter.exactInputSingleSupportingFeeOnTransferTokens(
-      {
-        tokenIn: wnative.address,
-        tokenOut: usdt.address,
-        recipient: deployer.address,
-        deadline: ethers.constants.MaxUint256,
-        amountIn: ethers.utils.parseEther("0.1"),
-        amountOutMinimum: "0",
-        limitSqrtPrice: "0"
-      }
-    );
+    await swapRouter.exactInputSingleSupportingFeeOnTransferTokens({
+      tokenIn: wnative.address,
+      tokenOut: usdt.address,
+      recipient: deployer.address,
+      deadline: ethers.constants.MaxUint256,
+      amountIn: ethers.utils.parseEther("0.1"),
+      amountOutMinimum: "0",
+      limitSqrtPrice: "0",
+    });
 
     const usdtBal = await usdt.balanceOf(deployer.address);
     expect(usdtBal).gt(0);
@@ -253,6 +252,11 @@ describe("PancakeswapMint Adapter: ", async () => {
     const tokens = [mintParams.token0, mintParams.token1];
     const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
 
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
+
     if (mintParams.token0 === wnative.address) {
       await wnative.approve(
         batchTransaction.address,
@@ -271,6 +275,7 @@ describe("PancakeswapMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [pancakeswapMintPositionAdapter.address],
       [0],
       [2],

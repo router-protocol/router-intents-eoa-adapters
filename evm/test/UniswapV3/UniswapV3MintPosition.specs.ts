@@ -12,6 +12,7 @@ import { IUniswapV3NonfungiblePositionManager__factory } from "../../typechain/f
 import { BigNumber, Contract, Wallet } from "ethers";
 import { getUniswapV3Data } from "./utils";
 import { decodeExecutionEvent } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "5";
 const UNISWAP_V3_POSITION_MANAGER =
@@ -39,7 +40,8 @@ describe("UniswapV3Mint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const UniswapV3MintPositionAdapter = await ethers.getContractFactory(
@@ -160,6 +162,10 @@ describe("UniswapV3Mint Adapter: ", async () => {
 
     const tokens = [mintParams.token0, mintParams.token1];
     const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     if (mintParams.token0 === wnative.address) {
       await wnative.approve(
@@ -179,6 +185,7 @@ describe("UniswapV3Mint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [uniswapV3MintPositionAdapter.address],
       [0],
       [2],

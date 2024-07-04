@@ -54,6 +54,7 @@ contract AnkrStakeAvax is RouterIntentEoaAdapterWithoutDataProvider {
         (tokens, logData) = _stake(_recipient, _amount);
 
         emit ExecutionEvent(name(), logData);
+
         return tokens;
     }
 

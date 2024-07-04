@@ -9,6 +9,7 @@ import { RadiantBorrow__factory } from "../../typechain/factories/RadiantBorrow_
 import { ILendingPool__factory } from "../../typechain/factories/ILendingPool__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { RadiantSupply__factory } from "../../typechain/factories/RadiantSupply__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "1";
 const RADIANT_POOL = "0xA950974f64aA33f27F6C5e017eEE93BF7588ED07";
@@ -74,7 +75,8 @@ describe("RadiantBorrow Adapter: ", async () => {
       NATIVE_TOKEN,
       WETH,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -180,6 +182,10 @@ describe("RadiantBorrow Adapter: ", async () => {
     const data = [radiantSupplyData, radiantBorrowData];
     const value = [0, 0];
     const callType = [2, 2];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     await usdcVariableDebtToken.approveDelegation(
       batchTransaction.address,
@@ -192,6 +198,7 @@ describe("RadiantBorrow Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

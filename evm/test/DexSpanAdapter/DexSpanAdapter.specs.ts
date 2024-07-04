@@ -10,6 +10,7 @@ import { BigNumber, Contract, Wallet } from "ethers";
 import { getPathfinderData } from "../utils";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "42161";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -34,7 +35,8 @@ describe("DexSpan Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -103,6 +105,7 @@ describe("DexSpan Adapter: ", async () => {
     const data = [swapData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await usdt.balanceOf(deployer.address);
 
@@ -110,6 +113,7 @@ describe("DexSpan Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

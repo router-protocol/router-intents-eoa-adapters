@@ -10,6 +10,7 @@ import { BatchTransaction__factory } from "../../typechain/factories/BatchTransa
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { getTransaction } from "../utils";
 import { XFAI_PERIPHERY } from "../../tasks/deploy/xfai/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "59144";
 const USDC = "0x176211869cA2b568f2A7D4EE941E073a821EE1ff";
@@ -36,7 +37,8 @@ describe("XfaiMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const XfaiMintPositionAdapter = await ethers.getContractFactory("XfaiMint");
@@ -55,10 +57,7 @@ describe("XfaiMint Adapter: ", async () => {
     const mockToken = await MockToken.deploy();
     await mockToken.mint(deployer.address, ethers.utils.parseEther("10000"));
 
-    const xfaiLPToken = TokenInterface__factory.connect(
-      LP_TOKEN,
-      deployer
-    );
+    const xfaiLPToken = TokenInterface__factory.connect(LP_TOKEN, deployer);
 
     return {
       batchTransaction: BatchTransaction__factory.connect(
@@ -150,6 +149,10 @@ describe("XfaiMint Adapter: ", async () => {
       mintParams.amountETHDesired,
       mintParams.amountTokenDesired,
     ];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     await usdc.approve(batchTransaction.address, mintParams.amountTokenDesired);
 
@@ -159,15 +162,16 @@ describe("XfaiMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [xfaiMintPositionAdapter.address],
       [0],
       [2],
       [xfaiData],
-      {value: amountETHDesired}
+      { value: amountETHDesired }
     );
 
     const lpBalAfter = await xfaiLPToken.balanceOf(deployer.address);
 
     expect(lpBalAfter).gt(lpBalBefore);
-  }); 
+  });
 });

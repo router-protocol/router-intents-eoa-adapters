@@ -8,6 +8,7 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "5";
 const STADER_X_TOKEN = "0x3338eCd3ab3d3503c55c931d759fA6d78d287236";
@@ -34,7 +35,8 @@ describe("StaderStakeEth Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -109,6 +111,7 @@ describe("StaderStakeEth Adapter: ", async () => {
     const data = [staderData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const ethxBalBefore = await ethx.balanceOf(deployer.address);
@@ -117,6 +120,7 @@ describe("StaderStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

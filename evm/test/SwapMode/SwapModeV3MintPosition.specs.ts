@@ -12,6 +12,7 @@ import { IUniswapV3NonfungiblePositionManager__factory } from "../../typechain/f
 import { BigNumber, Contract, Wallet } from "ethers";
 import { getSwapModeData } from "./utils";
 import { decodeExecutionEvent } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "34443";
 const SWAPMODE_POSITION_MANAGER = "0xcc3726bCc27f232bC1CaAB40853AEa91ae43C216";
@@ -51,7 +52,8 @@ describe("SwapModeMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const SwapModeMintPositionAdapter = await ethers.getContractFactory(
@@ -199,6 +201,10 @@ describe("SwapModeMint Adapter: ", async () => {
 
     const tokens = [mintParams.token0, mintParams.token1];
     const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     if (mintParams.token0 === usdt.address) {
       await usdt.approve(batchTransaction.address, mintParams.amount0Desired);
@@ -212,6 +218,7 @@ describe("SwapModeMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [swapModeMintPositionAdapter.address],
       [0],
       [2],

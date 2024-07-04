@@ -12,6 +12,7 @@ import { IUniswapV3NonfungiblePositionManager__factory } from "../../typechain/f
 import { BigNumber, Contract, Wallet } from "ethers";
 import { getBaseSwapData } from "./utils";
 import { decodeExecutionEvent } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "8453";
 const BASESWAP_POSITION_MANAGER = "0xDe151D5c92BfAA288Db4B67c21CD55d5826bCc93";
@@ -25,7 +26,7 @@ const SWAP_ROUTER_ABI = [
 ];
 
 describe("BaseSwapMint Adapter: ", async () => {
-  const [deployer] = waffle.provider.getWallets();
+  const [deployer, alice] = waffle.provider.getWallets();
 
   const setupTests = async () => {
     let env = process.env.ENV;
@@ -50,7 +51,8 @@ describe("BaseSwapMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const BaseSwapMintPositionAdapter = await ethers.getContractFactory(
@@ -109,32 +111,6 @@ describe("BaseSwapMint Adapter: ", async () => {
     });
   });
 
-  const toBytes32 = (bn: BigNumber) => {
-    return ethers.utils.hexlify(ethers.utils.zeroPad(bn.toHexString(), 32));
-  };
-
-  // This works for token when it has balance mapping at slot 0.
-  const setUserTokenBalance = async (
-    contract: Contract,
-    user: Wallet,
-    balance: BigNumber
-  ) => {
-    const index = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256"],
-      [user.address, 0] // key, slot
-    );
-
-    await hardhat.network.provider.request({
-      method: "hardhat_setStorageAt",
-      params: [contract.address, index, toBytes32(balance).toString()],
-    });
-
-    await hardhat.network.provider.request({
-      method: "evm_mine",
-      params: [],
-    });
-  };
-
   it("Can mint a new position on BaseSwap", async () => {
     const {
       batchTransaction,
@@ -176,6 +152,19 @@ describe("BaseSwapMint Adapter: ", async () => {
       fee,
     });
 
+    const tokens = [mintParams.token0, mintParams.token1];
+    const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
+    const feeInfo = [
+      {
+        fee: 0,
+        recipient: alice.address,
+      },
+      {
+        fee: 0,
+        recipient: alice.address,
+      },
+    ];
+
     const mintParamsIface =
       "tuple(address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint256 amount0Desired, uint256 amount1Desired, uint256 amount0Min, uint256 amount1Min, address recipient, uint256 deadline) MintParams";
 
@@ -183,9 +172,6 @@ describe("BaseSwapMint Adapter: ", async () => {
       [mintParamsIface],
       [mintParams]
     );
-
-    const tokens = [mintParams.token0, mintParams.token1];
-    const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
 
     if (mintParams.token0 === wnative.address) {
       await wnative.approve(
@@ -205,6 +191,7 @@ describe("BaseSwapMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [baseSwapMintPositionAdapter.address],
       [0],
       [2],

@@ -11,6 +11,7 @@ import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { IThirdFyNonfungiblePositionManager__factory } from "../../typechain/factories/IThirdFyNonfungiblePositionManager__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
 import { decodeExecutionEvent } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "10242";
 const THIRD_FY_POSITION_MANAGER = "0x0BFaCE9a5c9F884a4f09fadB83b69e81EA41424B";
@@ -22,61 +23,61 @@ const SWAP_ROUTER = "0xd265f57c36AC60d3F7931eC5c7396966F0C246A7";
 
 const SWAP_ROUTER_ABI = [
   {
-    "inputs": [
-        {
-            "components": [
-                {
-                    "internalType": "address",
-                    "name": "tokenIn",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "tokenOut",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "recipient",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "deadline",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amountIn",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amountOutMinimum",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint160",
-                    "name": "limitSqrtPrice",
-                    "type": "uint160"
-                }
-            ],
-            "internalType": "struct ISwapRouter.ExactInputSingleParams",
-            "name": "params",
-            "type": "tuple"
-        }
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "tokenIn",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amountIn",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amountOutMinimum",
+            type: "uint256",
+          },
+          {
+            internalType: "uint160",
+            name: "limitSqrtPrice",
+            type: "uint160",
+          },
+        ],
+        internalType: "struct ISwapRouter.ExactInputSingleParams",
+        name: "params",
+        type: "tuple",
+      },
     ],
-    "name": "exactInputSingleSupportingFeeOnTransferTokens",
-    "outputs": [
-        {
-            "internalType": "uint256",
-            "name": "amountOut",
-            "type": "uint256"
-        }
+    name: "exactInputSingleSupportingFeeOnTransferTokens",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amountOut",
+        type: "uint256",
+      },
     ],
-    "stateMutability": "payable",
-    "type": "function"
-}
+    stateMutability: "payable",
+    type: "function",
+  },
 ];
 
 describe("ThirdFyMint Adapter: ", async () => {
@@ -105,7 +106,8 @@ describe("ThirdFyMint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const ThirdFyMintPositionAdapter = await ethers.getContractFactory(
@@ -209,21 +211,18 @@ describe("ThirdFyMint Adapter: ", async () => {
     const usdtBal = await usdt.balanceOf(deployer.address);
     expect(usdtBal).gt(0);
 
-    await swapRouter.exactInputSingleSupportingFeeOnTransferTokens(
-      {
-        tokenIn: usdt.address,
-        tokenOut: less.address,
-        recipient: deployer.address,
-        deadline: ethers.constants.MaxUint256,
-        amountIn: "500000000",
-        amountOutMinimum: "0",
-        limitSqrtPrice: "0"
-      }
-    );
+    await swapRouter.exactInputSingleSupportingFeeOnTransferTokens({
+      tokenIn: usdt.address,
+      tokenOut: less.address,
+      recipient: deployer.address,
+      deadline: ethers.constants.MaxUint256,
+      amountIn: "500000000",
+      amountOutMinimum: "0",
+      limitSqrtPrice: "0",
+    });
 
     const lessBal = await less.balanceOf(deployer.address);
     expect(lessBal).gt(0);
-
 
     const user = deployer;
     const chainId = CHAIN_ID;
@@ -252,6 +251,10 @@ describe("ThirdFyMint Adapter: ", async () => {
 
     const tokens = [mintParams.token0, mintParams.token1];
     const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     if (mintParams.token0 === usdt.address) {
       await usdt.approve(batchTransaction.address, mintParams.amount0Desired);
@@ -265,6 +268,7 @@ describe("ThirdFyMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       [thirdFyMintPositionAdapter.address],
       [0],
       [2],

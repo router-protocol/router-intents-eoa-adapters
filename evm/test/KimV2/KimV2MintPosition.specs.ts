@@ -11,6 +11,7 @@ import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { IKimRouter__factory } from "../../typechain/factories/IKimRouter__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
 import { decodeExecutionEvent } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "34443";
 const USDC = "0xd988097fb8612cc24eeC14542bC03424c656005f";
@@ -39,7 +40,8 @@ describe("KimV2Mint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const KimV2MintPositionAdapter = await ethers.getContractFactory(
@@ -189,10 +191,16 @@ describe("KimV2Mint Adapter: ", async () => {
       await usdt.approve(batchTransaction.address, mintParams.amountBDesired);
     }
 
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
+
     const tx = await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       [kimV2MintPositionAdapter.address],
       [0],
       [2],

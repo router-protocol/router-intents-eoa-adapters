@@ -13,6 +13,7 @@ import { IMaverickV2RewardsRouter__factory } from "../../typechain/factories/IMa
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { MAVERICK_V2_REWARDS_ROUTER } from "../../tasks/deploy/maverickV2/constants";
 import { BigNumber, Contract, Wallet } from "ethers";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "84532";
 const SAND = "0x434d7C7aE444B28d1ff275cf96A7783b035Cf4Db";
@@ -50,7 +51,8 @@ describe("MaverickV2Mint Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      mockAssetForwarder.address
+      mockAssetForwarder.address,
+      zeroAddress()
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -260,11 +262,16 @@ describe("MaverickV2Mint Adapter: ", async () => {
 
     const tokens = [sand.address, usdt.address];
     const amounts = [amountA, amountB];
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
 
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       [maverickV2MintAdapter.address],
       [0],
       [2],

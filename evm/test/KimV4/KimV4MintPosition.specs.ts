@@ -11,6 +11,7 @@ import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { IKimNonfungiblePositionManager__factory } from "../../typechain/factories/IKimNonfungiblePositionManager__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
 import { decodeExecutionEvent } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "34443";
 const KIM_V4_POSITION_MANAGER = "0x2e8614625226D26180aDf6530C3b1677d3D7cf10";
@@ -50,7 +51,8 @@ describe("KimV4Mint Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const KimV4MintPositionAdapter = await ethers.getContractFactory(
@@ -208,10 +210,16 @@ describe("KimV4Mint Adapter: ", async () => {
       await usdt.approve(batchTransaction.address, mintParams.amount1Desired);
     }
 
+    const feeInfo = [
+      { fee: 0, recipient: zeroAddress() },
+      { fee: 0, recipient: zeroAddress() },
+    ];
+
     const tx = await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       [kimV4MintPositionAdapter.address],
       [0],
       [2],

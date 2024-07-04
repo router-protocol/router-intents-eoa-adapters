@@ -9,6 +9,7 @@ import { MendiSupply__factory } from "../../typechain/factories/MendiSupply__fac
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { MENDI_TOKENS } from "../../tasks/deploy/mendi/constants";
 import { getTransaction } from "../utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "59144";
 
@@ -49,7 +50,8 @@ describe("MendiSupply Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -250,12 +252,14 @@ describe("MendiSupply Adapter: ", async () => {
     const data = [mendiSupplyData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const userBalBefore = await meWeth.balanceOf(alice.address);
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

@@ -23,6 +23,7 @@ import {
   SCROLL_MESSAGING_QUEUE,
   LIDO_SCROLL_GATEWAY,
 } from "../../tasks/deploy/lido/constants";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "1";
 const LIDO_REFERRAL_ADDRESS = "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84";
@@ -48,7 +49,8 @@ describe("LidoStakeEth Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -135,6 +137,7 @@ describe("LidoStakeEth Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const stethBalBefore = await steth.balanceOf(deployer.address);
@@ -143,6 +146,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -235,6 +239,7 @@ describe("LidoStakeEth Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const wstEthBalBefore = await wstEth.balanceOf(
       LIDO_ARBITRUM_GATEWAY[CHAIN_ID]
@@ -244,6 +249,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -283,6 +289,7 @@ describe("LidoStakeEth Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const wstEthBalBefore = await wstEth.balanceOf(
       LIDO_OPTIMISM_GATEWAY[CHAIN_ID]
@@ -292,6 +299,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -335,11 +343,13 @@ describe("LidoStakeEth Adapter: ", async () => {
     const wstEthBalBefore = await wstEth.balanceOf(
       LIDO_MANTLE_GATEWAY[CHAIN_ID]
     );
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -379,6 +389,7 @@ describe("LidoStakeEth Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const wstEthBalBefore = await wstEth.balanceOf(LIDO_BASE_GATEWAY[CHAIN_ID]);
 
@@ -386,6 +397,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -439,6 +451,7 @@ describe("LidoStakeEth Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const wstEthBalBefore = await wstEth.balanceOf(
       LIDO_ZKSYNC_GATEWAY[CHAIN_ID]
@@ -448,6 +461,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -486,6 +500,7 @@ describe("LidoStakeEth Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const wstEthBalBefore = await wstEth.balanceOf(
       LIDO_LINEA_GATEWAY[CHAIN_ID]
@@ -495,6 +510,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -539,6 +555,7 @@ describe("LidoStakeEth Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const LIDO_L1_SCROLL_GATEWAY = "0x6625C6332c9F91F2D27c304E729B86db87A3f504";
 
@@ -548,6 +565,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

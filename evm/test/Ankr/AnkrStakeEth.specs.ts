@@ -8,6 +8,8 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
+import { zeroAddress } from "ethereumjs-util";
+import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "1";
 const ANKR_TOKEN = "0xE95A203B1a91a908F9B9CE46459d101078c2c3cb";
@@ -16,7 +18,7 @@ const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const USDT = "0xdac17f958d2ee523a2206206994597c13d831ec7";
 
 describe("AnkrStakeEth Adapter: ", async () => {
-  const [deployer] = waffle.provider.getWallets();
+  const [deployer, alice] = waffle.provider.getWallets();
 
   const setupTests = async () => {
     let env = process.env.ENV;
@@ -34,7 +36,8 @@ describe("AnkrStakeEth Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -100,11 +103,14 @@ describe("AnkrStakeEth Adapter: ", async () => {
 
     const ankrData = defaultAbiCoder.encode(
       ["address", "uint256"],
-      [deployer.address, amount]
+      [deployer.address, MaxUint256]
     );
 
     const tokens = [NATIVE_TOKEN];
     const amounts = [amount];
+    const feeInfo = [
+      { fee: amount.mul(5).div(1000), recipient: alice.address },
+    ];
     const targets = [ankrStakeEthAdapter.address];
     const data = [ankrData];
     const value = [0];
@@ -117,6 +123,7 @@ describe("AnkrStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,

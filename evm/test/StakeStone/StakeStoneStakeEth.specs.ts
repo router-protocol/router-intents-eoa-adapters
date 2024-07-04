@@ -7,6 +7,7 @@ import { TokenInterface__factory } from "../../typechain/factories/TokenInterfac
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { defaultAbiCoder } from "ethers/lib/utils";
+import { zeroAddress } from "ethereumjs-util";
 
 const CHAIN_ID = "1";
 const STONE_TOKEN = "0x7122985656e38BDC0302Db86685bb972b145bD3C";
@@ -38,7 +39,8 @@ describe("StakeStoneStakeEth Adapter: ", async () => {
       NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
-      DEXSPAN[env][CHAIN_ID]
+      DEXSPAN[env][CHAIN_ID],
+      zeroAddress()
     );
 
     const StakeStoneStakeEth = await ethers.getContractFactory(
@@ -117,6 +119,7 @@ describe("StakeStoneStakeEth Adapter: ", async () => {
     const data = [stakeStoneData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const stoneBalBefore = await stone.balanceOf(deployer.address);
@@ -125,6 +128,7 @@ describe("StakeStoneStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
@@ -173,6 +177,8 @@ describe("StakeStoneStakeEth Adapter: ", async () => {
     const data = [stakeStoneData];
     const value = [0];
     const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const stoneBalBefore = await stone.balanceOf(deployer.address);
     const stoneBalStoneBefore = await stone.balanceOf(stone.address);
@@ -181,6 +187,7 @@ describe("StakeStoneStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
+      feeInfo,
       targets,
       value,
       callType,
