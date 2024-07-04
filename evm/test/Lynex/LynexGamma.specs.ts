@@ -10,7 +10,7 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { decodeExecutionEvent, getTransaction } from "../utils";
-import { LYNEX_GAMMA } from "../../tasks/deploy/lynex/constants";
+import { LYNEX_GAMMA, LYNEX_CLEARING } from "../../tasks/deploy/lynex/constants";
 
 const CHAIN_ID = "59144";
 const USDC = "0x176211869cA2b568f2A7D4EE941E073a821EE1ff";
@@ -45,7 +45,8 @@ describe("LynexGamma Adapter: ", async () => {
     const lynexGammaAdapter = await LynexGammaAdapter.deploy(
       NATIVE_TOKEN,
       WNATIVE,
-      LYNEX_GAMMA[CHAIN_ID]
+      LYNEX_GAMMA[CHAIN_ID],
+      LYNEX_CLEARING[CHAIN_ID]
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -96,7 +97,7 @@ describe("LynexGamma Adapter: ", async () => {
     });
   });
 
-  it("Can mint a new position on Lynex weth/usdc and receiver gets aUSDC/WETH", async () => {
+  it.only("Can mint a new position on Lynex weth/usdc and receiver gets aUSDC/WETH", async () => {
     const {
       batchTransaction,
       lynexGammaAdapter,

@@ -15,7 +15,7 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { LYNEX_GAMMA } from "./constants";
+import { LYNEX_GAMMA, LYNEX_CLEARING } from "./constants";
 
 const contractName: string = CONTRACT_NAME.LynexGamma;
 const contractType = ContractType.LP;
@@ -36,7 +36,8 @@ task(DEPLOY_LYNEX_GAMMA_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
-      LYNEX_GAMMA[network]
+      LYNEX_GAMMA[network],
+      LYNEX_CLEARING[network]
     );
     await instance.deployed();
 
@@ -81,6 +82,7 @@ task(VERIFY_LYNEX_GAMMA_ADAPTER).setAction(async function (
       NATIVE,
       WNATIVE[env][network],
       LYNEX_GAMMA[network],
+      LYNEX_CLEARING[network]
     ],
   });
 

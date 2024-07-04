@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {ILynexGamma, IHypervisor} from "./Interfaces.sol";
+import {ILynexGamma, IHypervisor, ILynexClearing} from "./Interfaces.sol";
 import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
@@ -22,10 +22,11 @@ contract LynexGamma is
     constructor(
         address __native,
         address __wnative,
-        address __lynexGamma
+        address __lynexGamma,
+        address __lynexClearing
     )
         RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative)
-        LynexGammaHelpers(__lynexGamma)
+        LynexGammaHelpers(__lynexGamma, __lynexClearing)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -101,16 +102,27 @@ contract LynexGamma is
                 depositParams.tokenB == token1,
                 "LynexGamma: Token mismatch"
             );
-        }
-
-        if (depositParams.tokenA == token1) {
+        } else if (depositParams.tokenA == token1) {
             require(
                 depositParams.tokenB == token0,
                 "LynexGamma: Token mismatch"
             );
             depositParams.depositB = amount0;
             depositParams.depositA = amount1;
+        } else {
+            revert("Token mismatch with pos");
         }
+
+        (uint256 amountStart, uint256 amountEnd) = lynexClearing
+            .getDepositAmount(
+                depositParams.pos,
+                token0,
+                depositParams.depositA
+            );
+
+        require(depositParams.depositB > amountStart, "DepositB amt < min amt");
+
+        depositParams.depositB = (amountStart / 2) + (amountEnd / 2);
 
         IERC20(token0).safeIncreaseAllowance(
             depositParams.pos,
