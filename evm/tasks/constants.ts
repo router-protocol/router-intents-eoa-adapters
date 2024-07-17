@@ -210,6 +210,8 @@ export const DEPLOY_LYNEX_GAMMA_ADAPTER = "DEPLOY_LYNEX_GAMMA_ADAPTER";
 export const VERIFY_LYNEX_GAMMA_ADAPTER = "VERIFY_LYNEX_GAMMA_ADAPTER";
 export const DEPLOY_XFAI_MINT_ADAPTER = "DEPLOY_XFAI_MINT_ADAPTER";
 export const VERIFY_XFAI_MINT_ADAPTER = "VERIFY_XFAI_MINT_ADAPTER";
+export const DEPLOY_QUICKSWAP_SWAP_ADAPTER = "DEPLOY_QUICKSWAP_SWAP_ADAPTER";
+export const VERIFY_QUICKSWAP_SWAP_ADAPTER = "VERIFY_QUICKSWAP_SWAP_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -248,6 +250,7 @@ export const ASSET_FORWARDER: {
     "34443": "0xc21e4ebd1d92036cb467b53fe3258f219d909eb9",
     "81457": "0x97eec1c29f745dC7c267F90292AA663d997a601D",
     "10242": "0x0000000000000000000000000000000000000000",
+    "196": "0x0000000000000000000000000000000000000000"
   },
 };
 
@@ -291,6 +294,7 @@ export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
     "11155111": "0x0000000000000000000000000000000000000000",
     "534351": "0x0000000000000000000000000000000000000000",
     "10243": "",
+    "196": ""
   },
   mainnet: {
     "1": "0x6c45e28a76977a96e263f84f95912b47f927b687",
@@ -311,6 +315,7 @@ export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
     "34443": "0xf0773508c585246bd09bfb401aa18b72685b03f9",
     "250": "0x0000000000000000000000000000000000000000",
     "10242": "0x0000000000000000000000000000000000000000",
+    "196": "0x0000000000000000000000000000000000000000"
   },
 };
 
@@ -353,6 +358,7 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
     "81457": "0x4300000000000000000000000000000000000004",
     "84532": "0x4200000000000000000000000000000000000006",
     "10242": "0x69D349E2009Af35206EFc3937BaD6817424729F7",
+    "196": "0xe538905cf8410324e03a5a23c1c177a474d59b2b"
   },
 };
 
@@ -432,7 +438,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ThirdFySwap: "ThirdFySwap",
   LynexGamma: "LynexGamma",
   XfaiMint: "XfaiMint",
-  ThrusterV2Mint: "ThrusterV2Mint",
-  ThrusterV3Mint: "ThrusterV3Mint",
-  MaverickV2Mint: "MaverickV2Mint",
+  QuickswapSwap: "QuickswapSwap"
 };
