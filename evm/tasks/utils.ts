@@ -10,6 +10,7 @@ export enum ContractType {
   LendingBorrowing,
   Bridge,
   Perpetuals,
+  StakestoneVault,
   Others,
 }
 
@@ -41,6 +42,8 @@ const getFilePath = (contractType: ContractType): string => {
     path = "deployment/staking.json";
   if (contractType === ContractType.LendingBorrowing)
     path = "deployment/lending-borrowing.json";
+  if (contractType === ContractType.StakestoneVault)
+    path = "deployment/stake-stone-vault.json";
   if (contractType === ContractType.LP) path = "deployment/lp.json";
   if (contractType === ContractType.Perpetuals) path = "deployment/perps.json";
   if (contractType === ContractType.Others) path = "deployment/others.json";
