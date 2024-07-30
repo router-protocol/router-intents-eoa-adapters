@@ -8,7 +8,7 @@ export const STONE: { [chainId: string]: string } = {
 };
 
 export const STAKE_STONE_VAULT: { [chainId: string]: string } = {
-  "196": "0xd817DBcadC5919b2658A575aF1b395dC87B9C3a3",
+  "196": "0x57f41EfeaB626B0B529A54532Dc31f4A3A7e0f25",
 };
 
 export const WETH: { [chainId: string]: string } = {

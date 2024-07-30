@@ -3,7 +3,7 @@
     "196": [
       {
         "name": "TokenOracle",
-        "address": "0x298e2AD30BA8FFaa573814A48929c71824ebC3b9"
+        "address": "0x87a4e0abA5960912E65fBfbeFEbA62F097e757bd"
       },
       {
         "name": "FeeCalculator",
@@ -11,11 +11,11 @@
       },
       {
         "name": "StakeStoneVault",
-        "address": "0xd817DBcadC5919b2658A575aF1b395dC87B9C3a3"
+        "address": "0x57f41EfeaB626B0B529A54532Dc31f4A3A7e0f25"
       },
       {
         "name": "StakeStoneVaultAdapter",
-        "address": "0x184DeC0a555E3BDC28872f8D185969C2FCA4EaE5"
+        "address": "0xeA8fd31012991e1518Fe47f7BC7849859385Cf70"
       },
       {
         "name": "QuickswapSwap",
