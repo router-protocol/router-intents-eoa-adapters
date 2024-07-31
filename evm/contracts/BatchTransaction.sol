@@ -171,7 +171,6 @@ contract BatchTransaction is
      * @param appId Application Id
      * @param tokens Addresses of the tokens to fetch from the user
      * @param amounts amounts of the tokens to fetch from the user
-     * @param feeInfos feeInfo for the tokens
      * @param target Addresses of the contracts to call
      * @param value Amounts of native tokens to send along with the transactions
      * @param callType Type of call. 1: call, 2: delegatecall
@@ -181,7 +180,6 @@ contract BatchTransaction is
         uint256 appId,
         address[] calldata tokens,
         uint256[] calldata amounts,
-        FeeInfo[] calldata feeInfos,
         address[] calldata target,
         uint256[] calldata value,
         uint256[] calldata callType,
@@ -189,33 +187,34 @@ contract BatchTransaction is
     ) external payable nonReentrant {
         uint256 tokensLength = tokens.length;
         require(
-            tokensLength == amounts.length && tokensLength == feeInfos.length,
+            tokensLength == amounts.length,
             Errors.ARRAY_LENGTH_MISMATCH
         );
         uint256 totalValue = 0;
 
-        for (uint256 i = 0; i < tokensLength; ) {
-            totalValue += _pullTokens(tokens[i], amounts[i]);
-            tokensToRefund[msg.sender].tokens.push(tokens[i]);
+        // for (uint256 i = 0; i < tokensLength; ) {
+        //     totalValue += _pullTokens(tokens[i], amounts[i]);
+        //     tokensToRefund[msg.sender].tokens.push(tokens[i]);
 
-            if (feeInfos[i].fee != 0) {
-                if (feeInfos[i].fee > (amounts[i] * 500) / 10000)
-                    revert(IntentErrors.FEE_EXCEEDS_MAX_BIPS);
+        //     if (feeInfos[i].fee != 0) {
+        //         if (feeInfos[i].fee > (amounts[i] * 500) / 10000)
+        //             revert(IntentErrors.FEE_EXCEEDS_MAX_BIPS);
 
-                if (feeInfos[i].recipient == address(0))
-                    revert(IntentErrors.FEE_RECIPIENT_CANNOT_BE_ZERO_ADDRESS);
+        //         if (feeInfos[i].recipient == address(0))
+        //             revert(IntentErrors.FEE_RECIPIENT_CANNOT_BE_ZERO_ADDRESS);
 
-                withdrawTokens(
-                    tokens[i],
-                    feeInfos[i].recipient,
-                    uint256(feeInfos[i].fee)
-                );
-            }
+        //         withdrawTokens(
+        //             tokens[i],
+        //             feeInfos[i].recipient,
+        //             uint256(feeInfos[i].fee)
+        //         );
+        //     }
 
-            unchecked {
-                ++i;
-            }
-        }
+        //     unchecked {
+        //         ++i;
+        //     }
+        // }
+        //add fee
 
         require(
             msg.value >= totalValue,
