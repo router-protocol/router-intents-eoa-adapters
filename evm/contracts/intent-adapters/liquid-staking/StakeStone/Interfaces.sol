@@ -19,3 +19,7 @@ interface ILzOft {
         bytes calldata _adapterParams
     ) external payable;
 }
+
+interface IStakeStoneVault {
+    function deposit(uint256 _amount, address _receiver) external returns(uint256 stoneAmount);
+}

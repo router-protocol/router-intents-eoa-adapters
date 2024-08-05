@@ -30,6 +30,12 @@
         "address": "0x184DeC0a555E3BDC28872f8D185969C2FCA4EaE5"
       }
     ],
+    "196": [
+      {
+        "name": "QuickswapSwap",
+        "address": "0x710b200D4109B2fe9Aa6D13da6A3539ce1CFD39D"
+      }
+    ],
     "324": [
       {
         "name": "DexSpanAdapter",

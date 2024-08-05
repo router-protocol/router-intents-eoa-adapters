@@ -258,6 +258,14 @@ const config: HardhatUserConfig = {
           : [""],
       chainId: 10242,
     },
+    xlayer: {
+      url: process.env.XLAYER_URL || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
+          : [""],
+      chainId: 196,
+    },
     zkevm: {
       url: process.env.ZKEVM_MAINNET_URL || "https://zkevm-rpc.com",
       chainId: 1101,
@@ -421,6 +429,7 @@ const config: HardhatUserConfig = {
       zkSync: "UWXM66JSY25DSV1NQQBB5J3ZX6H4AA56NN",
       blast: process.env.BLASTSCAN_API_KEY || "",
       arthera: process.env.ETHERSCAN_API_KEY || "",
+      xlayer: process.env.ETHERSCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -519,6 +528,14 @@ const config: HardhatUserConfig = {
           browserURL: "https://explorer.arthera.net/",
         },
       },
+      {
+        network: "xlayer",
+        chainId: 196,
+        urls: {
+            apiURL: "https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER",
+            browserURL: "https://www.oklink.com/xlayer",
+        }
+    }
     ],
   },
 };
