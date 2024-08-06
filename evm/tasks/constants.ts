@@ -216,6 +216,12 @@ export const DEPLOY_QUICKSWAP_SWAP_ADAPTER = "DEPLOY_QUICKSWAP_SWAP_ADAPTER";
 export const VERIFY_QUICKSWAP_SWAP_ADAPTER = "VERIFY_QUICKSWAP_SWAP_ADAPTER";
 export const DEPLOY_STAKESTONE_VAULT_ADAPTER = "DEPLOY_STAKESTONE_VAULT_ADAPTER";
 export const VERIFY_STAKESTONE_VAULT_ADAPTER = "VERIFY_STAKESTONE_VAULT_ADAPTER";
+export const DEPLOY_STAKESTONE_VAULT = "DEPLOY_STAKESTONE_VAULT";
+export const VERIFY_STAKESTONE_VAULT = "VERIFY_STAKESTONE_VAULT";
+export const DEPLOY_FEE_CALCULATOR = "DEPLOY_FEE_CALCULATOR";
+export const VERIFY_FEE_CALCULATOR = "VERIFY_FEE_CALCULATOR";
+export const DEPLOY_TOKEN_ORACLE = "DEPLOY_TOKEN_ORACLE";
+export const VERIFY_TOKEN_ORACLE = "VERIFY_TOKEN_ORACLE";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -445,5 +451,8 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   XfaiMint: "XfaiMint",
   QuickswapSwap: "QuickswapSwap",
   StakeStoneVaultAdapter: "StakeStoneVaultAdapter",
+  TokenOracle: "TokenOracle",
+  FeeCalculator: "FeeCalculator",
+  StakeStoneVault: "StakeStoneVault",
   NitroAdapterXLayer: "NitroAdapterXLayer"
 };
