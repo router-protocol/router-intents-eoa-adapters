@@ -5,51 +5,110 @@ import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvide
 import {Errors} from "../../Errors.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+contract FeeDataStore is Ownable {
+    uint256 public batchHandlerFeeInBps;
+    mapping(uint256 => address) public feeWalletWhitelist;
+    address public _feeWallet;
+
+    uint256 public MAX_BEPS;
+
+    constructor(
+        address _owner,
+        uint16 __batchHandlerFee,
+        address __feeWallet
+    ) {
+        _transferOwnership(_owner);
+        batchHandlerFeeInBps = __batchHandlerFee;
+        _feeWallet = __feeWallet;
+        MAX_BEPS = 500;
+    }
+
+    /**
+     * @notice function to update fee wallet for partner.
+     * @param appIds Array of appIds for partner.
+     * @param feeWallets Array of Addresses of the partner fee wallet.
+     */
+    function updateFeeWalletForAppId(
+        uint256[] memory appIds,
+        address[] memory feeWallets
+    ) external onlyOwner {
+        uint256 len = feeWallets.length;
+
+        require(len != 0 && len == appIds.length, Errors.ARRAY_LENGTH_MISMATCH);
+
+        for (uint i = 0; i < len; ) {
+            feeWalletWhitelist[appIds[i]] = feeWallets[i];
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /**
+     * @notice function to check whether an adapter is whitelisted.
+     * @param appId appId of partner.
+     */
+    function isAppIdFeeWalletWhitelisted(
+        uint256 appId,
+        address feeWallet
+    ) public view returns (bool) {
+        return feeWalletWhitelist[appId] == feeWallet;
+    }
+
+    /**
+     * @notice function to set batch handler fee in bps.
+     * @param _batchHandlerFeeInBps Fee to be charged in bps
+     */
+    function setBatchHandlerFeeInBps(
+        uint256 _batchHandlerFeeInBps
+    ) external onlyOwner {
+        batchHandlerFeeInBps = _batchHandlerFeeInBps;
+    }
+
+    /**
+     * @notice function to set Fee wallet.
+     * @param feeWallet Fee address to update
+     */
+    function setFeeWallet(address feeWallet) external onlyOwner{
+        _feeWallet = feeWallet;
+    }
+    /**
+     * @notice function to set Fee wallet.
+     * @param _max_beps Fee address to update
+     */
+    function setMaxBeps(uint256 _max_beps) external onlyOwner{
+        MAX_BEPS = _max_beps;
+    }
+}
+
 /**
  * @title FeeAdapter
  * @author Ateet Tiwari
  * @notice Adapter for Fee Deductions
  */
-contract FeeAdapter is RouterIntentEoaAdapterWithoutDataProvider, AccessControl {
+contract FeeAdapter is
+    RouterIntentEoaAdapterWithoutDataProvider,
+    AccessControl
+{
     using SafeERC20 for IERC20;
 
-    address public feeWallet;
-    address public batchHandler;
-    uint256 private batchHandlerFeeInBeps;
-    mapping(uint256 => address) private feeWalletWhitelist;
-
-    bytes32 public constant SETTER_ROLE = keccak256("SETTER_ROLE");
+    FeeDataStore public immutable feeDataStore;
 
     constructor(
         address __native,
         address __wnative,
         address __feeWallet,
-        uint16 __batchHandlerFee,
-        address __batchHandler
+        uint16 __batchHandlerFee
     )
         RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative)
     // solhint-disable-next-line no-empty-blocks
     {
-        feeWallet = __feeWallet;
-        batchHandlerFeeInBeps = __batchHandlerFee;
-        batchHandler = __batchHandler;
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(SETTER_ROLE, msg.sender);
-
-    }
-
-     /**
-     * @notice modifier to ensure that only Batch Handler can call fees handler function
-     */
-    modifier onlyBatchHandler() {
-        _onlyBatchHandler();
-        _;
-    }
-
-    function _onlyBatchHandler() private view {
-        require(
-            msg.sender == batchHandler,
-            "Only Batch Handler calls allowed"
+        feeDataStore = new FeeDataStore(
+            msg.sender,
+            __batchHandlerFee,
+            __feeWallet
         );
     }
 
@@ -62,101 +121,60 @@ contract FeeAdapter is RouterIntentEoaAdapterWithoutDataProvider, AccessControl 
      */
     function execute(
         bytes calldata data
-    ) external payable override onlyBatchHandler returns (address[] memory tokens) {
-        (uint256[] memory _appId, uint96[] memory _fee, address[] memory _tokens, uint256[] memory _amounts, bool _isActive) = parseInputs(
-            data
-        );
+    ) external payable override returns (address[] memory tokens) {
+        (
+            uint256[] memory _appId,
+            uint96[] memory _fee,
+            address[] memory _tokens,
+            uint256[] memory _amounts,
+            bool _isActive
+        ) = parseInputs(data);
+
         uint256 appIdLength = _appId.length;
+        uint256 tokenLength = _tokens.length;        
+        require(appIdLength == _fee.length, Errors.ARRAY_LENGTH_MISMATCH);
+        require(tokenLength == _amounts.length, Errors.ARRAY_LENGTH_MISMATCH);
 
-        require(
-            appIdLength == _fee.length,
-            Errors.ARRAY_LENGTH_MISMATCH
-        );
-
-        require(
-            _tokens.length == _amounts.length,
-            Errors.ARRAY_LENGTH_MISMATCH
-        );
-
-        uint256 tokenLength = _tokens.length;
-       
-        for(uint256 x = 0; x < tokenLength; )
-        {
-             if(_isActive)
-            {
-                uint256 fee = (_amounts[x]*batchHandlerFeeInBeps)/10000;
-                if (fee > (_amounts[x] * 500) / 10000)
+        for (uint256 x = 0; x < tokenLength; ) {
+            if (_isActive) {
+                uint256 fee = (_amounts[x] *
+                    feeDataStore.batchHandlerFeeInBps()) / 10000;
+                if (fee > (_amounts[x] * feeDataStore.MAX_BEPS()) / 10000) {
                     revert(Errors.FEE_EXCEEDS_MAX_BIPS);
-                withdrawTokens(
-                        _tokens[x],
-                        feeWallet,
-                        uint256(fee)
-                    );
+                }// vatsal wallet
+                withdrawTokens(_tokens[x], feeDataStore._feeWallet(), fee);
             }
+
             for (uint256 i = 0; i < appIdLength; ) {
-            uint256 appId = _appId[i];
-            if (feeWalletWhitelist[appId] != address(0)) {
-                if (_fee[i] > (_amounts[x] * 500) / 10000)
-                    revert(Errors.FEE_EXCEEDS_MAX_BIPS);
-                withdrawTokens(
-                    _tokens[x],
-                    feeWalletWhitelist[appId],
-                    uint256(_fee[i])
+                uint256 appId = _appId[i];
+                address feeWalletForApp = feeDataStore.feeWalletWhitelist(
+                    appId
                 );
-            }
-            else
-            {
-                revert("Fee Params not present for appId");
-            }
 
-            unchecked {
-                ++i;
+                if (feeWalletForApp != address(0)) {
+                    if (_fee[i] > (_amounts[x] * feeDataStore.MAX_BEPS()) / 10000) {
+                        revert(Errors.FEE_EXCEEDS_MAX_BIPS);
+                    }
+                    withdrawTokens(
+                        _tokens[x],
+                        feeWalletForApp,
+                        uint256(_fee[i])
+                    );
+                } else {
+                    revert("Fee Params not present for appId");
+                }
+
+                unchecked {
+                    ++i;
+                }
             }
-        }
 
             unchecked {
                 ++x;
             }
-
         }
 
         return _tokens;
-    }
-
-    /**
-     * @notice function to check whether an adapter is whitelisted.
-     * @param appId appId of partner.
-     */
-    function isAppIdFeeWalletWhitelisted(uint256 appId, address feeWallet) public view returns (bool) {
-        require(feeWalletWhitelist[appId] == feeWallet, "fee wallet not correct for app id");
-    }
-
-    /**
-     * @notice function to check whether an adapter is whitelisted.
-     * @param appId appId of partner.
-     */
-    function AppIdInfo(uint256 appId) public view returns (address) {
-        return feeWalletWhitelist[appId];
-    }
-
-    /**
-     * @notice function to update fee wallet for partner.
-     * @param appId appId for partner.
-     * @param feeWallet Addresses of the partner fee wallet.
-     */
-    function updateFeeWalletForAppId(
-        uint256 appId,
-        address feeWallet
-    ) external onlyRole(SETTER_ROLE) {
-        feeWalletWhitelist[appId] = feeWallet;
-    }
-
-    /**
-     * @notice function to set batch handler address.
-     * @param __batchHandler Address of the batchhandler currently deployed.
-     */
-    function setBatchHandler(address __batchHandler) external onlyRole(SETTER_ROLE) {
-        batchHandler = __batchHandler;
     }
 
     /**
@@ -165,8 +183,18 @@ contract FeeAdapter is RouterIntentEoaAdapterWithoutDataProvider, AccessControl 
      */
     function parseInputs(
         bytes memory data
-    ) public pure returns (uint256[] memory, uint96[] memory, address[] memory, uint256[] memory, bool) {
-        return abi.decode(data, (uint256[], uint96[], address[], uint256[], bool));
+    )
+        public
+        pure
+        returns (
+            uint256[] memory,
+            uint96[] memory,
+            address[] memory,
+            uint256[] memory,
+            bool
+        )
+    {
+        return
+            abi.decode(data, (uint256[], uint96[], address[], uint256[], bool));
     }
-
 }
