@@ -62,8 +62,8 @@ describe("Fee Adapter: ", async () => {
       [true, true]
     );
     await feeAdapter.updateFeeWalletForAppId(
-      1,
-      "0xBec33ce33afdAF5604CCDF2c4b575238C5FBD23d"
+      [1],
+      ["0xBec33ce33afdAF5604CCDF2c4b575238C5FBD23d"]
     );
     return {
       batchTransaction: BatchTransaction__factory.connect(
