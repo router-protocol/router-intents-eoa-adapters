@@ -147,7 +147,12 @@ contract FeeAdapter is
 
             for (uint256 i = 0; i < appIdLength; ) {
                 uint256 appId = _appId[i];
-                address feeWalletForApp = feeDataStore.feeWalletWhitelist(
+                if(appId == 0)
+                {
+                    continue;
+                }
+                else {
+                    address feeWalletForApp = feeDataStore.feeWalletWhitelist(
                     appId
                 );
 
@@ -166,6 +171,7 @@ contract FeeAdapter is
 
                 unchecked {
                     ++i;
+                }   
                 }
             }
 

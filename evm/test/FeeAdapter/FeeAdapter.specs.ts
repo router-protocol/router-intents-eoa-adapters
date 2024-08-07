@@ -94,7 +94,7 @@ describe("Fee Adapter: ", async () => {
   });
 
   it("Deduct fee in normal flow when batch handler fee is deducted, swap from ETH to USDT", async () => {
-    const { batchTransaction, dexSpanAdapter, wnative, usdt } =
+    const { batchTransaction, dexSpanAdapter, wnative, usdt, feeAdapter } =
       await setupTests();
 
     const amount = ethers.utils.parseEther("1").toString();
