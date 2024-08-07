@@ -1,7 +1,7 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE } from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE,FEE_WALLET } from "../../tasks/constants";
 import { SharedStakeEth__factory } from "../../typechain/factories/SharedStakeEth__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
@@ -9,6 +9,7 @@ import { BatchTransaction__factory } from "../../typechain/factories/BatchTransa
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 import { zeroAddress } from "ethereumjs-util";
+import { ChainId } from "@uniswap/sdk-core";
 
 const CHAIN_ID = "1";
 const SHARED_STAKE_WSGETH = "0x31AA035313b1D2109e61Ee0E3662A86A8615fF1d";
@@ -36,6 +37,7 @@ describe("SharedStakeEth Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -110,7 +112,7 @@ describe("SharedStakeEth Adapter: ", async () => {
     const data = [sharedStakeData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const wsgEthBalBefore = await wsgEth.balanceOf(deployer.address);
@@ -119,7 +121,7 @@ describe("SharedStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

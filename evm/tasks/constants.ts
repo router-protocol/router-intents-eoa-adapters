@@ -358,6 +358,8 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
   },
 };
 
+export const FEE_WALLET: "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee";
+
 export const CONTRACT_NAME: { [key: string]: string } = {
   BatchTransaction: "BatchTransaction",
   LidoStakeEth: "LidoStakeEth",

@@ -33,10 +33,11 @@ describe("AnkrStakeEth Adapter: ", async () => {
     );
 
     const batchTransaction = await BatchTransaction.deploy(
-      NATIVE,
+      NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -123,7 +124,7 @@ describe("AnkrStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

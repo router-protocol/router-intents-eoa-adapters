@@ -149,10 +149,10 @@ describe("XfaiMint Adapter: ", async () => {
       mintParams.amountETHDesired,
       mintParams.amountTokenDesired,
     ];
-    const feeInfo = [
-      { fee: 0, recipient: zeroAddress() },
-      { fee: 0, recipient: zeroAddress() },
-    ];
+    // const feeInfo = [
+    //   { fee: 0, recipient: zeroAddress() },
+    //   { fee: 0, recipient: zeroAddress() },
+    // ];
 
     await usdc.approve(batchTransaction.address, mintParams.amountTokenDesired);
 
@@ -162,7 +162,7 @@ describe("XfaiMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       [xfaiMintPositionAdapter.address],
       [0],
       [2],

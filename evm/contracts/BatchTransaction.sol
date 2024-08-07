@@ -197,7 +197,9 @@ contract BatchTransaction is
         );
         uint256 totalValue = 0;
 //add fee
-        _execute(
+        if(_feeAdapter != address(0))
+        {
+            _execute(
                 msg.sender,
                 _feeAdapter,
                 address(0),
@@ -205,8 +207,8 @@ contract BatchTransaction is
                 value[0],
                 callType[0],
                 feeData
-        );
-
+            );
+        }
         require(
             msg.value >= totalValue,
             Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED

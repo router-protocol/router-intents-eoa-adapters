@@ -32,16 +32,25 @@ describe("AerodromeMint Adapter: ", async () => {
     );
     const mockAssetForwarder = await MockAssetForwarder.deploy();
 
+    const FeeAdapter = await ethers.getContractFactory("FeeAdapter");
+    const feeAdapter = await FeeAdapter.deploy(
+      NATIVE_TOKEN,
+      WNATIVE_TOKEN,
+      FEE_WALLET,
+      5
+    );
+
     const BatchTransaction = await ethers.getContractFactory(
       "BatchTransaction"
     );
 
     const batchTransaction = await BatchTransaction.deploy(
       NATIVE_TOKEN,
-      WNATIVE,
+      WNATIVE_TOKEN,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      zeroAddress()
+      zeroAddress(),
+      feeAdapter.address
     );
 
     const AerodromeMintPositionAdapter = await ethers.getContractFactory(

@@ -107,6 +107,7 @@ describe("ThirdFyMint Adapter: ", async () => {
       WNATIVE,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -225,7 +226,7 @@ describe("ThirdFyMint Adapter: ", async () => {
     expect(lessBal).gt(0);
 
     const user = deployer;
-    const chainId = CHAIN_ID;
+    // const chainId = CHAIN_ID;
     const token0 = usdt.address;
     const token1 = less.address;
     const amount0 = usdtBal.div(2).toString();
@@ -268,7 +269,7 @@ describe("ThirdFyMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       [thirdFyMintPositionAdapter.address],
       [0],
       [2],

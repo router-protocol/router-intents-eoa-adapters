@@ -49,6 +49,7 @@ describe("PenpieStakePendle Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -151,7 +152,7 @@ describe("PenpieStakePendle Adapter: ", async () => {
     const data = [penpieData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await pendle.approve(batchTransaction.address, pendleBalance);
 
@@ -164,7 +165,7 @@ describe("PenpieStakePendle Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

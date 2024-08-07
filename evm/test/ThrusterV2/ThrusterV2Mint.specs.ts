@@ -59,6 +59,7 @@ describe("ThrusterV2Mint Adapter: ", async () => {
       WNATIVE,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -173,10 +174,10 @@ describe("ThrusterV2Mint Adapter: ", async () => {
 
     const tokens = [mintParams.tokenA, mintParams.tokenB];
     const amounts = [mintParams.amountADesired, mintParams.amountBDesired];
-    const feeInfo = [
-      { fee: 0, recipient: zeroAddress() },
-      { fee: 0, recipient: zeroAddress() },
-    ];
+    // const feeInfo = [
+    //   { fee: 0, recipient: zeroAddress() },
+    //   { fee: 0, recipient: zeroAddress() },
+    // ];
 
     await wnative.approve(batchTransaction.address, wnativeBal);
     await usdb.approve(batchTransaction.address, usdbBal);
@@ -188,7 +189,7 @@ describe("ThrusterV2Mint Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       [thrusterV2MintAdapter.address],
       [0],
       [2],
@@ -253,10 +254,10 @@ describe("ThrusterV2Mint Adapter: ", async () => {
 
     const tokens = [mintParams.tokenA, mintParams.tokenB];
     const amounts = [mintParams.amountADesired, mintParams.amountBDesired];
-    const feeInfo = [
-      { fee: 0, recipient: zeroAddress() },
-      { fee: 0, recipient: zeroAddress() },
-    ];
+    // const feeInfo = [
+    //   { fee: 0, recipient: zeroAddress() },
+    //   { fee: 0, recipient: zeroAddress() },
+    // ];
 
     await wnative.approve(batchTransaction.address, wnativeBal);
     await pacMoon.approve(batchTransaction.address, pacMoonBal);
@@ -268,7 +269,7 @@ describe("ThrusterV2Mint Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       [thrusterV2MintAdapter.address],
       [0],
       [2],
