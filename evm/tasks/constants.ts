@@ -210,6 +210,8 @@ export const DEPLOY_LYNEX_GAMMA_ADAPTER = "DEPLOY_LYNEX_GAMMA_ADAPTER";
 export const VERIFY_LYNEX_GAMMA_ADAPTER = "VERIFY_LYNEX_GAMMA_ADAPTER";
 export const DEPLOY_XFAI_MINT_ADAPTER = "DEPLOY_XFAI_MINT_ADAPTER";
 export const VERIFY_XFAI_MINT_ADAPTER = "VERIFY_XFAI_MINT_ADAPTER";
+export const DEPLOY_FEE_ADAPTER = "DEPLOY_FEE_ADAPTER";
+export const VERIFY_FEE_ADAPTER = "VERIFY_FEE_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -432,7 +434,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ThirdFySwap: "ThirdFySwap",
   LynexGamma: "LynexGamma",
   XfaiMint: "XfaiMint",
-  ThrusterV2Mint: "ThrusterV2Mint",
-  ThrusterV3Mint: "ThrusterV3Mint",
-  MaverickV2Mint: "MaverickV2Mint",
+  FeeAdapter: "FeeAdapter"
 };
