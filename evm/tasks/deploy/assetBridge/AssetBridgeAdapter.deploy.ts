@@ -16,8 +16,8 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { AssetBridgeAdapter__factory } from "../../../typechain/factories/AssetBridgeAdapter__factory";
-import { AssetBridgeDataStore__factory } from "../../../typechain/factories/AssetBridgeDataStore__factory";
+// import { AssetBridgeAdapter__factory } from "../../../typechain/factories/AssetBridgeAdapter__factory";
+// import { AssetBridgeDataStore__factory } from "../../../typechain/factories/AssetBridgeDataStore__factory";
 
 const contractName: string = CONTRACT_NAME.AssetBridgeAdapter;
 const contractType = ContractType.Bridge;
@@ -77,18 +77,15 @@ task(VERIFY_ASSET_BRIDGE_ADAPTER).setAction(async function (
     }
   }
 
-  const assetBridgeAdapter = AssetBridgeAdapter__factory.connect(
-    address!,
-    _hre.ethers.provider
-  );
+  const assetBridgeAdapterContract = await _hre.ethers.getContractFactory("AssetBridgeAdapter");
+  const assetBridgeAdapter = await assetBridgeAdapterContract.attach(address!);
   const dataStore = await assetBridgeAdapter.assetBridgeDataStore();
-  const assetBridgeDataStore = AssetBridgeDataStore__factory.connect(
-    dataStore,
-    _hre.ethers.provider
-  );
+
+  const assetBridgeDataStoreContract = await _hre.ethers.getContractFactory("AssetBridgeDataStore");
+  const assetBridgeDataStore = await assetBridgeDataStoreContract.attach(dataStore);
   const owner = await assetBridgeDataStore.owner();
 
-  console.log(`Verifying ${contractName} Contract....`);
+console.log(`Verifying ${contractName} Contract....`);
 
   await _hre.run("verify:verify", {
     address: dataStore,

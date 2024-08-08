@@ -16,8 +16,8 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { DexSpanAdapter__factory } from "../../../typechain/factories/DexSpanAdapter__factory";
-import { DexSpanDataStore__factory } from "../../../typechain/factories/DexSpanDataStore__factory";
+// import { DexSpanAdapter__factory } from "../../../typechain/factories/DexSpanAdapter__factory";
+// import { DexSpanDataStore__factory } from "../../../typechain/factories/DexSpanDataStore__factory";
 
 const contractName: string = CONTRACT_NAME.DexSpanAdapter;
 const contractType = ContractType.Swap;
@@ -77,15 +77,13 @@ task(VERIFY_DEXSPAN_ADAPTER).setAction(async function (
     }
   }
 
-  const dexspanAdapter = DexSpanAdapter__factory.connect(
-    address!,
-    _hre.ethers.provider
+  const dexspanAdapterContract = await _hre.ethers.getContractFactory("DexSpanAdapter");
+  const dexspanAdapter = await dexspanAdapterContract.attach(
+    address!
   );
   const dataStore = await dexspanAdapter.dexSpanDataStore();
-  const dexspanDataStore = DexSpanDataStore__factory.connect(
-    dataStore,
-    _hre.ethers.provider
-  );
+  const dexSpanStoreAdaptorContract = await _hre.ethers.getContractFactory("DexSpanDataStore");
+  const dexspanDataStore = await dexSpanStoreAdaptorContract.attach(dataStore);
   const owner = await dexspanDataStore.owner();
 
   console.log(`Verifying ${contractName} Contract....`);

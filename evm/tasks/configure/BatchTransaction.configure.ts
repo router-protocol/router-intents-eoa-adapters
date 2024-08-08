@@ -11,7 +11,7 @@ import {
   DEFAULT_ENV,
   SET_ADAPTERS_ON_BATCH_TX,
 } from "../constants";
-import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
+// import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 
 const contractName = CONTRACT_NAME.BatchTransaction;
 
@@ -30,10 +30,10 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
 
   const deployment = getDeployments(ContractType.None) as IDeployment;
 
-  const instance = BatchTransaction__factory.connect(
-    deployment[env][network][contractName],
-    _hre.ethers.provider.getSigner()
-  );
+const batchTransactionContract = await _hre.ethers.getContractFactory("BatchTransaction");
+
+  const instance = await batchTransactionContract.attach(
+    deployment[env][network][contractName]);
 
   const adapters = [];
   const shouldWhitelist = [];

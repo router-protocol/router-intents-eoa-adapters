@@ -17,8 +17,8 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { NitroAdapter__factory } from "../../../typechain/factories/NitroAdapter__factory";
-import { NitroDataStore__factory } from "../../../typechain/factories/NitroDataStore__factory";
+// import { NitroAdapter__factory } from "../../../typechain/factories/NitroAdapter__factory";
+// import { NitroDataStore__factory } from "../../../typechain/factories/NitroDataStore__factory";
 
 const contractName: string = CONTRACT_NAME.NitroAdapter;
 const contractType = ContractType.Bridge;
@@ -79,16 +79,14 @@ task(VERIFY_NITRO_ADAPTER).setAction(async function (
       break;
     }
   }
+const nitroAdapterContract = await _hre.ethers.getContractFactory("NitroAdapter");
 
-  const nitroAdapter = NitroAdapter__factory.connect(
-    address!,
-    _hre.ethers.provider
-  );
+  const nitroAdapter = nitroAdapterContract.attach(address!);
   const dataStore = await nitroAdapter.nitroDataStore();
-  const nitroDataStore = NitroDataStore__factory.connect(
-    dataStore,
-    _hre.ethers.provider
-  );
+
+  const nitroDataStoreContract = await _hre.ethers.getContractFactory("NitroDataStore");
+
+  const nitroDataStore = nitroDataStoreContract.attach(dataStore);
   const owner = await nitroDataStore.owner();
 
   console.log(`Verifying ${contractName} Contract....`);

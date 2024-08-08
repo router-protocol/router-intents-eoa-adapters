@@ -17,8 +17,8 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { NitroAdapterXLayer__factory } from "../../../typechain/factories/NitroAdapterXLayer__factory";
-import { NitroDataStore__factory } from "../../../typechain/factories/NitroDataStore__factory";
+// import { NitroAdapterXLayer__factory } from "../../../typechain/factories/NitroAdapterXLayer__factory";
+// import { NitroDataStore__factory } from "../../../typechain/factories/NitroDataStore__factory";
 
 const contractName: string = CONTRACT_NAME.NitroAdapterXLayer;
 const contractType = ContractType.Bridge;
@@ -35,7 +35,7 @@ task(DEPLOY_NITRO_XLAYER_ADAPTER)
     const network = await _hre.getChainId();
 
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
-    const factory = await _hre.ethers.getContractFactory(contractName); 
+    const factory = await _hre.ethers.getContractFactory(contractName);
 
     const instance = await factory.deploy(
       NATIVE,
@@ -43,7 +43,7 @@ task(DEPLOY_NITRO_XLAYER_ADAPTER)
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network]
     );
-    
+
     await instance.deployed();
 
     const deployment = await recordAllDeployments(
@@ -81,15 +81,16 @@ task(VERIFY_NITRO_XLAYER_ADAPTER).setAction(async function (
     }
   }
 
-  const nitroAdapter = NitroAdapterXLayer__factory.connect(
-    address!,
-    _hre.ethers.provider
+  const nitroAdapterXLayerContract = await _hre.ethers.getContractFactory(
+    "NitroAdapterXLayer"
   );
+  const nitroAdapter = nitroAdapterXLayerContract.attach(address!);
   const dataStore = await nitroAdapter.nitroDataStore();
-  const nitroDataStore = NitroDataStore__factory.connect(
-    dataStore,
-    _hre.ethers.provider
-  );
+
+const nitroDataStoreContract = await _hre.ethers.getContractFactory("NitroDataStore");
+
+  const nitroDataStore = nitroDataStoreContract.attach(
+    dataStore);
   const owner = await nitroDataStore.owner();
 
   console.log(`Verifying ${contractName} Contract....`);
@@ -101,7 +102,8 @@ task(VERIFY_NITRO_XLAYER_ADAPTER).setAction(async function (
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
     ],
-    contract: "contracts/intent-adapters/bridge/NitroAdapterXLayer.sol:NitroDataStore"
+    contract:
+      "contracts/intent-adapters/bridge/NitroAdapterXLayer.sol:NitroDataStore",
   });
 
   console.log(`Verifying ${contractName} Contract....`);

@@ -34,7 +34,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const config: HardhatUserConfig = {
   paths: {
-    artifacts: "artifacts",
+    artifacts: "./artifacts",
     cache: "cache",
     deploy: "src/deploy",
     sources: "contracts",
@@ -537,7 +537,7 @@ const config: HardhatUserConfig = {
         }
     }
     ],
-  },
+  }
 };
 
 export default config;
