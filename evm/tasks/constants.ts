@@ -268,7 +268,7 @@ export const ASSET_BRIDGE: {
   [network: string]: { [chainId: string]: string };
 } = {
   mainnet: {
-    "1": "0xf9f4c3dc7ba8f56737a92d74fd67230c38af51f2",
+    "1": "0xd87Fff92728792F6dFFA5A915Bd4F7BE1A5bb45E",
     "10": "0x21c1E74CAaDf990E237920d5515955a024031109",
     "250": "0x0000000000000000000000000000000000000000",
     "534352": "0x21c1E74CAaDf990E237920d5515955a024031109",
