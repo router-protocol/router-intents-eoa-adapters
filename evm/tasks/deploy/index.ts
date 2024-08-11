@@ -48,6 +48,7 @@ import "./assetBridge";
 import "./thrusterV2";
 import "./thrusterV3";
 import "./maverickV2";
-import "./stakestoneVault"
+import "./stakestoneVault";
+import "./nuri";
 
 import "./BatchTransaction.deploy";
