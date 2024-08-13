@@ -227,7 +227,7 @@ const config: HardhatUserConfig = {
       chainId: 59144,
     },
     scroll: {
-      url: "https://1rpc.io/scroll",
+      url: "https://scroll-mainnet.rpc.grove.city/v1/a7a7c8e2",
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]

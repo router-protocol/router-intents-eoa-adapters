@@ -67,6 +67,12 @@
         "name": "ThrusterV3Mint",
         "address": "0xe2f77e7B44C02BE634ef5f318c9359571074186C"
       }
+    ],
+    "534352": [
+      {
+        "name": "NuriMint",
+        "address": "0x4D9733ca83610E1343Ed2581d1779f294638BB33"
+      }
     ]
   }
 }
