@@ -49,5 +49,7 @@ import "./thrusterV2";
 import "./thrusterV3";
 import "./maverickV2";
 import "./feeAdapter";
+import "./stakestoneVault";
+import "./nuri";
 
 import "./BatchTransaction.deploy";

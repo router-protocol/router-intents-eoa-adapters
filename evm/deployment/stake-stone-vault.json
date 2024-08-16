@@ -1,0 +1,26 @@
+{
+  "mainnet": {
+    "196": [
+      {
+        "name": "TokenOracle",
+        "address": "0x87a4e0abA5960912E65fBfbeFEbA62F097e757bd"
+      },
+      {
+        "name": "FeeCalculator",
+        "address": "0xe2f77e7B44C02BE634ef5f318c9359571074186C"
+      },
+      {
+        "name": "StakeStoneVault",
+        "address": "0x57f41EfeaB626B0B529A54532Dc31f4A3A7e0f25"
+      },
+      {
+        "name": "StakeStoneVaultAdapter",
+        "address": "0xeA8fd31012991e1518Fe47f7BC7849859385Cf70"
+      },
+      {
+        "name": "QuickswapSwap",
+        "address": "0x710b200D4109B2fe9Aa6D13da6A3539ce1CFD39D"
+      }
+    ]
+  }
+}
