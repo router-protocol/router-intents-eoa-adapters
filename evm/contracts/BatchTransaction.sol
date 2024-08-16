@@ -197,6 +197,15 @@ contract BatchTransaction is
         );
         uint256 totalValue = 0;
 //add fee
+
+        for (uint256 i = 0; i < tokensLength; ) {
+            totalValue += _pullTokens(tokens[i], amounts[i]);
+            tokensToRefund[msg.sender].tokens.push(tokens[i]);
+            unchecked {
+                ++i;
+            }
+        }
+
         if(_feeAdapter != address(0))
         {
             _execute(
@@ -204,8 +213,8 @@ contract BatchTransaction is
                 _feeAdapter,
                 address(0),
                 address(0),
-                value[0],
-                callType[0],
+                0,
+                2,
                 feeData
             );
         }
