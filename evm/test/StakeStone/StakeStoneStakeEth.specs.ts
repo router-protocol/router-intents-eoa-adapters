@@ -119,16 +119,19 @@ describe("StakeStoneStakeEth Adapter: ", async () => {
     const data = [stakeStoneData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
-
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const stoneBalBefore = await stone.balanceOf(deployer.address);
 
+    const fee = ["0"];
+    const feeData = defaultAbiCoder.encode(
+      ["uint256[]", "uint96[]", "address[]", "uint256[]", "bool"],
+      [0, fee, tokens, amounts, false]
+    );
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
-      feeInfo,
+      feeData,
       targets,
       value,
       callType,
@@ -177,17 +180,20 @@ describe("StakeStoneStakeEth Adapter: ", async () => {
     const data = [stakeStoneData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const stoneBalBefore = await stone.balanceOf(deployer.address);
     const stoneBalStoneBefore = await stone.balanceOf(stone.address);
 
+    const feeData = defaultAbiCoder.encode(
+      ["uint256[]", "uint96[]", "address[]", "uint256[]", "bool"],
+      [0, fee, tokens, amounts, false]
+    );
     await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
-      feeInfo,
+      feeData,
       targets,
       value,
       callType,
@@ -214,8 +220,6 @@ describe("StakeStoneStakeEth Adapter: ", async () => {
 
     const amount = "100000000000000000";
     const dstEid = "0";
-    const nativeFee = "0";
-    const refundAddress = deployer.address;
     const crossChainData = "0x";
 
     const targets = [stakeStoneStakeEthAdapter.address];
