@@ -131,7 +131,7 @@ contract FeeAdapter is
         ) = parseInputs(data);
 
         uint256 appIdLength = _appId.length;
-        uint256 tokenLength = _tokens.length;        
+        uint256 tokenLength = _tokens.length;      
         require(appIdLength == _fee.length, Errors.ARRAY_LENGTH_MISMATCH);
         require(tokenLength == _amounts.length, Errors.ARRAY_LENGTH_MISMATCH);
 
@@ -141,37 +141,39 @@ contract FeeAdapter is
                     feeDataStore.batchHandlerFeeInBps()) / 10000;
                 if (fee > (_amounts[x] * feeDataStore.MAX_BEPS()) / 10000) {
                     revert(Errors.FEE_EXCEEDS_MAX_BIPS);
-                }// vatsal wallet
-                withdrawTokens(_tokens[x], feeDataStore._feeWallet(), fee);
+                }
+                withdrawTokens(_tokens[x], feeDataStore._feeWallet(), uint256(fee));
             }
 
             for (uint256 i = 0; i < appIdLength; ) {
                 uint256 appId = _appId[i];
                 if(appId == 0)
                 {
+                    unchecked {
+                        ++i;
+                    }   
                     continue;
                 }
                 else {
                     address feeWalletForApp = feeDataStore.feeWalletWhitelist(
-                    appId
-                );
+                    appId);
+                
 
-                if (feeWalletForApp != address(0)) {
-                    if (_fee[i] > (_amounts[x] * feeDataStore.MAX_BEPS()) / 10000) {
-                        revert(Errors.FEE_EXCEEDS_MAX_BIPS);
+                    if (feeWalletForApp != address(0)) {
+                        if (_fee[i] > (_amounts[x] * feeDataStore.MAX_BEPS()) / 10000) {
+                            revert(Errors.FEE_EXCEEDS_MAX_BIPS);
+                        }
+                        withdrawTokens(
+                            _tokens[x],
+                            feeWalletForApp,
+                            uint256(_fee[i])
+                        );
+                    } else {
+                        revert("Fee Params not present for appId");
                     }
-                    withdrawTokens(
-                        _tokens[x],
-                        feeWalletForApp,
-                        uint256(_fee[i])
-                    );
-                } else {
-                    revert("Fee Params not present for appId");
-                }
-
-                unchecked {
-                    ++i;
-                }   
+                    unchecked {
+                        ++i;
+                    }   
                 }
             }
 
