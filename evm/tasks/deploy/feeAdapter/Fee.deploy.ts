@@ -16,6 +16,8 @@ import {
   saveDeployments,
 } from "../../utils";
 import { FEE_WALLET } from "./constants";
+import { FeeAdapter__factory } from "../../../typechain/factories/FeeAdapter__factory";
+import { FeeDataStore__factory } from "../../../typechain/factories/FeeDataStore__factory";
 
 const contractName: string = CONTRACT_NAME.FeeAdapter;
 const contractType = ContractType.Others;
@@ -74,6 +76,25 @@ task(VERIFY_FEE_ADAPTER).setAction(async function (
       break;
     }
   }
+
+  const feeAdapter = FeeAdapter__factory.connect(
+    address!,
+    _hre.ethers.provider
+  );
+
+  const dataStore = await feeAdapter.feeDataStore();
+  const feeDataStore = FeeDataStore__factory.connect(
+    dataStore,
+    _hre.ethers.provider
+  );
+  const owner = await feeDataStore.owner();
+
+  console.log(`Verifying ${contractName} Contract....`);
+
+  await _hre.run("verify:verify", {
+    address: dataStore,
+    constructorArguments: [owner, 5, FEE_WALLET],
+  });
 
   console.log(`Verifying ${contractName} Contract....`);
   await _hre.run("verify:verify", {
