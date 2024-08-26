@@ -226,6 +226,8 @@ export const DEPLOY_TOKEN_ORACLE = "DEPLOY_TOKEN_ORACLE";
 export const VERIFY_TOKEN_ORACLE = "VERIFY_TOKEN_ORACLE";
 export const DEPLOY_NURI_MINT_ADAPTER = "DEPLOY_NURI_MINT_ADAPTER";
 export const VERIFY_NURI_MINT_ADAPTER = "VERIFY_NURI_MINT_ADAPTER";
+export const DEPLOY_PARIFI_VAULT_DEPOSIT_ADAPTER = "DEPLOY_PARIFI_VAULT_DEPOSIT_ADAPTER";
+export const VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER = "VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -460,4 +462,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   StakeStoneVault: "StakeStoneVault",
   NitroAdapterXLayer: "NitroAdapterXLayer",
   NuriMint: "NuriMint",
+  ParifiVaultDeposit: "ParifiVaultDeposit",
 };

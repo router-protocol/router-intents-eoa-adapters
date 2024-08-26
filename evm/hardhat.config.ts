@@ -187,7 +187,7 @@ const config: HardhatUserConfig = {
       chainId: 43113,
     },
     arbitrum: {
-      url: "https://public.stackup.sh/api/v1/node/arbitrum-one",
+      url: "https://api.stateless.solutions/arbitrum-one/v1/demo",
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]
@@ -227,7 +227,7 @@ const config: HardhatUserConfig = {
       chainId: 59144,
     },
     scroll: {
-      url: "https://1rpc.io/scroll",
+      url: "https://scroll-mainnet.rpc.grove.city/v1/a7a7c8e2",
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]
