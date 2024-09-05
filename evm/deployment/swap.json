@@ -22,6 +22,10 @@
       {
         "name": "DexSpanAdapter",
         "address": "0x3cE8041B8240BD76Ec38486D8D584CE15aCE1D73"
+      },
+      {
+        "name": "WenSwapper",
+        "address": "0xA58e0e498bdD576014b2A33C8A652e11EFF402d7"
       }
     ],
     "169": [

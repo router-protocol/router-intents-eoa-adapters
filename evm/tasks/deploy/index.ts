@@ -50,5 +50,6 @@ import "./thrusterV3";
 import "./maverickV2";
 import "./stakestoneVault";
 import "./nuri";
+import "./pumpFun";
 
 import "./BatchTransaction.deploy";

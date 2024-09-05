@@ -153,4 +153,51 @@ describe("ParifiVaultDeposit Adapter: ", async () => {
     expect(balBefore).gt(balAfter);
     expect(receiptTokenBalAfter).gt(receiptTokenBalBefore);
   });
+
+  it("Can deposit eth, swap to weth and deposit weth on parifi on same chain", async () => {
+    const {
+      batchTransaction,
+      parifiVaultDepositAdapter,
+      receiptTokenWeth
+    } = await setupTests();
+
+    const amount = ethers.utils.parseEther("1");
+
+    const parifiData = defaultAbiCoder.encode(
+      ["address", "address", "uint256"],
+      [NATIVE, deployer.address, amount]
+    );
+
+    const tokens = [NATIVE];
+    const amounts = [amount];
+    const targets = [parifiVaultDepositAdapter.address];
+    const data = [parifiData];
+    const value = [0];
+    const callType = [2];
+    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+
+    const balBefore = await ethers.provider.getBalance(deployer.address);
+    const receiptTokenBalBefore = await receiptTokenWeth.balanceOf(
+      deployer.address
+    );
+
+    await batchTransaction.executeBatchCallsSameChain(
+      0,
+      tokens,
+      amounts,
+      feeInfo,
+      targets,
+      value,
+      callType,
+      data,
+      { value : amount,
+        gasLimit: 10000000 }
+    );
+
+    const balAfter = await ethers.provider.getBalance(deployer.address);
+    const receiptTokenBalAfter = await receiptTokenWeth.balanceOf(deployer.address);
+
+    expect(balBefore).gt(balAfter);
+    expect(receiptTokenBalAfter).gt(receiptTokenBalBefore);
+  });
 });
