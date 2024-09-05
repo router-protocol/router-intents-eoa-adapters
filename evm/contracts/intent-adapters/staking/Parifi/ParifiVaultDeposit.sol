@@ -50,9 +50,22 @@ contract ParifiVaultDeposit is RouterIntentEoaAdapterWithoutDataProvider {
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
-            IERC20(_asset).safeTransferFrom(msg.sender, self(), _amount);
-        } else if (_amount == type(uint256).max)
-            _amount = IERC20(_asset).balanceOf(address(this));
+            if (_asset != native())
+                IERC20(_asset).safeTransferFrom(msg.sender, self(), _amount);
+            else
+                require(
+                    msg.value == _amount,
+                    Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
+                );
+        } else {
+            if (_amount == type(uint256).max)
+                _amount = getBalance(_asset, address(this));
+        }
+
+        if (_asset == native()) {
+            convertNativeToWnative(_amount);
+            _asset = wnative();
+        }
 
         bytes memory logData;
 
@@ -75,10 +88,7 @@ contract ParifiVaultDeposit is RouterIntentEoaAdapterWithoutDataProvider {
         } else if (_asset == weth) {
             vault = pfWeth;
         } else revert InvalidVault();
-        IERC20(_asset).safeIncreaseAllowance(
-            address(vault),
-            _amount
-        );
+        IERC20(_asset).safeIncreaseAllowance(address(vault), _amount);
         vault.deposit(_amount, _recipient);
 
         tokens = new address[](2);
