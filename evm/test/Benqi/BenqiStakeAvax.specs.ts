@@ -36,6 +36,7 @@ describe("BenqiStakeAvax Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -121,7 +122,7 @@ describe("BenqiStakeAvax Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

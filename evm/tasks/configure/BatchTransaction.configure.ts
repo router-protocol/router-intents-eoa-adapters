@@ -133,6 +133,19 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
   }
   console.log(`Setting Perp Adapters on ${contractName} complete`);
 
+  const feeDeployments = getDeployments(
+    ContractType.Fee
+  ) as IDeploymentAdapters;
+
+  if (feeDeployments[env] && feeDeployments[env][network]) {
+    len = feeDeployments[env][network].length;
+    for (let i = 0; i < len; i++) {
+      shouldWhitelist.push(true);
+      adapters.push(feeDeployments[env][network][i].address);
+    }
+  }
+  console.log(`Setting Fee Adapters on ${contractName} complete`);
+
   if (adapters.length === 0) {
     console.log("Adapters length zero: ", adapters);
     return;

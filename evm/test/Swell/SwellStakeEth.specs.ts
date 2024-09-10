@@ -1,7 +1,7 @@
 import hardhat, { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { RPC } from "../constants";
-import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE } from "../../tasks/constants";
+import { DEXSPAN, DEFAULT_ENV, NATIVE, WNATIVE, FEE_WALLET } from "../../tasks/constants";
 import { SwellStakeEth__factory } from "../../typechain/factories/SwellStakeEth__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
@@ -35,6 +35,7 @@ describe("SwellStakeEth Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -109,7 +110,7 @@ describe("SwellStakeEth Adapter: ", async () => {
     const data = [swellData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const swEthBalBefore = await swEth.balanceOf(deployer.address);
@@ -118,7 +119,7 @@ describe("SwellStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

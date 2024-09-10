@@ -36,7 +36,8 @@ describe("OriginStakeEth Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      zeroAddress()
+      zeroAddress(),
+      zeroAddress(),
     );
 
     const DexSpanAdapter = await ethers.getContractFactory("DexSpanAdapter");
@@ -111,7 +112,7 @@ describe("OriginStakeEth Adapter: ", async () => {
     const data = [originData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const oEthBalBefore = await oEth.balanceOf(deployer.address);
@@ -120,7 +121,7 @@ describe("OriginStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

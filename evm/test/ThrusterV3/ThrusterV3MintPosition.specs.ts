@@ -156,10 +156,10 @@ describe("ThrusterV3Mint Adapter: ", async () => {
 
     const tokens = [mintParams.token0, mintParams.token1];
     const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
-    const feeInfo = [
-      { fee: 0, recipient: zeroAddress() },
-      { fee: 0, recipient: zeroAddress() },
-    ];
+    // const feeInfo = [
+    //   { fee: 0, recipient: zeroAddress() },
+    //   { fee: 0, recipient: zeroAddress() },
+    // ];
 
     if (mintParams.token0 === wnative.address) {
       await wnative.approve(
@@ -179,7 +179,7 @@ describe("ThrusterV3Mint Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       [thrusterV3MintPositionAdapter.address],
       [0],
       [2],

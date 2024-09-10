@@ -33,10 +33,11 @@ describe("AnkrStakeFantom Adapter: ", async () => {
     );
 
     const batchTransaction = await BatchTransaction.deploy(
-      NATIVE,
+      NATIVE_TOKEN,
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -108,9 +109,9 @@ describe("AnkrStakeFantom Adapter: ", async () => {
 
     const tokens = [NATIVE_TOKEN];
     const amounts = [amount];
-    const feeInfo = [
-      { fee: amount.mul(5).div(1000), recipient: alice.address },
-    ];
+    // const feeInfo = [
+    //   { fee: amount.mul(5).div(1000), recipient: alice.address },
+    // ];
     const targets = [ankrStakeFantomAdapter.address];
     const data = [ankrData];
     const value = [0];
@@ -123,7 +124,7 @@ describe("AnkrStakeFantom Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

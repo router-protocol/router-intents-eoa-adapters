@@ -35,6 +35,7 @@ describe("SynClubStakeBnb Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -99,7 +100,7 @@ describe("SynClubStakeBnb Adapter: ", async () => {
     const data = [synClubData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const snBnbBalBefore = await snBnb.balanceOf(deployer.address);
@@ -108,7 +109,7 @@ describe("SynClubStakeBnb Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

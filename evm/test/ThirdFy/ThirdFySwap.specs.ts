@@ -96,17 +96,18 @@ describe("ThirdFySwap Adapter: ", async () => {
       "BatchTransaction"
     );
 
-    const swapRouter = new ethers.Contract(
-      THIRD_FY_SWAP_ROUTER,
-      SWAP_ROUTER_ABI,
-      deployer
-    );
+    // const swapRouter = new ethers.Contract(
+    //   THIRD_FY_SWAP_ROUTER,
+    //   SWAP_ROUTER_ABI,
+    //   deployer
+    // );
 
     const batchTransaction = await BatchTransaction.deploy(
       NATIVE_TOKEN,
       WNATIVE,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -207,9 +208,9 @@ describe("ThirdFySwap Adapter: ", async () => {
     const usdtBal = await usdt.balanceOf(deployer.address);
     expect(usdtBal).gt(0);
 
-    const user = deployer;
-    const chainId = CHAIN_ID;
-    const tokenIn = usdt.address;
+    // const user = deployer;
+    // const chainId = CHAIN_ID;
+    // const tokenIn = usdt.address;
     const amountIn = usdtBal.div(2).toString();
 
     const swapParams = {
@@ -237,7 +238,7 @@ describe("ThirdFySwap Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       [thirdFySwapAdapter.address],
       [0],
       [2],

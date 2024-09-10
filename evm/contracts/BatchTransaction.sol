@@ -42,6 +42,8 @@ contract BatchTransaction is
     address private _dexspan;
     address private _assetBridge;
 
+    address private _feeAdapter;
+
     // user -> token array
     mapping(address => RefundData) private tokensToRefund;
     mapping(address => bool) private adapterWhitelist;
@@ -59,13 +61,15 @@ contract BatchTransaction is
         address __wnative,
         address __assetForwarder,
         address __dexspan,
-        address __assetBridge
+        address __assetBridge,
+        address __feeAdapter
     ) {
         _native = __native;
         _wnative = __wnative;
         _assetForwarder = __assetForwarder;
         _dexspan = __dexspan;
         _assetBridge = __assetBridge;
+        _feeAdapter = __feeAdapter;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(SETTER_ROLE, msg.sender);
@@ -171,7 +175,6 @@ contract BatchTransaction is
      * @param appId Application Id
      * @param tokens Addresses of the tokens to fetch from the user
      * @param amounts amounts of the tokens to fetch from the user
-     * @param feeInfos feeInfo for the tokens
      * @param target Addresses of the contracts to call
      * @param value Amounts of native tokens to send along with the transactions
      * @param callType Type of call. 1: call, 2: delegatecall
@@ -181,7 +184,7 @@ contract BatchTransaction is
         uint256 appId,
         address[] calldata tokens,
         uint256[] calldata amounts,
-        FeeInfo[] calldata feeInfos,
+        bytes calldata feeData,
         address[] calldata target,
         uint256[] calldata value,
         uint256[] calldata callType,
@@ -189,34 +192,32 @@ contract BatchTransaction is
     ) external payable nonReentrant {
         uint256 tokensLength = tokens.length;
         require(
-            tokensLength == amounts.length && tokensLength == feeInfos.length,
+            tokensLength == amounts.length,
             Errors.ARRAY_LENGTH_MISMATCH
         );
         uint256 totalValue = 0;
+//add fee
 
         for (uint256 i = 0; i < tokensLength; ) {
             totalValue += _pullTokens(tokens[i], amounts[i]);
             tokensToRefund[msg.sender].tokens.push(tokens[i]);
-
-            if (feeInfos[i].fee != 0) {
-                if (feeInfos[i].fee > (amounts[i] * 500) / 10000)
-                    revert(IntentErrors.FEE_EXCEEDS_MAX_BIPS);
-
-                if (feeInfos[i].recipient == address(0))
-                    revert(IntentErrors.FEE_RECIPIENT_CANNOT_BE_ZERO_ADDRESS);
-
-                withdrawTokens(
-                    tokens[i],
-                    feeInfos[i].recipient,
-                    uint256(feeInfos[i].fee)
-                );
-            }
-
             unchecked {
                 ++i;
             }
         }
 
+        if(_feeAdapter != address(0))
+        {
+            _execute(
+                msg.sender,
+                _feeAdapter,
+                address(0),
+                address(0),
+                0,
+                2,
+                feeData
+            );
+        }
         require(
             msg.value >= totalValue,
             Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED

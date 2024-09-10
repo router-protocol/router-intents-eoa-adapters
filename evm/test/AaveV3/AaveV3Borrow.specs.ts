@@ -72,6 +72,7 @@ describe("AaveV3Borrow Adapter: ", async () => {
       WMATIC,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 

@@ -9,7 +9,7 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { IVelocoreVault__factory } from "../../typechain/factories/IVelocoreVault__factory";
-import { BigNumber, Contract, Wallet } from "ethers";
+// import { BigNumber, Contract, Wallet } from "ethers";
 import { getTransaction } from "../utils";
 import {
   VELOCORE_TOKEN,
@@ -108,39 +108,37 @@ describe("VelocoreMint Adapter: ", async () => {
     });
   });
 
-  const toBytes32 = (bn: BigNumber) => {
-    return ethers.utils.hexlify(ethers.utils.zeroPad(bn.toHexString(), 32));
-  };
+  // const toBytes32 = (bn: BigNumber) => {
+  //   return ethers.utils.hexlify(ethers.utils.zeroPad(bn.toHexString(), 32));
+  // };
 
   // This works for token when it has balance mapping at slot 0.
-  const setUserTokenBalance = async (
-    contract: Contract,
-    user: Wallet,
-    balance: BigNumber
-  ) => {
-    const index = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256"],
-      [user.address, 0] // key, slot
-    );
+  // const setUserTokenBalance = async (
+  //   contract: Contract,
+  //   user: Wallet,
+  //   balance: BigNumber
+  // ) => {
+  //   const index = ethers.utils.solidityKeccak256(
+  //     ["uint256", "uint256"],
+  //     [user.address, 0] // key, slot
+  //   );
 
-    await hardhat.network.provider.request({
-      method: "hardhat_setStorageAt",
-      params: [contract.address, index, toBytes32(balance).toString()],
-    });
+  //   await hardhat.network.provider.request({
+  //     method: "hardhat_setStorageAt",
+  //     params: [contract.address, index, toBytes32(balance).toString()],
+  //   });
 
-    await hardhat.network.provider.request({
-      method: "evm_mine",
-      params: [],
-    });
-  };
+  //   await hardhat.network.provider.request({
+  //     method: "evm_mine",
+  //     params: [],
+  //   });
+  // };
 
   it.only("Can mint a new position on Velocore weth/usdc", async () => {
     const {
       batchTransaction,
       velocoreMintPositionAdapter,
-      vault,
       usdc,
-      wnative,
       usdc_eth_lp_token,
     } = await setupTests();
 
@@ -171,7 +169,7 @@ describe("VelocoreMint Adapter: ", async () => {
     const tokenA = NATIVE_TOKEN;
     const tokenB = usdc.address;
     const amountADesired = ethers.utils.parseEther("0.1").toString();
-    const amountBDesired = usdcBal.div(2).toString(); //(amountA) * multipliier * decimals;
+    const amountBDesired = usdcBal.div(2).toString();
 
     const mintParams = {
       tokenA,
@@ -192,10 +190,6 @@ describe("VelocoreMint Adapter: ", async () => {
 
     const tokens = [mintParams.tokenA, mintParams.tokenB];
     const amounts = [mintParams.amountADesired, mintParams.amountBDesired];
-    const feeInfo = [
-      { fee: 0, recipient: zeroAddress() },
-      { fee: 0, recipient: zeroAddress() },
-    ];
 
     let value = "0";
 
@@ -213,7 +207,7 @@ describe("VelocoreMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       [velocoreMintPositionAdapter.address],
       [0],
       [2],

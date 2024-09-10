@@ -50,6 +50,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -137,7 +138,7 @@ describe("LidoStakeEth Adapter: ", async () => {
     const data = [lidoData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const stethBalBefore = await steth.balanceOf(deployer.address);
@@ -146,7 +147,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,
@@ -249,7 +250,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,
@@ -299,7 +300,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,
@@ -349,7 +350,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,
@@ -397,7 +398,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,
@@ -461,7 +462,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,
@@ -510,7 +511,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,
@@ -565,7 +566,7 @@ describe("LidoStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

@@ -185,7 +185,7 @@ describe("UniswapV3Mint Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       [uniswapV3MintPositionAdapter.address],
       [0],
       [2],

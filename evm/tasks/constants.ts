@@ -212,6 +212,8 @@ export const DEPLOY_LYNEX_GAMMA_ADAPTER = "DEPLOY_LYNEX_GAMMA_ADAPTER";
 export const VERIFY_LYNEX_GAMMA_ADAPTER = "VERIFY_LYNEX_GAMMA_ADAPTER";
 export const DEPLOY_XFAI_MINT_ADAPTER = "DEPLOY_XFAI_MINT_ADAPTER";
 export const VERIFY_XFAI_MINT_ADAPTER = "VERIFY_XFAI_MINT_ADAPTER";
+export const DEPLOY_FEE_ADAPTER = "DEPLOY_FEE_ADAPTER";
+export const VERIFY_FEE_ADAPTER = "VERIFY_FEE_ADAPTER";
 export const DEPLOY_QUICKSWAP_SWAP_ADAPTER = "DEPLOY_QUICKSWAP_SWAP_ADAPTER";
 export const VERIFY_QUICKSWAP_SWAP_ADAPTER = "VERIFY_QUICKSWAP_SWAP_ADAPTER";
 export const DEPLOY_STAKESTONE_VAULT_ADAPTER =
@@ -381,6 +383,8 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
   },
 };
 
+export const FEE_WALLET = "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee";
+
 export const CONTRACT_NAME: { [key: string]: string } = {
   BatchTransaction: "BatchTransaction",
   LidoStakeEth: "LidoStakeEth",
@@ -457,6 +461,7 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ThirdFySwap: "ThirdFySwap",
   LynexGamma: "LynexGamma",
   XfaiMint: "XfaiMint",
+  FeeAdapter: "FeeAdapter",
   QuickswapSwap: "QuickswapSwap",
   StakeStoneVaultAdapter: "StakeStoneVaultAdapter",
   TokenOracle: "TokenOracle",

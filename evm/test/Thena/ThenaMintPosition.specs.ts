@@ -106,6 +106,7 @@ describe("ThenaMint Adapter: ", async () => {
       WNATIVE,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -217,7 +218,7 @@ describe("ThenaMint Adapter: ", async () => {
     expect(usdtBal).gt(0);
 
     const user = deployer;
-    const chainId = CHAIN_ID;
+    // const chainId = CHAIN_ID;
     const token0 = usdt.address;
     const token1 = wnative.address;
     const amount0 = usdtBal.toString();
@@ -266,7 +267,7 @@ describe("ThenaMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       [thenaMintPositionAdapter.address],
       [0],
       [2],

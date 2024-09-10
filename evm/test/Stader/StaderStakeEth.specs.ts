@@ -36,6 +36,7 @@ describe("StaderStakeEth Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -111,7 +112,7 @@ describe("StaderStakeEth Adapter: ", async () => {
     const data = [staderData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const ethxBalBefore = await ethx.balanceOf(deployer.address);
@@ -120,7 +121,7 @@ describe("StaderStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,

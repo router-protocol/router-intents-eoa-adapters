@@ -37,6 +37,7 @@ describe("FraxStakeEth Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
+      zeroAddress(),
       zeroAddress()
     );
 
@@ -115,7 +116,7 @@ describe("FraxStakeEth Adapter: ", async () => {
     const data = [fraxData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const fraxEthBalBefore = await fraxEth.balanceOf(deployer.address);
@@ -124,7 +125,7 @@ describe("FraxStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,
@@ -201,7 +202,7 @@ describe("FraxStakeEth Adapter: ", async () => {
     const data = [fraxData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
     const sFraxEthBalBefore = await sFraxEth.balanceOf(deployer.address);
@@ -210,7 +211,7 @@ describe("FraxStakeEth Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      "",
       targets,
       value,
       callType,
@@ -286,14 +287,14 @@ describe("FraxStakeEth Adapter: ", async () => {
     const data = [fraxData];
     const value = [0];
     const callType = [2];
-    const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
+    // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
 
     await expect(
       batchTransaction.executeBatchCallsSameChain(
         0,
         tokens,
         amounts,
-        feeInfo,
+        "",
         targets,
         value,
         callType,
