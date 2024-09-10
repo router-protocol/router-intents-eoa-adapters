@@ -1,0 +1,10 @@
+{
+    "mainnet": {
+      "59144": [
+        {
+          "name": "FeeAdapter",
+          "address": "0xD95189b0A3f694aD71b6E9d54FA9B385C16D796B"
+        }
+      ]
+    }
+  }
