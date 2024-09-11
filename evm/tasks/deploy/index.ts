@@ -52,5 +52,7 @@ import "./feeAdapter";
 import "./stakestoneVault";
 import "./nuri";
 import "./pumpFun";
+import "./symbiotic";
+import "./eigenLayer"
 
 import "./BatchTransaction.deploy";

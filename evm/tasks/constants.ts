@@ -232,6 +232,10 @@ export const DEPLOY_PARIFI_VAULT_DEPOSIT_ADAPTER = "DEPLOY_PARIFI_VAULT_DEPOSIT_
 export const VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER = "VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER";
 export const DEPLOY_WEN_SWAPPER_ADAPTER = "DEPLOY_WEN_SWAPPER_ADAPTER";
 export const VERIFY_WEN_SWAPPER_ADAPTER = "VERIFY_WEN_SWAPPER_ADAPTER";
+export const DEPLOY_SYMBIOTIC_AFFINE_ADAPTER = "DEPLOY_SYMBIOTIC_AFFINE_ADAPTER";
+export const VERIFY_SYMBIOTIC_AFFINE_ADAPTER = "VERIFY_SYMBIOTIC_AFFINE_ADAPTER";
+export const DEPLOY_EIGENLAYER_AFFINE_ADAPTER = "DEPLOY_EIGENLAYER_AFFINE_ADAPTER";
+export const VERIFY_EIGENLAYER_AFFINE_ADAPTER = "VERIFY_EIGENLAYER_AFFINE_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -461,14 +465,16 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ThirdFySwap: "ThirdFySwap",
   LynexGamma: "LynexGamma",
   XfaiMint: "XfaiMint",
-  FeeAdapter: "FeeAdapter",
-  QuickswapSwap: "QuickswapSwap",
+  FeeAdapter: "FeeAdapter",  
+  QuickswapSwap: "QuickswapSwap",  
   StakeStoneVaultAdapter: "StakeStoneVaultAdapter",
   TokenOracle: "TokenOracle",
   FeeCalculator: "FeeCalculator",
   StakeStoneVault: "StakeStoneVault",
-  NitroAdapterXLayer: "NitroAdapterXLayer",
+  NitroAdapterXLayer: "NitroAdapterXLayer",  
   NuriMint: "NuriMint",
   ParifiVaultDeposit: "ParifiVaultDeposit",
-  WenSwapper : "WenSwapper"
+  WenSwapper : "WenSwapper",
+  SymbioticAffine : "SymbioticAffine",
+  EigenLayerAffine : "EigenLayerAffine",
 };
