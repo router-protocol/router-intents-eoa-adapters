@@ -4,6 +4,10 @@
       {
         "name": "ThenaMint",
         "address": "0x3D83031304f1b66391298A58273F716c1273774A"
+      },
+      {
+        "name": "PancakeswapMint",
+        "address": "0x164cE9Bcb429819771f4DABFb82200B2600855B0"
       }
     ],
     "8453": [
@@ -55,7 +59,11 @@
       },
       {
         "name": "LynexGamma",
-        "address": "0xb885d94fdAB3F6D5582C1eD6773c1db82C535a34"
+        "address": "0xc622a7d92c7567487bb3383D20dB833cA21896Bc"
+      },
+      {
+        "name": "NileMint",
+        "address": "0xb77833401C73A8b41532D398902197C4baA8EBA9"
       }
     ],
     "81457": [
