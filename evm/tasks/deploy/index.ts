@@ -52,5 +52,6 @@ import "./feeAdapter";
 import "./stakestoneVault";
 import "./nuri";
 import "./pumpFun";
+import "./scribe";
 
 import "./BatchTransaction.deploy";

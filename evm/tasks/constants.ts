@@ -228,10 +228,14 @@ export const DEPLOY_TOKEN_ORACLE = "DEPLOY_TOKEN_ORACLE";
 export const VERIFY_TOKEN_ORACLE = "VERIFY_TOKEN_ORACLE";
 export const DEPLOY_NURI_MINT_ADAPTER = "DEPLOY_NURI_MINT_ADAPTER";
 export const VERIFY_NURI_MINT_ADAPTER = "VERIFY_NURI_MINT_ADAPTER";
-export const DEPLOY_PARIFI_VAULT_DEPOSIT_ADAPTER = "DEPLOY_PARIFI_VAULT_DEPOSIT_ADAPTER";
-export const VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER = "VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER";
+export const DEPLOY_PARIFI_VAULT_DEPOSIT_ADAPTER =
+  "DEPLOY_PARIFI_VAULT_DEPOSIT_ADAPTER";
+export const VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER =
+  "VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER";
 export const DEPLOY_WEN_SWAPPER_ADAPTER = "DEPLOY_WEN_SWAPPER_ADAPTER";
 export const VERIFY_WEN_SWAPPER_ADAPTER = "VERIFY_WEN_SWAPPER_ADAPTER";
+export const DEPLOY_SCRIBE_MINT_ADAPTER = "DEPLOY_SCRIBE_MINT_ADAPTER";
+export const VERIFY_SCRIBE_MINT_ADAPTER = "VERIFY_SCRIBE_MINT_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -303,7 +307,7 @@ export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
     "5": "0x6dEcd37F5409e2D32cE5a792d9BcE07d3752c60B",
     "80001": "0x04D2b2C62d7Ba9aA583bfd930c6fa4Ac0AFFB25D",
     "43113": "0x017F615438b9f0be26c23f5AB17db39BA1e63Cd1",
-    "1": "0x6A0fD5577c540e16A3A49C40b51E0880a2a528ce",
+    "1": "0x35101b9DeCace6324aaDf65867d695D175c71D59",
     "137": "0xc57133521ffbd729cb81cc8ddc12d9e9f61e0f6a",
     "56": "0x0000000000000000000000000000000000000000",
     "43114": "0x0000000000000000000000000000000000000000",
@@ -461,14 +465,15 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ThirdFySwap: "ThirdFySwap",
   LynexGamma: "LynexGamma",
   XfaiMint: "XfaiMint",
-  FeeAdapter: "FeeAdapter",  
-  QuickswapSwap: "QuickswapSwap",  
+  FeeAdapter: "FeeAdapter",
+  QuickswapSwap: "QuickswapSwap",
   StakeStoneVaultAdapter: "StakeStoneVaultAdapter",
   TokenOracle: "TokenOracle",
   FeeCalculator: "FeeCalculator",
   StakeStoneVault: "StakeStoneVault",
-  NitroAdapterXLayer: "NitroAdapterXLayer",  
+  NitroAdapterXLayer: "NitroAdapterXLayer",
   NuriMint: "NuriMint",
   ParifiVaultDeposit: "ParifiVaultDeposit",
-  WenSwapper : "WenSwapper"
+  WenSwapper: "WenSwapper",
+  ScribeMint: "ScribeMint",
 };
