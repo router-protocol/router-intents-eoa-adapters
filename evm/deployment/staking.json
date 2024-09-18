@@ -1,1 +1,20 @@
-{"mainnet":{"10":[{"name":"PenpieStakePendle","address":"0x57f41EfeaB626B0B529A54532Dc31f4A3A7e0f25"}],"42161":[{"name":"PenpieStakePendle","address":"0xD4Bd2bA9CED0aE7A951061fa5Fbc14C6FfdfC184"},{"name":"ParifiVaultDeposit","address":"0x5A9086250D20fe14BE099f5635F95266Be4D108f"}]}}
+{
+  "mainnet": {
+    "10": [
+      {
+        "name": "PenpieStakePendle",
+        "address": "0x57f41EfeaB626B0B529A54532Dc31f4A3A7e0f25"
+      }
+    ],
+    "42161": [
+      {
+        "name": "PenpieStakePendle",
+        "address": "0xD4Bd2bA9CED0aE7A951061fa5Fbc14C6FfdfC184"
+      },
+      {
+        "name": "ParifiVaultDeposit",
+        "address": "0x5A9086250D20fe14BE099f5635F95266Be4D108f"
+      }
+    ]
+  }
+}
