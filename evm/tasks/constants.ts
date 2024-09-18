@@ -236,6 +236,8 @@ export const DEPLOY_SYMBIOTIC_AFFINE_ADAPTER = "DEPLOY_SYMBIOTIC_AFFINE_ADAPTER"
 export const VERIFY_SYMBIOTIC_AFFINE_ADAPTER = "VERIFY_SYMBIOTIC_AFFINE_ADAPTER";
 export const DEPLOY_EIGENLAYER_AFFINE_ADAPTER = "DEPLOY_EIGENLAYER_AFFINE_ADAPTER";
 export const VERIFY_EIGENLAYER_AFFINE_ADAPTER = "VERIFY_EIGENLAYER_AFFINE_ADAPTER";
+export const DEPLOY_SYMBIOTIC_AFFINE_ETHEREUM_ADAPTER = "DEPLOY_SYMBIOTIC_AFFINE_ETHEREUM_ADAPTER";
+export const VERIFY_SYMBIOTIC_AFFINE_ETHEREUM_ADAPTER = "VERIFY_SYMBIOTIC_AFFINE_ETHEREUM_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -477,4 +479,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   WenSwapper : "WenSwapper",
   SymbioticAffine : "SymbioticAffine",
   EigenLayerAffine : "EigenLayerAffine",
+  SymbioticAffineEthereum : "SymbioticAffineEthereum",
 };

@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {IUltraLRT} from "./Interfaces.sol";
+import {IUltraLRTEthereum} from "./Interfaces.sol";
 import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
- * @title SymbioticAffine
+ * @title SymbioticAffineEthereum
  * @author Yashika Goyal
- * @notice Staking Assets for UltraETH on Linea and Blast.
+ * @notice Staking Assets for UltraETH on Ethereum.
  */
-contract SymbioticAffine is RouterIntentEoaAdapterWithoutDataProvider {
+contract SymbioticAffineEthereum is RouterIntentEoaAdapterWithoutDataProvider {
     using SafeERC20 for IERC20;
 
     address public immutable ultraLRT;
@@ -25,7 +25,7 @@ contract SymbioticAffine is RouterIntentEoaAdapterWithoutDataProvider {
     }
 
     function name() public pure override returns (string memory) {
-        return "SymbioticAffine";
+        return "SymbioticAffineEthereum";
     }
 
     /**
@@ -34,13 +34,8 @@ contract SymbioticAffine is RouterIntentEoaAdapterWithoutDataProvider {
     function execute(
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
-        (address _asset, address _recipient, uint256 _amount) = parseInputs(
-            data
-        );
-        require(
-            _asset == IUltraLRT(ultraLRT).baseAsset(),
-            "Asset mismatch: SymbioticAffine"
-        );
+        (address _asset, address _recipient, uint256 _amount) = parseInputs(data);
+        require(_asset == IUltraLRTEthereum(ultraLRT).asset(), "Asset mismatch: SymbioticAffine");
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
@@ -64,7 +59,7 @@ contract SymbioticAffine is RouterIntentEoaAdapterWithoutDataProvider {
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
         IERC20(_asset).safeIncreaseAllowance(ultraLRT, _amount);
-        IUltraLRT(ultraLRT).deposit(_amount, _recipient);
+        IUltraLRTEthereum(ultraLRT).deposit(_amount, _recipient);
 
         tokens = new address[](2);
         tokens[0] = ultraLRT;
