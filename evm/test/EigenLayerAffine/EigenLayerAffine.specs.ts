@@ -85,6 +85,7 @@ describe("EigenLayerAffine Adapter: ", async () => {
       ),
       wnative: IWETH__factory.connect(WNATIVE, deployer),
       ultraLRTToken,
+      stETH: TokenInterface__factory.connect(ST_ETH, deployer),
     };
   };
 
@@ -106,21 +107,43 @@ describe("EigenLayerAffine Adapter: ", async () => {
       batchTransaction,
       eigenLayerAffineAdapter,
       wnative,
+      stETH,
       ultraLRTToken,
     } = await setupTests();
 
     await wnative.deposit({ value: ethers.utils.parseEther("0.1") });
 
+    const txn = await getTransaction({
+      fromTokenAddress: NATIVE_TOKEN,
+      toTokenAddress: ST_ETH,
+      amount: ethers.utils.parseEther("0.2").toString(),
+      fromTokenChainId: CHAIN_ID,
+      toTokenChainId: CHAIN_ID,
+      senderAddress: deployer.address,
+      receiverAddress: deployer.address,
+    });
+
+    await deployer.sendTransaction({
+      to: txn.to,
+      value: txn.value,
+      data: txn.data,
+    });
+    expect(await stETH.balanceOf(deployer.address)).gt(0);
+
+    const unit256Max = ethers.BigNumber.from(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    );
+
     const EigenLayerAffineData = defaultAbiCoder.encode(
       ["address", "address", "uint256"],
-      [WNATIVE, deployer.address, ethers.utils.parseEther("0.1")]
+      [WNATIVE, deployer.address, unit256Max]
     );
 
     const tokens = [WNATIVE];
-    const amounts = [ethers.utils.parseEther("0.1")];
+    const amounts = [(await stETH.balanceOf(deployer.address)).toString()];
 
     const appId = [0];
-    const fee = [0];
+    const fee = ["0"];
 
     const feeData = defaultAbiCoder.encode(
       ["uint256[]", "uint96[]", "address[]", "uint256[]", "bool"],

@@ -111,16 +111,20 @@ describe("SymbioticAffine Adapter: ", async () => {
 
     await wnative.deposit({ value: ethers.utils.parseEther("0.1") });
 
+    const unit256Max = ethers.BigNumber.from(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    );
+
     const symbioticAffineData = defaultAbiCoder.encode(
       ["address", "address", "uint256"],
-      [WNATIVE, deployer.address, "100000000000000000"]
+      [WNATIVE, deployer.address, unit256Max]
     );
 
     const tokens = [WNATIVE];
     const amounts = ["100000000000000000"];
 
-    const appId = ["1"];
-    const fee = ["1000000"];
+    const appId = [0];
+    const fee = ["0"];
 
     const feeData = defaultAbiCoder.encode(
       ["uint256[]", "uint96[]", "address[]", "uint256[]", "bool"],
