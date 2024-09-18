@@ -62,7 +62,6 @@ describe("ScribeMint Adapter: ", async () => {
   const setupTests = async () => {
     let env = process.env.ENV;
     if (!env) env = DEFAULT_ENV;
-    console.log("11111111111111111111111111");
 
     const swapRouter = new ethers.Contract(
       SWAP_ROUTER,
@@ -105,13 +104,25 @@ describe("ScribeMint Adapter: ", async () => {
     );
 
     await batchTransaction.setAdapterWhitelist(
-      [scribeMintPositionAdapter.address],
-      [true]
+      [scribeMintPositionAdapter.address, feeAdapter.address],
+      [true, true]
     );
 
     const MockToken = await ethers.getContractFactory("MockToken");
     const mockToken = await MockToken.deploy();
     await mockToken.mint(deployer.address, ethers.utils.parseEther("10000"));
+    const FeeDataStoreAddress = await feeAdapter.feeDataStore();
+
+    const FeeDataStoreContract = await ethers.getContractFactory(
+      "FeeDataStore"
+    );
+    const feeDataStoreInstance =
+      FeeDataStoreContract.attach(FeeDataStoreAddress);
+
+    await feeDataStoreInstance.updateFeeWalletForAppId(
+      [1],
+      ["0xBec33ce33afdAF5604CCDF2c4b575238C5FBD23d"]
+    );
 
     return {
       batchTransaction: BatchTransaction__factory.connect(
@@ -190,11 +201,13 @@ describe("ScribeMint Adapter: ", async () => {
 
     await wnative.deposit({ value: ethers.utils.parseEther("10") });
 
+    await wnative.approve(SWAP_ROUTER, ethers.utils.parseEther("10"));
+
     await swapRouter.exactInputSingle(
       {
         tokenIn: wnative.address,
         tokenOut: usdt.address,
-        deployer: deployer.address,
+        deployer: zeroAddress(),
         recipient: deployer.address,
         deadline: ethers.constants.MaxUint256,
         amountIn: ethers.utils.parseEther("0.1"),
@@ -204,16 +217,19 @@ describe("ScribeMint Adapter: ", async () => {
       { gasLimit: 1000000 }
     );
 
-    await swapRouter.exactInputSingle({
-      tokenIn: wnative.address,
-      tokenOut: usdc.address,
-      deployer: deployer.address,
-      recipient: deployer.address,
-      deadline: ethers.constants.MaxUint256,
-      amountIn: ethers.utils.parseEther("0.1"),
-      amountOutMinimum: "0",
-      limitSqrtPrice: "0",
-    });
+    await swapRouter.exactInputSingle(
+      {
+        tokenIn: wnative.address,
+        tokenOut: usdc.address,
+        deployer: zeroAddress(),
+        recipient: deployer.address,
+        deadline: ethers.constants.MaxUint256,
+        amountIn: ethers.utils.parseEther("0.1"),
+        amountOutMinimum: "0",
+        limitSqrtPrice: "0",
+      },
+      { gasLimit: 1000000 }
+    );
 
     const usdcBal = await usdc.balanceOf(deployer.address);
     expect(usdcBal).gt(0);
@@ -224,22 +240,26 @@ describe("ScribeMint Adapter: ", async () => {
     const user = deployer;
     const chainId = CHAIN_ID;
     const token0 = usdc.address;
-    const token1 = usdt.address;
+    const token1 = wnative.address;
     const amount0 = usdcBal.toString();
-    const amount1 = usdtBal.toString();
+    const amount1 = ethers.utils.parseEther("0.1").toString();
+
+    const unit256Max = ethers.BigNumber.from(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    );
 
     const mintParams = {
       token0: token0,
       token1: token1,
-      deployer: "0xbAE27269D777D6fc0AefFa9DfAbA8960291E51eB",
+      deployer: zeroAddress(),
       tickLower: "-887220",
       tickUpper: "887220",
-      amount0Desired: amount0,
-      amount1Desired: amount1,
+      amount0Desired: unit256Max,
+      amount1Desired: unit256Max,
       amount0Min: "0",
       amount1Min: "0",
       recipient: user.address,
-      deadline: ethers.constants.MaxUint256,
+      deadline: "1726632604269",
     };
 
     const mintParamsIface =
@@ -248,33 +268,47 @@ describe("ScribeMint Adapter: ", async () => {
     const scribeData = defaultAbiCoder.encode([mintParamsIface], [mintParams]);
 
     const tokens = [mintParams.token0, mintParams.token1];
-    const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
+    const amounts = [amount0, amount1];
 
-    if (mintParams.token0 === usdt.address) {
-      await usdt.approve(batchTransaction.address, mintParams.amount0Desired);
+    if (mintParams.token0 === wnative.address) {
+      await wnative.approve(batchTransaction.address, mintParams.amount0Desired);
       await usdc.approve(batchTransaction.address, mintParams.amount1Desired);
     } else {
       await usdc.approve(batchTransaction.address, mintParams.amount0Desired);
-      await usdt.approve(batchTransaction.address, mintParams.amount1Desired);
+      await wnative.approve(batchTransaction.address, mintParams.amount1Desired);
     }
+
+    const appId = ["1"];
+    const fee = ["0"];
 
     const feeData = defaultAbiCoder.encode(
       ["uint256[]", "uint96[]", "address[]", "uint256[]", "bool"],
-      [[0], [0], tokens, amounts, true]
+      [appId, fee, tokens, amounts, true]
     );
+
+    const targets = [scribeMintPositionAdapter.address];
+    const data = [scribeData];
+    const value = [0];
+    const callType = [2];
+    
+    const handlerBalancerBefore = await wnative.balanceOf(FEE_WALLET);
 
     const tx = await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
       feeData,
-      [scribeMintPositionAdapter.address],
-      [0],
-      [2],
-      [scribeData],
+      targets,
+      value,
+      callType,
+      data,
       { gasLimit: 10000000 }
     );
     const txReceipt = await tx.wait();
+
+    const handlerBalancerAfter = await wnative.balanceOf(FEE_WALLET);
+
+    expect(handlerBalancerAfter).gt(handlerBalancerBefore);
 
     const { data: scribeExecutionEventData } = decodeExecutionEvent(txReceipt);
 
@@ -284,7 +318,7 @@ describe("ScribeMint Adapter: ", async () => {
     );
 
     const position = await positionManager.positions(scribeEventData[1]);
-    expect(position.token0).eq(mintParams.token0);
-    expect(position.token1).eq(mintParams.token1);
+    expect(position.token0.toLowerCase()).eq(mintParams.token0);
+    expect(position.token1.toLowerCase()).eq(mintParams.token1);
   });
 });

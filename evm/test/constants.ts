@@ -11,7 +11,7 @@ export const RPC: { [networkId: string]: string } = {
   "5": "https://rpc.ankr.com/eth_goerli",
   "80001": "https://polygon-mumbai-bor.publicnode.com",
   "17000": "https://ethereum-holesky.publicnode.com",
-  "534352": "https://scroll.drpc.org",
+  "534352": "https://rpc.ankr.com/scroll",
   "5000": "https://1rpc.io/mantle",
   "421614": "https://public.stackup.sh/api/v1/node/arbitrum-sepolia",
   "34443": "https://mainnet.mode.network",
