@@ -100,6 +100,7 @@ task(VERIFY_NITRO_ADAPTER).setAction(async function (
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
     ],
+    contract: "contracts/intent-adapters/bridge/NitroAdapter.sol:NitroDataStore"
   });
 
   console.log(`Verifying ${contractName} Contract....`);
