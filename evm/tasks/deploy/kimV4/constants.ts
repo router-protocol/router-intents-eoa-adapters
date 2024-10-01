@@ -1,3 +1,4 @@
 export const POSITION_MANAGER: { [chainId: string]: string } = {
   "34443": "0x2e8614625226D26180aDf6530C3b1677d3D7cf10",
+  "8453": "0xB7cF725E5b697F8338B929e6A52df823F2120a6A"
 };
