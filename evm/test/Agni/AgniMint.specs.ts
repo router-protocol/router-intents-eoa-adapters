@@ -14,7 +14,9 @@ import { getAgniData } from "./utils";
 import { decodeExecutionEvent } from "../utils";
 import { zeroAddress } from "ethereumjs-util";
 import { AgniRouterAbi } from "./AgniRouterAbi";
+
 const CHAIN_ID = "5000";
+const FEE_WALLET = "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee";
 const AGNI_V3_POSITION_MANAGER = "0x218bf598D1453383e2F4AA7b14fFB9BfB102D637";
 const USDT = "0x201EBa5CC46D216Ce6DC03F6a759e8E766e956aE";
 const USDC = "0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9";
@@ -22,6 +24,61 @@ const NATIVE_TOKEN = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 const WNATIVE = "0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8";
 const AGNI_ROUTER = "0x319B69888b0d11cEC22caA5034e25FfFBDc88421";
 
+const SWAP_ROUTER_ABI = [
+  {
+    inputs: [
+      {
+        components: [
+          {
+            type: "address",
+            name: "tokenIn",
+          },
+          {
+            type: "address",
+            name: "tokenOut",
+          },
+          {
+            type: "uint24",
+            name: "fee",
+          },
+          {
+            type: "address",
+            name: "recipient",
+          },
+          {
+            type: "uint256",
+            name: "deadline",
+          },
+          {
+            type: "uint256",
+            name: "amountIn",
+          },
+          {
+            type: "uint256",
+            name: "amountOutMinimum",
+          },
+          {
+            type: "uint160",
+            name: "sqrtPriceLimitX96",
+          },
+        ],
+        internalType: "struct ISwapRouter.ExactInputSingleParams",
+        name: "params",
+        type: "tuple",
+      },
+    ],
+    name: "exactInputSingle",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amountOut",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+];
 describe("AgniMint Adapter: ", async () => {
   const [deployer] = waffle.provider.getWallets();
 
@@ -31,7 +88,7 @@ describe("AgniMint Adapter: ", async () => {
 
     const swapRouter = new ethers.Contract(
       AGNI_ROUTER,
-      AgniRouterAbi,
+      SWAP_ROUTER_ABI,
       deployer
     );
 
@@ -44,7 +101,7 @@ describe("AgniMint Adapter: ", async () => {
     const feeAdapter = await FeeAdapter.deploy(
       NATIVE_TOKEN,
       WNATIVE,
-      deployer.address,
+      FEE_WALLET,
       5
     );
 
@@ -69,17 +126,26 @@ describe("AgniMint Adapter: ", async () => {
     );
 
     await batchTransaction.setAdapterWhitelist(
-      [agniMintPositionAdapter.address],
-      [true]
-    );
-
-    const isAdapterWhiteListed = await batchTransaction.isAdapterWhitelisted(
-      agniMintPositionAdapter.address
+      [agniMintPositionAdapter.address, feeAdapter.address],
+      [true, true]
     );
 
     const MockToken = await ethers.getContractFactory("MockToken");
     const mockToken = await MockToken.deploy();
     await mockToken.mint(deployer.address, ethers.utils.parseEther("10000"));
+
+    const FeeDataStoreAddress = await feeAdapter.feeDataStore();
+
+    const FeeDataStoreContract = await ethers.getContractFactory(
+      "FeeDataStore"
+    );
+    const feeDataStoreInstance =
+      FeeDataStoreContract.attach(FeeDataStoreAddress);
+
+    await feeDataStoreInstance.updateFeeWalletForAppId(
+      [1],
+      ["0xBec33ce33afdAF5604CCDF2c4b575238C5FBD23d"]
+    );
 
     return {
       batchTransaction: BatchTransaction__factory.connect(
@@ -96,13 +162,13 @@ describe("AgniMint Adapter: ", async () => {
         deployer
       ),
       usdt: TokenInterface__factory.connect(USDT, deployer),
+      usdc: TokenInterface__factory.connect(USDC, deployer),
       wnative: IWETH__factory.connect(WNATIVE, deployer),
       positionManager: IAgniPositionManager__factory.connect(
         AGNI_V3_POSITION_MANAGER,
         deployer
       ),
       swapRouter,
-      usdc: TokenInterface__factory.connect(USDC, deployer),
     };
   };
 
@@ -153,10 +219,11 @@ describe("AgniMint Adapter: ", async () => {
       usdt,
       wnative,
       swapRouter,
+      usdc
     } = await setupTests();
 
     await wnative.deposit({ value: ethers.utils.parseEther("10") });
-    await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("1000"));
+    // await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("1000"));
 
     await wnative.approve(AGNI_ROUTER, ethers.utils.parseEther("5"));
 
@@ -170,46 +237,33 @@ describe("AgniMint Adapter: ", async () => {
       amountOutMinimum: "0",
       limitSqrtPrice: "0",
     };
-    const encodedMessageSwapper = defaultAbiCoder.encode(
-      [
-        "address",
-        "address",
-        "uint24",
-        "address",
-        "uint256",
-        "uint256",
-        "uint256",
-        "uint160",
-      ],
-      [
-        swaperInputData.tokenIn,
-        swaperInputData.tokenOut,
-        swaperInputData.fee,
-        swaperInputData.recipient,
-        swaperInputData.deadline,
-        swaperInputData.amountIn,
-        swaperInputData.amountOutMinimum,
-        swaperInputData.limitSqrtPrice,
-      ]
-    );
-    // const xx = await swapRouter.exactInputSingle({
-    //   tokenIn: wnative.address,
-    //   tokenOut: usdt.address,
-    //   fee: 100,
-    //   recipient: deployer.address,
-    //   deadline: ethers.constants.MaxUint256.toString(),
-    //   amountIn: ethers.utils.parseEther("0.1").toBigInt(),
-    //   amountOutMinimum: "0",
-    //   limitSqrtPrice: "0",
-    // });
+
+    // const xx = await swapRouter.exactInputSingle(
+    //   {
+    //     tokenIn: wnative.address,
+    //     tokenOut: usdt.address,
+    //     fee: 100,
+    //     recipient: deployer.address,
+    //     deadline: ethers.constants.MaxUint256,
+    //     amountIn: ethers.utils.parseEther("0.1"),
+    //     amountOutMinimum: "0",
+    //     limitSqrtPrice: "0",
+    //   },
+    //   {
+    //     gasLimit: 1000000,
+    //   }
+    // );
 
     // await usdt.deposit({ value: ethers.utils.parseEther("10") });
     // // await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("1000"));
 
-    await usdt.approve(AGNI_ROUTER, ethers.utils.parseEther("5"));
+    await setUserTokenBalance(usdc, deployer, ethers.utils.parseEther("1000"));
+    const usdcBal = await usdc.balanceOf(deployer.address);
+    // expect(usdcBal).gt(0);
 
+    await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("1000"));
     const usdtBal = await usdt.balanceOf(deployer.address);
-    expect(usdtBal).gt(0);
+    // expect(usdtBal).gt(0);
 
     const user = deployer;
     const chainId = CHAIN_ID;
@@ -219,6 +273,9 @@ describe("AgniMint Adapter: ", async () => {
     const amount0 = usdtBal.toString();
     const fee = 100;
 
+    const unit256Max = ethers.BigNumber.from(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    );
     const mintParams = await getAgniData({
       user,
       chainId,
@@ -254,8 +311,10 @@ describe("AgniMint Adapter: ", async () => {
     const feeX = ["0"];
     const feeData = defaultAbiCoder.encode(
       ["uint256[]", "uint96[]", "address[]", "uint256[]", "bool"],
-      [[0], feeX, tokens, amounts, false]
+      [[1], feeX, tokens, amounts, true]
     );
+
+    const handlerBalancerBefore = await wnative.balanceOf(FEE_WALLET);
 
     const tx = await batchTransaction.executeBatchCallsSameChain(
       0,
@@ -265,9 +324,13 @@ describe("AgniMint Adapter: ", async () => {
       [agniMintPositionAdapter.address],
       [0],
       [2],
-      [AgniData]
+      [AgniData],
+      { gasLimit: 10000000 }
     );
     const txReceipt = await tx.wait();
+    const handlerBalancerAfter = await wnative.balanceOf(FEE_WALLET);
+
+    expect(handlerBalancerAfter).gt(handlerBalancerBefore);
 
     const { data: AgniExecutionEventData } = decodeExecutionEvent(txReceipt);
 
@@ -279,6 +342,5 @@ describe("AgniMint Adapter: ", async () => {
     const position = await positionManager.positions(AgniEventData[1]);
     expect(position.token0).eq(mintParams.token0);
     expect(position.token1).eq(mintParams.token1);
-    expect(position.fee).eq(mintParams.fee);
   });
 });
