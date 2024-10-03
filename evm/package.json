@@ -91,7 +91,8 @@
     "@routerprotocol/intents-core": "^1.0.0",
     "axios": "^1.5.0",
     "ethereumjs-util": "^7.1.0",
-    "solidity-docgen": "^0.6.0-beta.36"
+    "solidity-docgen": "^0.6.0-beta.36",
+    "@rari-capital/solmate": "^6.4.0"
   },
   "husky": {
     "hooks": {

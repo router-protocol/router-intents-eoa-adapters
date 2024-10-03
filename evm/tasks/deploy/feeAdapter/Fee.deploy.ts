@@ -20,7 +20,7 @@ import { FeeAdapter__factory } from "../../../typechain/factories/FeeAdapter__fa
 import { FeeDataStore__factory } from "../../../typechain/factories/FeeDataStore__factory";
 
 const contractName: string = CONTRACT_NAME.FeeAdapter;
-const contractType = ContractType.Others;
+const contractType = ContractType.Fee;
 task(DEPLOY_FEE_ADAPTER)
   .addFlag("verify", "pass true to verify the contract")
   .setAction(async function (

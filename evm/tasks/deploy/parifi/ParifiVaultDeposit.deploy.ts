@@ -1,12 +1,10 @@
 import { HardhatRuntimeEnvironment, TaskArguments } from "hardhat/types";
 import {
-  ASSET_FORWARDER,
   CONTRACT_NAME,
   DEFAULT_ENV,
-  DEPLOY_NITRO_ADAPTER,
-  DEXSPAN,
+  DEPLOY_PARIFI_VAULT_DEPOSIT_ADAPTER,
   NATIVE,
-  VERIFY_NITRO_ADAPTER,
+  VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER,
   WNATIVE,
 } from "../../constants";
 import { task } from "hardhat/config";
@@ -17,13 +15,12 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { NitroAdapter__factory } from "../../../typechain/factories/NitroAdapter__factory";
-import { NitroDataStore__factory } from "../../../typechain/factories/NitroDataStore__factory";
+import { USDC, PF_USDC, PF_WETH } from "./constants";
 
-const contractName: string = CONTRACT_NAME.NitroAdapter;
-const contractType = ContractType.Bridge;
+const contractName: string = CONTRACT_NAME.ParifiVaultDeposit;
+const contractType = ContractType.Staking;
 
-task(DEPLOY_NITRO_ADAPTER)
+task(DEPLOY_PARIFI_VAULT_DEPOSIT_ADAPTER)
   .addFlag("verify", "pass true to verify the contract")
   .setAction(async function (
     _taskArguments: TaskArguments,
@@ -36,12 +33,12 @@ task(DEPLOY_NITRO_ADAPTER)
 
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
     const factory = await _hre.ethers.getContractFactory(contractName);
-
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
-      ASSET_FORWARDER[env][network],
-      DEXSPAN[env][network]
+      USDC[network],
+      PF_USDC[network],
+      PF_WETH[network]
     );
     await instance.deployed();
 
@@ -58,11 +55,11 @@ task(DEPLOY_NITRO_ADAPTER)
     console.log(`${contractName} contract deployed at`, instance.address);
 
     if (_taskArguments.verify === true) {
-      await _hre.run(VERIFY_NITRO_ADAPTER);
+      await _hre.run(VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER);
     }
   });
 
-task(VERIFY_NITRO_ADAPTER).setAction(async function (
+task(VERIFY_PARIFI_VAULT_DEPOSIT_ADAPTER).setAction(async function (
   _taskArguments: TaskArguments,
   _hre: HardhatRuntimeEnvironment
 ) {
@@ -70,8 +67,8 @@ task(VERIFY_NITRO_ADAPTER).setAction(async function (
   if (!env) env = DEFAULT_ENV;
 
   const network = await _hre.getChainId();
-  const deployments = getDeployments(contractType) as IDeploymentAdapters;
 
+  const deployments = getDeployments(contractType) as IDeploymentAdapters;
   let address;
   for (let i = 0; i < deployments[env][network].length; i++) {
     if (deployments[env][network][i].name === contractName) {
@@ -79,38 +76,15 @@ task(VERIFY_NITRO_ADAPTER).setAction(async function (
       break;
     }
   }
-
-  const nitroAdapter = NitroAdapter__factory.connect(
-    address!,
-    _hre.ethers.provider
-  );
-  const dataStore = await nitroAdapter.nitroDataStore();
-  const nitroDataStore = NitroDataStore__factory.connect(
-    dataStore,
-    _hre.ethers.provider
-  );
-  const owner = await nitroDataStore.owner();
-
-  console.log(`Verifying ${contractName} Contract....`);
-
-  await _hre.run("verify:verify", {
-    address: dataStore,
-    constructorArguments: [
-      owner,
-      ASSET_FORWARDER[env][network],
-      DEXSPAN[env][network],
-    ],
-    contract: "contracts/intent-adapters/bridge/NitroAdapter.sol:NitroDataStore"
-  });
-
   console.log(`Verifying ${contractName} Contract....`);
   await _hre.run("verify:verify", {
     address,
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
-      ASSET_FORWARDER[env][network],
-      DEXSPAN[env][network],
+      USDC[network],
+      PF_USDC[network],
+      PF_WETH[network],
     ],
   });
 

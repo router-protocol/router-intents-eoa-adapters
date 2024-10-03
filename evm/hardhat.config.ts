@@ -187,7 +187,7 @@ const config: HardhatUserConfig = {
       chainId: 43113,
     },
     arbitrum: {
-      url: "https://public.stackup.sh/api/v1/node/arbitrum-one",
+      url: "https://api.stateless.solutions/arbitrum-one/v1/demo",
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]
@@ -249,6 +249,14 @@ const config: HardhatUserConfig = {
           ? [process.env.PRIVATE_KEY]
           : [""],
       chainId: 34443,
+    },
+    mantle: {
+      url: process.env.MANTLE_URL || "",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
+          : [""],
+      chainId: 5000,
     },
     arthera: {
       url: process.env.ARTHERA_URL || "",
@@ -430,6 +438,7 @@ const config: HardhatUserConfig = {
       blast: process.env.BLASTSCAN_API_KEY || "",
       arthera: process.env.ETHERSCAN_API_KEY || "",
       xlayer: process.env.ETHERSCAN_API_KEY || "",
+      mantle: process.env.ETHERSCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -535,7 +544,15 @@ const config: HardhatUserConfig = {
             apiURL: "https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER",
             browserURL: "https://www.oklink.com/xlayer",
         }
-    }
+    },
+    {
+      network: "mantle",
+      chainId: 5000,
+      urls: {
+        apiURL: "https://explorer.mantle.xyz/api",
+        browserURL: "https://explorer.mantle.xyz/",
+      },
+    },
     ],
   },
 };
