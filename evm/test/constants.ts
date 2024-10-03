@@ -20,5 +20,5 @@ export const RPC: { [networkId: string]: string } = {
   "84532": "https://sepolia.base.org",
   "10242": "https://rpc-trace.arthera.net/",
   "196": "https://rpc.xlayer.tech",
-  "5000": "https://rpc.mantle.xyz",
+  "5000": "https://rpc.ankr.com/mantle/4ae47d0ced171bb8d2181b94607bd52a6fe25d8f64060cefd21ee610f98b7bf5",
 };
