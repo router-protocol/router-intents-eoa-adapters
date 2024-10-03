@@ -100,6 +100,14 @@ describe("PancakeswapMint Adapter: ", async () => {
     );
     const mockAssetForwarder = await MockAssetForwarder.deploy();
 
+    const FeeAdapter = await ethers.getContractFactory("FeeAdapter");
+    const feeAdapter = await FeeAdapter.deploy(
+      NATIVE_TOKEN,
+      WNATIVE,
+      deployer.address,
+      5
+    );
+
     const BatchTransaction = await ethers.getContractFactory(
       "BatchTransaction"
     );
@@ -109,7 +117,8 @@ describe("PancakeswapMint Adapter: ", async () => {
       WNATIVE,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
-      zeroAddress()
+      zeroAddress(),
+      feeAdapter.address
     );
 
     const PancakeswapMintPositionAdapter = await ethers.getContractFactory(
@@ -252,10 +261,15 @@ describe("PancakeswapMint Adapter: ", async () => {
     const tokens = [mintParams.token0, mintParams.token1];
     const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
 
-    const feeInfo = [
-      { fee: 0, recipient: zeroAddress() },
-      { fee: 0, recipient: zeroAddress() },
-    ];
+    const feeX = ["0"];
+    const feeData = defaultAbiCoder.encode(
+      ["uint256[]", "uint96[]", "address[]", "uint256[]", "bool"],
+      [[0], feeX, tokens, amounts, false]
+    );
+    // const feeInfo = [
+    //   { fee: 0, recipient: zeroAddress() },
+    //   { fee: 0, recipient: zeroAddress() },
+    // ];
 
     if (mintParams.token0 === wnative.address) {
       await wnative.approve(
@@ -275,7 +289,7 @@ describe("PancakeswapMint Adapter: ", async () => {
       0,
       tokens,
       amounts,
-      feeInfo,
+      feeData,
       [pancakeswapMintPositionAdapter.address],
       [0],
       [2],
