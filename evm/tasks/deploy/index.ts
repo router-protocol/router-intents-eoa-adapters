@@ -55,3 +55,4 @@ import "./pumpFun";
 import "./scribe";
 
 import "./BatchTransaction.deploy";
+import "./ExternalBatchTransaction.deploy";

@@ -3,6 +3,12 @@ export const DEFAULT_ENV = "mainnet";
 
 export const DEPLOY_BATCH_TRANSACTION = "DEPLOY_BATCH_TRANSACTION";
 export const VERIFY_BATCH_TRANSACTION = "VERIFY_BATCH_TRANSACTION";
+
+export const DEPLOY_EXTERNAL_BATCH_TRANSACTION =
+  "DEPLOY_EXTERNAL_BATCH_TRANSACTION";
+export const VERIFY_EXTERNAL_BATCH_TRANSACTION =
+  "VERIFY_EXTERNAL_BATCH_TRANSACTION";
+
 export const DEPLOY_LIDO_STAKE_ETH_ADAPTER = "DEPLOY_LIDO_STAKE_ETH_ADAPTER";
 export const VERIFY_LIDO_STAKE_ETH_ADAPTER = "VERIFY_LIDO_STAKE_ETH_ADAPTER";
 export const DEPLOY_LIDO_STAKE_ETH_TESTNET_ADAPTER =
@@ -391,6 +397,7 @@ export const FEE_WALLET = "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee";
 
 export const CONTRACT_NAME: { [key: string]: string } = {
   BatchTransaction: "BatchTransaction",
+  BatchTransactionExternal: "BatchTransactionExternal",
   LidoStakeEth: "LidoStakeEth",
   LidoStakeEthTestnet: "LidoStakeEthTestnet",
   LidoStakeMatic: "LidoStakeMatic",
