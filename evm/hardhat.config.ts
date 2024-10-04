@@ -187,7 +187,7 @@ const config: HardhatUserConfig = {
       chainId: 43113,
     },
     arbitrum: {
-      url: "https://api.stateless.solutions/arbitrum-one/v1/demo",
+      url: "https://rpc.ankr.com/arbitrum",
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]
