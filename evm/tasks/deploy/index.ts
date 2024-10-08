@@ -53,5 +53,6 @@ import "./stakestoneVault";
 import "./nuri";
 import "./pumpFun";
 import "./scribe";
+import "./agni";
 
 import "./BatchTransaction.deploy";

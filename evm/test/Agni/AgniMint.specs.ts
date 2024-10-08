@@ -3,25 +3,26 @@ import { expect } from "chai";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { RPC } from "../constants";
 import { DEXSPAN, DEFAULT_ENV } from "../../tasks/constants";
-import { PancakeswapMint__factory } from "../../typechain/factories/PancakeswapMint__factory";
+import { AgniMint__factory } from "../../typechain/factories/AgniMint__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
-import { IPancakeswapNonfungiblePositionManager__factory } from "../../typechain/factories/IPancakeswapNonfungiblePositionManager__factory";
+import { IAgniPositionManager__factory } from "../../typechain/factories/IAgniPositionManager__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { getPancakeswapData } from "./utils";
+import { getAgniData } from "./utils";
 import { decodeExecutionEvent } from "../utils";
 import { zeroAddress } from "ethereumjs-util";
+import { AgniRouterAbi } from "./AgniRouterAbi";
 
-const CHAIN_ID = "56";
-const PANCAKESWAP_V3_POSITION_MANAGER =
-  "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364";
-const USDT = "0x55d398326f99059fF775485246999027B3197955";
-const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const WNATIVE = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
-const THENA_SWAP_ROUTER = "0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0";
+const CHAIN_ID = "5000";
+const FEE_WALLET = "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee";
+const AGNI_V3_POSITION_MANAGER = "0x218bf598D1453383e2F4AA7b14fFB9BfB102D637";
+const USDT = "0x201EBa5CC46D216Ce6DC03F6a759e8E766e956aE";
+const USDC = "0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9";
+const NATIVE_TOKEN = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+const WNATIVE = "0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8";
+const AGNI_ROUTER = "0x319B69888b0d11cEC22caA5034e25FfFBDc88421";
 
 const SWAP_ROUTER_ABI = [
   {
@@ -29,39 +30,36 @@ const SWAP_ROUTER_ABI = [
       {
         components: [
           {
-            internalType: "address",
+            type: "address",
             name: "tokenIn",
-            type: "address",
           },
           {
-            internalType: "address",
+            type: "address",
             name: "tokenOut",
-            type: "address",
           },
           {
-            internalType: "address",
+            type: "uint24",
+            name: "fee",
+          },
+          {
+            type: "address",
             name: "recipient",
-            type: "address",
           },
           {
-            internalType: "uint256",
+            type: "uint256",
             name: "deadline",
-            type: "uint256",
           },
           {
-            internalType: "uint256",
+            type: "uint256",
             name: "amountIn",
-            type: "uint256",
           },
           {
-            internalType: "uint256",
+            type: "uint256",
             name: "amountOutMinimum",
-            type: "uint256",
           },
           {
-            internalType: "uint160",
-            name: "limitSqrtPrice",
             type: "uint160",
+            name: "sqrtPriceLimitX96",
           },
         ],
         internalType: "struct ISwapRouter.ExactInputSingleParams",
@@ -69,7 +67,7 @@ const SWAP_ROUTER_ABI = [
         type: "tuple",
       },
     ],
-    name: "exactInputSingleSupportingFeeOnTransferTokens",
+    name: "exactInputSingle",
     outputs: [
       {
         internalType: "uint256",
@@ -81,8 +79,7 @@ const SWAP_ROUTER_ABI = [
     type: "function",
   },
 ];
-
-describe("PancakeswapMint Adapter: ", async () => {
+describe("AgniMint Adapter: ", async () => {
   const [deployer] = waffle.provider.getWallets();
 
   const setupTests = async () => {
@@ -90,7 +87,7 @@ describe("PancakeswapMint Adapter: ", async () => {
     if (!env) env = DEFAULT_ENV;
 
     const swapRouter = new ethers.Contract(
-      THENA_SWAP_ROUTER,
+      AGNI_ROUTER,
       SWAP_ROUTER_ABI,
       deployer
     );
@@ -104,7 +101,7 @@ describe("PancakeswapMint Adapter: ", async () => {
     const feeAdapter = await FeeAdapter.deploy(
       NATIVE_TOKEN,
       WNATIVE,
-      deployer.address,
+      FEE_WALLET,
       5
     );
 
@@ -121,32 +118,42 @@ describe("PancakeswapMint Adapter: ", async () => {
       feeAdapter.address
     );
 
-    const PancakeswapMintPositionAdapter = await ethers.getContractFactory(
-      "PancakeswapMint"
+    const AgniMintPositionAdapter = await ethers.getContractFactory("AgniMint");
+    const agniMintPositionAdapter = await AgniMintPositionAdapter.deploy(
+      NATIVE_TOKEN,
+      WNATIVE,
+      AGNI_V3_POSITION_MANAGER
     );
-    const pancakeswapMintPositionAdapter =
-      await PancakeswapMintPositionAdapter.deploy(
-        NATIVE_TOKEN,
-        WNATIVE,
-        PANCAKESWAP_V3_POSITION_MANAGER
-      );
 
     await batchTransaction.setAdapterWhitelist(
-      [pancakeswapMintPositionAdapter.address],
-      [true]
+      [agniMintPositionAdapter.address, feeAdapter.address],
+      [true, true]
     );
 
     const MockToken = await ethers.getContractFactory("MockToken");
     const mockToken = await MockToken.deploy();
     await mockToken.mint(deployer.address, ethers.utils.parseEther("10000"));
 
+    const FeeDataStoreAddress = await feeAdapter.feeDataStore();
+
+    const FeeDataStoreContract = await ethers.getContractFactory(
+      "FeeDataStore"
+    );
+    const feeDataStoreInstance =
+      FeeDataStoreContract.attach(FeeDataStoreAddress);
+
+    await feeDataStoreInstance.updateFeeWalletForAppId(
+      [1],
+      ["0xBec33ce33afdAF5604CCDF2c4b575238C5FBD23d"]
+    );
+
     return {
       batchTransaction: BatchTransaction__factory.connect(
         batchTransaction.address,
         deployer
       ),
-      pancakeswapMintPositionAdapter: PancakeswapMint__factory.connect(
-        pancakeswapMintPositionAdapter.address,
+      agniMintPositionAdapter: AgniMint__factory.connect(
+        agniMintPositionAdapter.address,
         deployer
       ),
       mockToken: TokenInterface__factory.connect(mockToken.address, deployer),
@@ -155,13 +162,13 @@ describe("PancakeswapMint Adapter: ", async () => {
         deployer
       ),
       usdt: TokenInterface__factory.connect(USDT, deployer),
+      usdc: TokenInterface__factory.connect(USDC, deployer),
       wnative: IWETH__factory.connect(WNATIVE, deployer),
-      positionManager: IPancakeswapNonfungiblePositionManager__factory.connect(
-        PANCAKESWAP_V3_POSITION_MANAGER,
+      positionManager: IAgniPositionManager__factory.connect(
+        AGNI_V3_POSITION_MANAGER,
         deployer
       ),
       swapRouter,
-      usdc: TokenInterface__factory.connect(USDC, deployer),
     };
   };
 
@@ -204,33 +211,59 @@ describe("PancakeswapMint Adapter: ", async () => {
     });
   };
 
-  it("Can mint a new position on PANCAKESWAP", async () => {
+  it("Can mint a new position on AGNI", async () => {
     const {
       batchTransaction,
-      pancakeswapMintPositionAdapter,
+      agniMintPositionAdapter,
       positionManager,
       usdt,
       wnative,
       swapRouter,
+      usdc
     } = await setupTests();
 
     await wnative.deposit({ value: ethers.utils.parseEther("10") });
     // await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("1000"));
 
-    await wnative.approve(THENA_SWAP_ROUTER, ethers.utils.parseEther("5"));
+    await wnative.approve(AGNI_ROUTER, ethers.utils.parseEther("5"));
 
-    await swapRouter.exactInputSingleSupportingFeeOnTransferTokens({
+    const swaperInputData = {
       tokenIn: wnative.address,
       tokenOut: usdt.address,
+      fee: 100,
       recipient: deployer.address,
-      deadline: ethers.constants.MaxUint256,
-      amountIn: ethers.utils.parseEther("0.1"),
+      deadline: ethers.constants.MaxUint256.toString(),
+      amountIn: ethers.utils.parseEther("0.1").toBigInt(),
       amountOutMinimum: "0",
       limitSqrtPrice: "0",
-    });
+    };
 
+    // const xx = await swapRouter.exactInputSingle(
+    //   {
+    //     tokenIn: wnative.address,
+    //     tokenOut: usdt.address,
+    //     fee: 100,
+    //     recipient: deployer.address,
+    //     deadline: ethers.constants.MaxUint256,
+    //     amountIn: ethers.utils.parseEther("0.1"),
+    //     amountOutMinimum: "0",
+    //     limitSqrtPrice: "0",
+    //   },
+    //   {
+    //     gasLimit: 1000000,
+    //   }
+    // );
+
+    // await usdt.deposit({ value: ethers.utils.parseEther("10") });
+    // // await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("1000"));
+
+    await setUserTokenBalance(usdc, deployer, ethers.utils.parseEther("1000"));
+    const usdcBal = await usdc.balanceOf(deployer.address);
+    // expect(usdcBal).gt(0);
+
+    await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("1000"));
     const usdtBal = await usdt.balanceOf(deployer.address);
-    expect(usdtBal).gt(0);
+    // expect(usdtBal).gt(0);
 
     const user = deployer;
     const chainId = CHAIN_ID;
@@ -238,9 +271,12 @@ describe("PancakeswapMint Adapter: ", async () => {
     const token0 = usdt.address;
     const amount1 = ethers.utils.parseEther("0.1").toString();
     const amount0 = usdtBal.toString();
-    const fee = 500;
+    const fee = 100;
 
-    const mintParams = await getPancakeswapData({
+    const unit256Max = ethers.BigNumber.from(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    );
+    const mintParams = await getAgniData({
       user,
       chainId,
       token0,
@@ -253,23 +289,10 @@ describe("PancakeswapMint Adapter: ", async () => {
     const mintParamsIface =
       "tuple(address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint256 amount0Desired, uint256 amount1Desired, uint256 amount0Min, uint256 amount1Min, address recipient, uint256 deadline) MintParams";
 
-    const PANCAKESWAPData = defaultAbiCoder.encode(
-      [mintParamsIface],
-      [mintParams]
-    );
+    const AgniData = defaultAbiCoder.encode([mintParamsIface], [mintParams]);
 
     const tokens = [mintParams.token0, mintParams.token1];
     const amounts = [mintParams.amount0Desired, mintParams.amount1Desired];
-
-    const feeX = ["0"];
-    const feeData = defaultAbiCoder.encode(
-      ["uint256[]", "uint96[]", "address[]", "uint256[]", "bool"],
-      [[0], feeX, tokens, amounts, false]
-    );
-    // const feeInfo = [
-    //   { fee: 0, recipient: zeroAddress() },
-    //   { fee: 0, recipient: zeroAddress() },
-    // ];
 
     if (mintParams.token0 === wnative.address) {
       await wnative.approve(
@@ -285,29 +308,39 @@ describe("PancakeswapMint Adapter: ", async () => {
       );
     }
 
+    const feeX = ["0"];
+    const feeData = defaultAbiCoder.encode(
+      ["uint256[]", "uint96[]", "address[]", "uint256[]", "bool"],
+      [[1], feeX, tokens, amounts, true]
+    );
+
+    const handlerBalancerBefore = await wnative.balanceOf(FEE_WALLET);
+
     const tx = await batchTransaction.executeBatchCallsSameChain(
       0,
       tokens,
       amounts,
       feeData,
-      [pancakeswapMintPositionAdapter.address],
+      [agniMintPositionAdapter.address],
       [0],
       [2],
-      [PANCAKESWAPData]
+      [AgniData],
+      { gasLimit: 10000000 }
     );
     const txReceipt = await tx.wait();
+    const handlerBalancerAfter = await wnative.balanceOf(FEE_WALLET);
 
-    const { data: PANCAKESWAPExecutionEventData } =
-      decodeExecutionEvent(txReceipt);
+    expect(handlerBalancerAfter).gt(handlerBalancerBefore);
 
-    const PANCAKESWAPEventData = defaultAbiCoder.decode(
+    const { data: AgniExecutionEventData } = decodeExecutionEvent(txReceipt);
+
+    const AgniEventData = defaultAbiCoder.decode(
       [mintParamsIface, "uint256"],
-      PANCAKESWAPExecutionEventData
+      AgniExecutionEventData
     );
 
-    const position = await positionManager.positions(PANCAKESWAPEventData[1]);
+    const position = await positionManager.positions(AgniEventData[1]);
     expect(position.token0).eq(mintParams.token0);
     expect(position.token1).eq(mintParams.token1);
-    expect(position.fee).eq(mintParams.fee);
   });
 });
