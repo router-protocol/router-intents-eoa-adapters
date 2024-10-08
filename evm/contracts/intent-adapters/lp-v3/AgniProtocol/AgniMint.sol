@@ -8,9 +8,9 @@ import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {AgniHelpers} from "./AgniHelpers.sol";
 
 /**
- * @title PancakeswapMint
+ * @title AgniMint
  * @author Yashika Goyal
- * @notice Minting a new position on Pancakeswap.
+ * @notice Minting a new position on Agni.
  */
 contract AgniMint is RouterIntentEoaAdapterWithoutDataProvider, AgniHelpers {
     using SafeERC20 for IERC20;
@@ -28,7 +28,7 @@ contract AgniMint is RouterIntentEoaAdapterWithoutDataProvider, AgniHelpers {
     }
 
     function name() public pure override returns (string memory) {
-        return "PancakeswapMint";
+        return "AgniMint";
     }
 
     /**
