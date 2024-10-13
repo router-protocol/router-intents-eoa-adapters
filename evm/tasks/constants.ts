@@ -243,6 +243,11 @@ export const VERIFY_WEN_SWAPPER_ADAPTER = "VERIFY_WEN_SWAPPER_ADAPTER";
 export const DEPLOY_SCRIBE_MINT_ADAPTER = "DEPLOY_SCRIBE_MINT_ADAPTER";
 export const VERIFY_SCRIBE_MINT_ADAPTER = "VERIFY_SCRIBE_MINT_ADAPTER";
 
+export const DEPLOY_BASENAME_REGISTRY_ADAPTER =
+  "DEPLOY_BASENAME_REGISTRY_ADAPTER";
+export const VERIFY_BASENAME_REGISTRY_ADAPTER =
+  "VERIFY_BASENAME_REGISTRY_ADAPTER";
+
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
 } = {
@@ -483,4 +488,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ParifiVaultDeposit: "ParifiVaultDeposit",
   WenSwapper: "WenSwapper",
   ScribeMint: "ScribeMint",
+  BaseRegistry: "BaseRegistry",
 };

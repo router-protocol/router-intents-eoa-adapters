@@ -12,7 +12,8 @@ export enum ContractType {
   Perpetuals,
   StakestoneVault,
   Others,
-  Fee
+  Fee,
+  External
 }
 
 export interface IDeployment {
