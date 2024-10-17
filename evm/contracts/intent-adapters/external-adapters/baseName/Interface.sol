@@ -26,4 +26,6 @@ interface IBaseRegisterRouter {
         bytes registeryData;
     }
     function register(RegisterRequest calldata request) external payable;
+
+    function registerPrice(string memory name, uint256 duration) external view returns (uint256);
 }

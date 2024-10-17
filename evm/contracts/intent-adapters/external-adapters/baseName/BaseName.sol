@@ -6,7 +6,6 @@ import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvide
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {BaseNameRegistryHelpers} from "./BaseNameHelpers.sol";
-
 /**
  * @title Base Name Registry
  * @author Ateet Tiwari
@@ -39,7 +38,6 @@ contract BaseNameRegistry is RouterIntentEoaAdapterWithoutDataProvider, BaseName
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
         (address _recipient, uint256 _amount, IBaseRegisterRouter.RegisterRequest memory registeryData) = parseInputs(data);
-        uint256 nativeFee = 0;
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
             require(
@@ -62,7 +60,10 @@ contract BaseNameRegistry is RouterIntentEoaAdapterWithoutDataProvider, BaseName
         uint256 _amount,
         IBaseRegisterRouter.RegisterRequest memory _registryParams
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        registerModule.register{value: _amount}(_registryParams); 
+        uint priceRequired = registerModule.registerPrice(_registryParams.name, _registryParams.duration);
+        require(_amount > priceRequired, "amount supplied is lesser than required");
+        registerModule.register{value: priceRequired}(_registryParams); 
+        tokens = new address[](1);
         tokens[0] = native();
         logData = abi.encode(_recipient, _amount, true);
     }
