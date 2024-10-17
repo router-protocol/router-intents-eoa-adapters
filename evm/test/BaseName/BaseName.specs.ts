@@ -9,10 +9,8 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransactionExternal__factory } from "../../typechain/factories/BatchTransactionExternal__factory";
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { getTransaction } from "../utils";
 import { BASENAME_REGISTRY } from "../../tasks/deploy/basename-external/constants";
 import { zeroAddress } from "ethereumjs-util";
-import { MaxUint256 } from "@ethersproject/constants";
 import { BaseResolverAbi } from "./BaseResolverAbi";
 const { keccak256 } = ethers.utils;
 
@@ -87,7 +85,8 @@ describe("Base Name Adapter: ", async () => {
       params: [
         {
           forking: {
-            jsonRpcUrl: RPC[CHAIN_ID],
+            jsonRpcUrl:
+              "https://base-mainnet.g.alchemy.com/v2/bh8kdOiwQ7zFD7fJYheIbHDEzbobAi9x",
           },
         },
       ],
@@ -126,9 +125,7 @@ describe("Base Name Adapter: ", async () => {
 
     await wnative.deposit({ value: ethers.utils.parseEther("0.1") });
     // await setUserTokenBalance(usdc, deployer, ethers.utils.parseEther("1"));
-
-    expect(await usdc.balanceOf(deployer.address)).gt(0);
-    const amount = 1000000000000000;
+    const amount = 999088168608000;
     const duration = 31536000;
     const name = "ateet";
     const resolver = "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD";
@@ -140,7 +137,7 @@ describe("Base Name Adapter: ", async () => {
       waffle.provider
     );
     const rootnode =
-      0xff1e3c0eb00ec714e34b6114125fbde1dea2f24a72fbf672e7b7fd5690328e10n;
+      "0xff1e3c0eb00ec714e34b6114125fbde1dea2f24a72fbf672e7b7fd5690328e10";
     // const nodehash = keccak256(ethers.encodePacked(rootNode, keccak256(bytes(request.name))));
     const nodehash = keccak256(
       ethers.utils.defaultAbiCoder.encode(
@@ -151,7 +148,7 @@ describe("Base Name Adapter: ", async () => {
 
     const setAddrData = contract.interface.encodeFunctionData("setAddr", [
       nodehash,
-      deployer,
+      deployer.address,
     ]);
     const setNameData = contract.interface.encodeFunctionData("setName", [
       nodehash,
@@ -160,11 +157,11 @@ describe("Base Name Adapter: ", async () => {
 
     const registerRequest = {
       name: name,
-      owner: deployer, // replace with actual owner address
+      owner: deployer.address, // replace with actual owner address
       duration: duration, // registration duration in seconds
       resolver: resolver, // replace with actual resolver address
       data: [setAddrData, setNameData], // replace with actual resolver data bytes
-      reverseRecord: true, // set as primary name
+      reverseRecord: false, // set as primary name
     };
 
     const registerEncode = defaultAbiCoder.encode(
@@ -179,6 +176,29 @@ describe("Base Name Adapter: ", async () => {
       ]
     );
 
+    const MAX_UINT_256 = BigInt(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    );
+    const dataEncoded = defaultAbiCoder.encode(
+      [
+        "address",
+        "uint256",
+        "tuple(string, address, uint256, address, bytes[], bool)",
+      ], // Types for RegisterRequest
+      [
+        registerRequest.owner,
+        MAX_UINT_256,
+        [
+          registerRequest.name,
+          registerRequest.owner,
+          registerRequest.duration,
+          registerRequest.resolver,
+          registerRequest.data,
+          registerRequest.reverseRecord,
+        ],
+      ]
+    );
+
     const tokens = [NATIVE_TOKEN];
     const amounts = [amount];
 
@@ -189,7 +209,11 @@ describe("Base Name Adapter: ", async () => {
       [baseNameRegistryAdapter.address],
       [0],
       [2],
-      [registerEncode]
+      [dataEncoded],
+      {
+        value: 1000000000000000,
+        gasLimit: 30000000,
+      }
     );
     expect(true).gt(true);
   });

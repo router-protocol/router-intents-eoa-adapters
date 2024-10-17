@@ -6,7 +6,8 @@ export const RPC: { [networkId: string]: string } = {
   "137": "https://polygon-bor-rpc.publicnode.com",
   "10": "https://optimism-mainnet.public.blastapi.io",
   "43114": "https://avalanche.public-rpc.com",
-  "8453": "https://base.llamarpc.com",
+  "8453":
+    "https://base.blockpi.network/v1/rpc/228d4e2c3bbf489be82a8e98c83d375af8898cef",
   "59144": "https://rpc.linea.build",
   "5": "https://rpc.ankr.com/eth_goerli",
   "80001": "https://polygon-mumbai-bor.publicnode.com",
@@ -20,6 +21,5 @@ export const RPC: { [networkId: string]: string } = {
   "238": "https://rpc.arthera.net",
   "81457": "https://rpc.blast.io",
   "84532": "https://sepolia.base.org",
-  "10242": "https://rpc-trace.arthera.net/",
   "196": "https://rpc.xlayer.tech"
 };
