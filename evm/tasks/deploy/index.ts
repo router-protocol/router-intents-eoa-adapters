@@ -56,3 +56,4 @@ import "./scribe";
 
 import "./BatchTransaction.deploy";
 import "./ExternalBatchTransaction.deploy";
+import "./basename-external";

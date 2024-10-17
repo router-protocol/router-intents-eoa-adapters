@@ -74,7 +74,7 @@ task(VERIFY_BASENAME_REGISTRY_ADAPTER).setAction(async function (
       break;
     }
   }
-  console.log(`Verifying ${contractName} Contract....`);
+  console.log(`Verifying ${contractName} Contract....`, address);
   await _hre.run("verify:verify", {
     address,
     constructorArguments: [
