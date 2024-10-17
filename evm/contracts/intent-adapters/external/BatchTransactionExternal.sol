@@ -247,7 +247,6 @@ contract BatchTransactionExternal is
         bytes[] calldata data
     ) internal {
         uint256 targetLength = target.length;
-
         require(
             targetLength != 0 &&
                 targetLength == value.length &&
@@ -334,7 +333,6 @@ contract BatchTransactionExternal is
         uint256 callType,
         bytes memory data
     ) internal onlyWhenLive{
-
         bytes memory _calldata;
         if (address(BaseAdapter(target).adapterDataProvider()) == address(0)) {
             _calldata = abi.encodeWithSelector(
@@ -354,7 +352,6 @@ contract BatchTransactionExternal is
         if (callType == 1) result = CallLib._call(target, value, _calldata);
         else if (callType == 2)
             result = CallLib._delegateCall(target, _calldata);
-
         if (result.length != 0) processResult(refundRecipient, result);
     }
 
