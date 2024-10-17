@@ -488,5 +488,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ParifiVaultDeposit: "ParifiVaultDeposit",
   WenSwapper: "WenSwapper",
   ScribeMint: "ScribeMint",
-  BaseRegistry: "BaseRegistry",
+  BaseRegistry: "BaseNameRegistry",
 };
