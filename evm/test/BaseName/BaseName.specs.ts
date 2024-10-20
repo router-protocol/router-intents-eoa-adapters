@@ -9,7 +9,11 @@ import { MockAssetForwarder__factory } from "../../typechain/factories/MockAsset
 import { BatchTransactionExternal__factory } from "../../typechain/factories/BatchTransactionExternal__factory";
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { BigNumber, Contract, Wallet } from "ethers";
-import { BASENAME_REGISTRY } from "../../tasks/deploy/basename-external/constants";
+import {
+  BASENAME_REGISTRY,
+  BASENAME_REVERSE_REGISTRY,
+  BASENAME_REVERSE_RESOLVER,
+} from "../../tasks/deploy/basename-external/constants";
 import { zeroAddress } from "ethereumjs-util";
 import { BaseResolverAbi } from "./BaseResolverAbi";
 const { keccak256 } = ethers.utils;
@@ -48,7 +52,10 @@ describe("Base Name Adapter: ", async () => {
     const baseNameRegistryAdapter = await BaseNameRegistryAdapter.deploy(
       NATIVE_TOKEN,
       WNATIVE,
-      BASENAME_REGISTRY[CHAIN_ID]
+      BASENAME_REGISTRY[CHAIN_ID],
+      BASENAME_REVERSE_REGISTRY[CHAIN_ID],
+      BASENAME_REVERSE_RESOLVER[CHAIN_ID],
+      "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD"
     );
     const MockToken = await ethers.getContractFactory("MockToken");
     const mockToken = await MockToken.deploy();
@@ -127,7 +134,7 @@ describe("Base Name Adapter: ", async () => {
     // await setUserTokenBalance(usdc, deployer, ethers.utils.parseEther("1"));
     const amount = 999088168608000;
     const duration = 31536000;
-    const name = "ateet";
+    const name = "ateetmx";
     const resolver = "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD";
 
     const contractAddress = "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD";
@@ -146,9 +153,10 @@ describe("Base Name Adapter: ", async () => {
       )
     );
 
+    console.log(batchTransaction.address);
     const setAddrData = contract.interface.encodeFunctionData("setAddr", [
       nodehash,
-      deployer.address,
+      batchTransaction.address,
     ]);
     const setNameData = contract.interface.encodeFunctionData("setName", [
       nodehash,
@@ -161,7 +169,7 @@ describe("Base Name Adapter: ", async () => {
       duration: duration, // registration duration in seconds
       resolver: resolver, // replace with actual resolver address
       data: [setAddrData, setNameData], // replace with actual resolver data bytes
-      reverseRecord: false, // set as primary name
+      reverseRecord: true, // set as primary name
     };
 
     const registerEncode = defaultAbiCoder.encode(

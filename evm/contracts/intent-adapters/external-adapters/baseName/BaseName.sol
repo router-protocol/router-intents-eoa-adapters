@@ -6,6 +6,7 @@ import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvide
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {BaseNameRegistryHelpers} from "./BaseNameHelpers.sol";
+import "hardhat/console.sol";
 /**
  * @title Base Name Registry
  * @author Ateet Tiwari
@@ -18,10 +19,13 @@ contract BaseNameRegistry is RouterIntentEoaAdapterWithoutDataProvider, BaseName
     constructor(
         address __native,
         address __wnative,
-        address __baseRegistry
+        address __baseRegistry,
+        address __baseReverseRegistry,
+        address __reverseResolver,
+        address __resolver
     )
         RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative)
-        BaseNameRegistryHelpers(__baseRegistry)
+        BaseNameRegistryHelpers(__baseRegistry, __baseReverseRegistry,__reverseResolver, __resolver)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -61,9 +65,21 @@ contract BaseNameRegistry is RouterIntentEoaAdapterWithoutDataProvider, BaseName
         IBaseRegisterRouter.RegisterRequest memory _registryParams
     ) internal returns (address[] memory tokens, bytes memory logData) {
         uint priceRequired = registerModule.registerPrice(_registryParams.name, _registryParams.duration);
-        require(_amount > priceRequired, "amount supplied is lesser than required");
+        require(_amount >= priceRequired, "amount supplied is lesser than required");
+        _registryParams.owner = msg.sender;
         registerModule.register{value: priceRequired}(_registryParams); 
+        console.log("heere after register");
+        console.log("msg.sender", msg.sender);
+        console.log("owner", _registryParams.owner);
+        console.log("reverseResolver", reverseResolver);
+        console.log("name", _registryParams.name);
+        bytes32 node = 0xff1e3c0eb00ec714e34b6114125fbde1dea2f24a72fbf672e7b7fd5690328e10;
+        // registerReverseModule.setNameForAddr(_registryParams.owner, _registryParams.owner, reverseResolver, _registryParams.name);
+        console.log("heere before setAddr");
+        resolver.setAddr(node, _recipient);
+        console.log("heere after setAddr");
         tokens = new address[](1);
+
         tokens[0] = native();
         logData = abi.encode(_recipient, _amount, true);
     }

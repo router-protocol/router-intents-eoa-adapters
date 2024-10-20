@@ -15,7 +15,9 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { BASENAME_REGISTRY } from "./constants";
+import { BASENAME_REGISTRY,
+  BASENAME_REVERSE_REGISTRY,
+  BASENAME_REVERSE_RESOLVER, } from "./constants";
 
 const contractName: string = CONTRACT_NAME.BaseRegistry;
 const contractType = ContractType.External;
@@ -36,19 +38,21 @@ task(DEPLOY_BASENAME_REGISTRY_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
-      BASENAME_REGISTRY[network]
+      BASENAME_REGISTRY[network],
+      BASENAME_REVERSE_REGISTRY[network],
+      BASENAME_REVERSE_RESOLVER[network]
     );
     await instance.deployed();
 
-    const deployment = await recordAllDeployments(
-      env,
-      network,
-      contractType,
-      contractName,
-      instance.address
-    );
+    // const deployment = await recordAllDeployments(
+    //   env,
+    //   network,
+    //   contractType,
+    //   contractName,
+    //   instance.address
+    // );
 
-    await saveDeployments(contractType, deployment);
+    // await saveDeployments(contractType, deployment);
 
     console.log(`${contractName} contract deployed at`, instance.address);
 
@@ -67,13 +71,13 @@ task(VERIFY_BASENAME_REGISTRY_ADAPTER).setAction(async function (
   const network = await _hre.getChainId();
 
   const deployments = getDeployments(contractType) as IDeploymentAdapters;
-  let address;
-  for (let i = 0; i < deployments[env][network].length; i++) {
-    if (deployments[env][network][i].name === contractName) {
-      address = deployments[env][network][i].address;
-      break;
-    }
-  }
+  const address = "0x0e48f2Cb7061cfc06c7326bA5A55809a1A50D51A";
+  // for (let i = 0; i < deployments[env][network].length; i++) {
+  //   if (deployments[env][network][i].name === contractName) {
+  //     address = deployments[env][network][i].address;
+  //     break;
+  //   }
+  // }
   console.log(`Verifying ${contractName} Contract....`, address);
   await _hre.run("verify:verify", {
     address,
@@ -81,6 +85,8 @@ task(VERIFY_BASENAME_REGISTRY_ADAPTER).setAction(async function (
       NATIVE,
       WNATIVE[env][network],
       BASENAME_REGISTRY[network],
+      BASENAME_REVERSE_REGISTRY[network],
+      BASENAME_REVERSE_RESOLVER[network]
     ],
   });
 
