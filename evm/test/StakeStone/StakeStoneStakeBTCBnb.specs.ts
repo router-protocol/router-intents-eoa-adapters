@@ -17,12 +17,12 @@ import { FeeAdapter__factory } from "../../typechain/factories/FeeAdapter__facto
 import { IWETH__factory } from "../../typechain/factories/IWETH__factory";
 import { getTransaction } from "../utils";
 
-const CHAIN_ID = "1";
-const SBTC_TOKEN = "0x094c0e36210634c3CfA25DC11B96b562E0b07624";
-const SBTC_VAULT = "0x7dBAC0aA440A25D7FB43951f7b178FF7A809108D";
-const SBTC_LZ_ADAPTER = "0x3f690f43a9fCA689829A22bf925c89B7a48ca57F";
+const CHAIN_ID = "56";
+const SBTC_TOKEN = "0x15469528C11E8Ace863F3F9e5a8329216e33dD7d";
+const SBTC_VAULT = "0x3aa0670E24Cb122e1d5307Ed74b0c44d619aFF9b";
+const SBTC_LZ_ADAPTER = "0x7122985656e38BDC0302Db86685bb972b145bD3C";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const CBBTC = "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf";
+const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 
 const LZ_CONTRACT_ABI = [
   {
@@ -60,7 +60,7 @@ const LZ_CONTRACT_ABI = [
   },
 ];
 
-describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
+describe("StakeStone Stake BTC on BNB Adapter: ", async () => {
   const [deployer] = waffle.provider.getWallets();
 
   const setupTests = async () => {
@@ -139,7 +139,7 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
         deployer
       ),
       sbtc: TokenInterface__factory.connect(SBTC_TOKEN, deployer),
-      cbBtc: TokenInterface__factory.connect(CBBTC, deployer),
+      btcB: TokenInterface__factory.connect(BTCB, deployer),
       lzContract,
     };
   };
@@ -158,12 +158,12 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
   });
 
   it("Can stake on stakeStone on same chain when lz dstEid is 0", async () => {
-    const { batchTransaction, stakeStoneStakeBTCEthAdapter, sbtc, cbBtc } =
+    const { batchTransaction, stakeStoneStakeBTCEthAdapter, sbtc, btcB } =
       await setupTests();
 
     const txn = await getTransaction({
       fromTokenAddress: NATIVE_TOKEN,
-      toTokenAddress: CBBTC,
+      toTokenAddress: BTCB,
       amount: ethers.utils.parseEther("200").toString(),
       fromTokenChainId: CHAIN_ID,
       toTokenChainId: CHAIN_ID,
@@ -177,9 +177,9 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
       data: txn.data,
     });
 
-    const cbBtcBalBefore = await cbBtc.balanceOf(deployer.address);
+    const btcBBalBefore = await btcB.balanceOf(deployer.address);
 
-    expect(cbBtcBalBefore).gt(0);
+    expect(btcBBalBefore).gt(0);
 
     const dstEid = "0";
     const nativeFee = "0";
@@ -195,11 +195,11 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
 
     const stakeStoneData = defaultAbiCoder.encode(
       ["address", "address", "uint256", "uint32", "bytes"],
-      [cbBtc.address, deployer.address, unit256Max, dstEid, crossChainData]
+      [btcB.address, deployer.address, unit256Max, dstEid, crossChainData]
     );
 
-    const tokens = [CBBTC];
-    const amounts = [cbBtcBalBefore];
+    const tokens = [BTCB];
+    const amounts = [btcBBalBefore];
     const targets = [stakeStoneStakeBTCEthAdapter.address];
     const data = [stakeStoneData];
     const value = [0];
@@ -212,7 +212,7 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
       [["1"], fee, tokens, amounts, true]
     );
 
-    await cbBtc.approve(batchTransaction.address, cbBtcBalBefore);
+    await btcB.approve(batchTransaction.address, btcBBalBefore);
 
     await batchTransaction.executeBatchCallsSameChain(
       0,
@@ -226,10 +226,10 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
       { gasLimit: 10000000 }
     );
 
-    const cbBtcbalAfter = await cbBtc.balanceOf(deployer.address);
+    const btcBbalAfter = await btcB.balanceOf(deployer.address);
     const sbtcBalAfter = await sbtc.balanceOf(deployer.address);
 
-    expect(cbBtcBalBefore).gt(cbBtcbalAfter);
+    expect(btcBBalBefore).gt(btcBbalAfter);
     expect(sbtcBalAfter).gt(sbtcBalBefore);
   });
 
@@ -239,12 +239,12 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
       stakeStoneStakeBTCEthAdapter,
       sbtc,
       lzContract,
-      cbBtc,
+      btcB,
     } = await setupTests();
 
     const txn = await getTransaction({
       fromTokenAddress: NATIVE_TOKEN,
-      toTokenAddress: CBBTC,
+      toTokenAddress: BTCB,
       amount: ethers.utils.parseEther("200").toString(),
       fromTokenChainId: CHAIN_ID,
       toTokenChainId: CHAIN_ID,
@@ -258,16 +258,16 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
       data: txn.data,
     });
 
-    const cbBtcBalBefore = await cbBtc.balanceOf(deployer.address);
+    const btcBBalBefore = await btcB.balanceOf(deployer.address);
 
-    expect(cbBtcBalBefore).gt(0);
-    const dstEid = "30102";
+    expect(btcBBalBefore).gt(0);
+    const dstEid = "30101";
 
     const fee = await lzContract.quoteSend(
       {
         dstEid: dstEid,
         to: ethers.utils.hexZeroPad(deployer.address, 32),
-        amountLD: "7937250800000000000",
+        amountLD: btcBBalBefore.toString(),
         minAmountLD: "0",
         extraOptions: "0x",
         composeMsg: "0x",
@@ -288,11 +288,11 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
 
     const stakeStoneData = defaultAbiCoder.encode(
       ["address", "address", "uint256", "uint32", "bytes"],
-      [cbBtc.address, deployer.address, unit256Max, dstEid, crossChainData]
+      [btcB.address, deployer.address, unit256Max, dstEid, crossChainData]
     );
 
-    const tokens = [CBBTC];
-    const amounts = [cbBtcBalBefore];
+    const tokens = [BTCB];
+    const amounts = [btcBBalBefore];
     const targets = [stakeStoneStakeBTCEthAdapter.address];
     const data = [stakeStoneData];
     const value = [0];
@@ -304,7 +304,7 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
       [["1"], ["0"], tokens, amounts, true]
     );
 
-    await cbBtc.approve(batchTransaction.address, cbBtcBalBefore);
+    await btcB.approve(batchTransaction.address, btcBBalBefore);
 
     await batchTransaction.executeBatchCallsSameChain(
       0,
@@ -318,6 +318,6 @@ describe("StakeStone Stake BTC on Ethereum Adapter: ", async () => {
       { value: fee[0].toString(), gasLimit: 10000000 }
     );
     const sbtcBalAfter = await sbtc.balanceOf(deployer.address);
-    expect(sbtcBalAfter.sub(sbtcBalBefore)).lt(10**13);
+    expect(sbtcBalAfter.sub(sbtcBalBefore)).lt(10 ** 13);
   });
 });
