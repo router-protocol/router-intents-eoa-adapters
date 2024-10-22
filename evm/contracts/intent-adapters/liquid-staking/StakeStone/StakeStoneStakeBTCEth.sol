@@ -7,11 +7,11 @@ import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
- * @title StakeStoneStakeBTCEth
+ * @title StakeStoneStakeBTC
  * @author Yashika Goyal
- * @notice Staking Tokens on StakeStone (Ethereum) to receive SBTC
+ * @notice Staking Tokens on StakeStone (Ethereum & BNB) to receive SBTC
  */
-contract StakeStoneStakeBTCEth is RouterIntentEoaAdapterWithoutDataProvider {
+contract StakeStoneStakeBTC is RouterIntentEoaAdapterWithoutDataProvider {
     using SafeERC20 for IERC20;
 
     address public immutable sBTC;
@@ -31,7 +31,7 @@ contract StakeStoneStakeBTCEth is RouterIntentEoaAdapterWithoutDataProvider {
     }
 
     function name() public pure override returns (string memory) {
-        return "StakeStoneStakeBTCEth";
+        return "StakeStoneStakeBTC";
     }
 
     /**

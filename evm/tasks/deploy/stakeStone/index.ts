@@ -1,3 +1,3 @@
 import "./StakeStoneStakeEth.deploy";
 import "./StakeStoneVaultAdapter.deploy";
-import "./StakeStoneStakeBTCEth.deploy";
+import "./StakeStoneStakeBTC.deploy";
