@@ -22,6 +22,7 @@ export const getPathfinderData = async (
     fromTokenChainId,
     toTokenChainId,
     slippageTolerance: 10,
+    partnerId: 0,
   };
 
   const quoteData = await getQuote(quoteParams);
@@ -71,25 +72,30 @@ const getQuote = async (params: any) => {
 };
 
 export const getTransaction = async (params: any) => {
-  const quote = await getQuote({
-    fromTokenAddress: params.fromTokenAddress,
-    toTokenAddress: params.toTokenAddress,
-    amount: params.amount,
-    fromTokenChainId: params.fromTokenChainId,
-    toTokenChainId: params.toTokenChainId,
-  });
+  try {
+    const quote = await getQuote({
+      fromTokenAddress: params.fromTokenAddress,
+      toTokenAddress: params.toTokenAddress,
+      amount: params.amount,
+      fromTokenChainId: params.fromTokenChainId,
+      toTokenChainId: params.toTokenChainId,
+      partnerId: 0,
+    });
 
-  const txEndpoint = "transaction";
-  const txUrl = `${PATH_FINDER_API_URL}/${txEndpoint}`;
-  const txParams = {
-    ...quote,
-    senderAddress: params.senderAddress,
-    receiverAddress: params.receiverAddress ?? params.senderAddress,
-  };
+    const txEndpoint = "transaction";
+    const txUrl = `${PATH_FINDER_API_URL}/${txEndpoint}`;
+    const txParams = {
+      ...quote,
+      senderAddress: params.senderAddress,
+      receiverAddress: params.receiverAddress ?? params.senderAddress,
+    };
 
-  const txData = await axios.post(txUrl, txParams);
-  // console.log(txData);
-  return txData.data.txn;
+    const txData = await axios.post(txUrl, txParams);
+    // console.log(txData);
+    return txData.data.txn;
+  } catch (ex) {
+    console.log(ex);
+  }
 };
 
 export const decodeUnsupportedOperationEvent = (
