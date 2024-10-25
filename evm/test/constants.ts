@@ -12,14 +12,15 @@ export const RPC: { [networkId: string]: string } = {
   "5": "https://rpc.ankr.com/eth_goerli",
   "80001": "https://polygon-mumbai-bor.publicnode.com",
   "17000": "https://ethereum-holesky.publicnode.com",
-  "534352": "https://rpc.ankr.com/scroll",
-  "5000": "https://1rpc.io/mantle",
+  "534352": "https://1rpc.io/scroll",
   "421614": "https://public.stackup.sh/api/v1/node/arbitrum-sepolia",
   "34443": "https://mainnet.mode.network",
   "11155111": "https://rpc2.sepolia.org",
-  "10242": "https://rpc-trace.arthera.net/",
   "238": "https://rpc.arthera.net",
   "81457": "https://rpc.blast.io",
   "84532": "https://sepolia.base.org",
-  "196": "https://rpc.xlayer.tech"
+  "10242": "https://rpc-trace.arthera.net/",
+  "196": "https://rpc.xlayer.tech",
+  "5000":
+    "https://rpc.ankr.com/mantle/4ae47d0ced171bb8d2181b94607bd52a6fe25d8f64060cefd21ee610f98b7bf5",
 };
