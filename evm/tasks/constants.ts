@@ -242,6 +242,8 @@ export const DEPLOY_STAKESTONE_STAKE_BTC_ADAPTER =
   "DEPLOY_STAKESTONE_STAKE_BTC_ADAPTER";
 export const VERIFY_STAKESTONE_STAKE_BTC_ADAPTER =
   "VERIFY_STAKESTONE_STAKE_BTC_ADAPTER";
+export const DEPLOY_RING_MINT_ADAPTER = "DEPLOY_RING_MINT_ADAPTER";
+export const VERIFY_RING_MINT_ADAPTER = "VERIFY_RING_MINT_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -483,5 +485,6 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   WenSwapper: "WenSwapper",
   ScribeMint: "ScribeMint",
   AgniMint: "AgniMint",
-  StakeStoneStakeBTC: "StakeStoneStakeBTC"
+  StakeStoneStakeBTC: "StakeStoneStakeBTC",
+  RingMint: "RingMint",
 };
