@@ -248,6 +248,8 @@ export const DEPLOY_STAKESTONE_STAKE_BTC_ADAPTER =
   "DEPLOY_STAKESTONE_STAKE_BTC_ADAPTER";
 export const VERIFY_STAKESTONE_STAKE_BTC_ADAPTER =
   "VERIFY_STAKESTONE_STAKE_BTC_ADAPTER";
+export const DEPLOY_RING_MINT_ADAPTER = "DEPLOY_RING_MINT_ADAPTER";
+export const VERIFY_RING_MINT_ADAPTER = "VERIFY_RING_MINT_ADAPTER";
 
 export const DEPLOY_BASENAME_REGISTRY_ADAPTER =
   "DEPLOY_BASENAME_REGISTRY_ADAPTER";
@@ -501,4 +503,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   AgniMint: "AgniMint",
   StakeStoneStakeBTC: "StakeStoneStakeBTC",
   TokenPreLaunch: "TokenLaunch",
+  RingMint: "RingMint",
 };
