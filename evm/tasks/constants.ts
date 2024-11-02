@@ -254,6 +254,9 @@ export const DEPLOY_BASENAME_REGISTRY_ADAPTER =
 export const VERIFY_BASENAME_REGISTRY_ADAPTER =
   "VERIFY_BASENAME_REGISTRY_ADAPTER";
 
+export const DEPLOY_TOKEN_LAUNCH_ADAPTER = "DEPLOY_TOKEN_LAUNCH_ADAPTER";
+export const VERIFY_TOKEN_LAUNCH_ADAPTER = "VERIFY_TOKEN_LAUNCH_ADAPTER";
+
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
 } = {
@@ -497,4 +500,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   BaseRegistry: "BaseNameRegistry",
   AgniMint: "AgniMint",
   StakeStoneStakeBTC: "StakeStoneStakeBTC",
+  TokenPreLaunch: "TokenLaunch",
 };

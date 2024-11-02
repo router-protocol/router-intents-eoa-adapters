@@ -13,7 +13,7 @@ export enum ContractType {
   StakestoneVault,
   Others,
   Fee,
-  External
+  External,
 }
 
 export interface IDeployment {
@@ -40,8 +40,7 @@ const getFilePath = (contractType: ContractType): string => {
   if (contractType === ContractType.Swap) path = "deployment/swap.json";
   if (contractType === ContractType.LiquidStaking)
     path = "deployment/liquid-staking.json";
-  if (contractType === ContractType.Staking)
-    path = "deployment/staking.json";
+  if (contractType === ContractType.Staking) path = "deployment/staking.json";
   if (contractType === ContractType.LendingBorrowing)
     path = "deployment/lending-borrowing.json";
   if (contractType === ContractType.StakestoneVault)

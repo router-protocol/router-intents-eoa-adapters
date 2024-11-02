@@ -58,3 +58,4 @@ import "./agni";
 import "./BatchTransaction.deploy";
 import "./ExternalBatchTransaction.deploy";
 import "./basename-external";
+import "./tokenLaunch";

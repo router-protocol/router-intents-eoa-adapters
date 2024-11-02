@@ -6,8 +6,7 @@ export const RPC: { [networkId: string]: string } = {
   "137": "https://polygon-bor-rpc.publicnode.com",
   "10": "https://optimism-mainnet.public.blastapi.io",
   "43114": "https://avalanche.public-rpc.com",
-  "8453":
-    "https://base.blockpi.network/v1/rpc/228d4e2c3bbf489be82a8e98c83d375af8898cef",
+  "8453": "https://base.llamarpc.com",
   "59144": "https://rpc.linea.build",
   "5": "https://rpc.ankr.com/eth_goerli",
   "80001": "https://polygon-mumbai-bor.publicnode.com",
