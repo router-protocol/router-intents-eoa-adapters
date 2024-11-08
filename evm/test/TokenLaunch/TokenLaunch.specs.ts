@@ -128,7 +128,7 @@ describe("Token Pre Launch Adapter: ", async () => {
   it("Can stake on eth on same chain", async () => {
     const { batchTransaction, tokenPrelaunchAdapter } = await setupTests();
 
-    const amount = ethers.utils.parseEther("1");
+    const amount = ethers.utils.parseEther("0.1");
 
     const refereerAddress = "0x00eb64b501613f8cf8ef3ac4f82fc63a50343fee";
     const refundAddress = "0xBec33ce33afdAF5604CCDF2c4b575238C5FBD23d";

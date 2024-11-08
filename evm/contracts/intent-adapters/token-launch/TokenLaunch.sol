@@ -5,7 +5,6 @@ import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvide
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 import {TokenLaunchHelpers} from "./TokenLaunchHelpers.sol";
-import "hardhat/console.sol";
 /**
  * @title Pre Sale Token Launch
  * @author Ateet Tiwari
@@ -39,13 +38,33 @@ contract TokenLaunch is RouterIntentEoaAdapterWithoutDataProvider, TokenLaunchHe
     ) external payable override returns (address[] memory tokens) {
         (address _tokenAddress, uint256 _amount, address _referrer, address _recipient) = parseInputs(data);
         if (address(this) == self()) {
-            require(
-                msg.value == _amount,
-                Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
-            );
+            if (_tokenAddress != native())
+                IERC20(_tokenAddress).safeTransferFrom(
+                    msg.sender,
+                    self(),
+                    _amount
+                );
+            else
+                require(
+                    msg.value == _amount,
+                    Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
+                );
         } else if (_amount == type(uint256).max)
-            _amount = address(this).balance;
-
+        {
+            if (_tokenAddress == native()) {
+                _amount = address(this).balance;
+            } else {
+            _amount = IERC20(_tokenAddress).balanceOf(address(this));
+            }
+        }
+        if(_tokenAddress != native())
+        {
+            IERC20(_tokenAddress).safeIncreaseAllowance(
+            address(tokenPreMinting),
+            _amount
+        );
+        }
+        
         bytes memory logData;
         (tokens, logData) = _buyTokens(_tokenAddress, _amount, _referrer, _recipient);
         emit ExecutionEvent(name(), logData);
@@ -59,10 +78,13 @@ contract TokenLaunch is RouterIntentEoaAdapterWithoutDataProvider, TokenLaunchHe
     ) internal returns (address[] memory tokens, bytes memory logData) {
         if(_tokenAddress == native())
         {
-            tokenPreMinting.buyTokensETH(_referrer, _recipient);
+            tokenPreMinting.buyTokensETH{
+                        value: _amount
+                    }(_referrer, _recipient);
         }
         else {
-            tokenPreMinting.buyTokens(_tokenAddress, _amount, _referrer, _recipient);
+            uint256 _newAmount = IERC20(_tokenAddress).balanceOf(address(this));
+            tokenPreMinting.buyTokens(_tokenAddress, _newAmount, _referrer, _recipient);
         }
         tokens = new address[](1);
         tokens[0] = _tokenAddress;

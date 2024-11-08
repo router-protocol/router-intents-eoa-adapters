@@ -8,10 +8,10 @@ interface ITokenLaunch {
         uint256 usdAmount,
         address referrer,
         address recipient
-    ) external;
+    ) external payable;
 
     function buyTokensETH(
         address referrer,
         address recipient
-    ) external;
+    ) external payable;
 }
