@@ -382,6 +382,8 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
     "11155111": "0xf550605cb56fbba5c0f0e01174cf4e707ce0c9ca",
     "534351": "0x5300000000000000000000000000000000000004",
     "10243": "",
+    "80002": "0x0ae690aad8663aab12a671a6a0d74242332de85f",
+    "421614": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
   },
   mainnet: {
     "1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",

@@ -37,7 +37,9 @@ task(DEPLOY_BATCH_TRANSACTION)
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
     const factory = await _hre.ethers.getContractFactory(contractName);
 
-    const feeDeployments = getDeployments(ContractType.Fee) as IDeploymentAdapters;
+    const feeDeployments = getDeployments(
+      ContractType.Fee
+    ) as IDeploymentAdapters;
     const feeAdapterAddress = feeDeployments[env][network][0];
 
     const instance = await factory.deploy(
@@ -78,7 +80,9 @@ task(VERIFY_BATCH_TRANSACTION).setAction(async function (
 
   const deployments = getDeployments(contractType) as IDeployment;
   const address = deployments[env][network][contractName];
-  const feeDeployments = getDeployments(ContractType.Fee) as IDeploymentAdapters;
+  const feeDeployments = getDeployments(
+    ContractType.Fee
+  ) as IDeploymentAdapters;
   const feeAdapterAddress = feeDeployments[env][network][0];
 
   console.log(`Verifying ${contractName} Contract....`);
@@ -90,7 +94,7 @@ task(VERIFY_BATCH_TRANSACTION).setAction(async function (
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       ASSET_BRIDGE[env][network],
-      feeAdapterAddress.address
+      feeAdapterAddress.address,
     ],
   });
 
