@@ -4,26 +4,25 @@ import {
   ASSET_FORWARDER,
   CONTRACT_NAME,
   DEFAULT_ENV,
-  DEPLOY_BATCH_TRANSACTION,
+  DEPLOY_EXTERNAL_BATCH_TRANSACTION,
   DEXSPAN,
   NATIVE,
-  VERIFY_BATCH_TRANSACTION,
+  VERIFY_EXTERNAL_BATCH_TRANSACTION,
   WNATIVE,
 } from "../constants";
 import { task } from "hardhat/config";
 import {
   ContractType,
   IDeployment,
-  IDeploymentAdapters,
   getDeployments,
   recordAllDeployments,
   saveDeployments,
 } from "../utils";
 
-const contractName: string = CONTRACT_NAME.BatchTransaction;
+const contractName: string = CONTRACT_NAME.BatchTransactionExternal;
 const contractType = ContractType.None;
 
-task(DEPLOY_BATCH_TRANSACTION)
+task(DEPLOY_EXTERNAL_BATCH_TRANSACTION)
   .addFlag("verify", "pass true to verify the contract")
   .setAction(async function (
     _taskArguments: TaskArguments,
@@ -37,18 +36,12 @@ task(DEPLOY_BATCH_TRANSACTION)
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
     const factory = await _hre.ethers.getContractFactory(contractName);
 
-    const feeDeployments = getDeployments(
-      ContractType.Fee
-    ) as IDeploymentAdapters;
-    const feeAdapterAddress = feeDeployments[env][network][0];
-
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
-      ASSET_BRIDGE[env][network],
-      feeAdapterAddress.address
+      ASSET_BRIDGE[env][network]
     );
     await instance.deployed();
 
@@ -65,11 +58,11 @@ task(DEPLOY_BATCH_TRANSACTION)
     console.log(`${contractName} contract deployed at`, instance.address);
 
     if (_taskArguments.verify === true) {
-      await _hre.run(VERIFY_BATCH_TRANSACTION);
+      await _hre.run(VERIFY_EXTERNAL_BATCH_TRANSACTION);
     }
   });
 
-task(VERIFY_BATCH_TRANSACTION).setAction(async function (
+task(VERIFY_EXTERNAL_BATCH_TRANSACTION).setAction(async function (
   _taskArguments: TaskArguments,
   _hre: HardhatRuntimeEnvironment
 ) {
@@ -80,10 +73,6 @@ task(VERIFY_BATCH_TRANSACTION).setAction(async function (
 
   const deployments = getDeployments(contractType) as IDeployment;
   const address = deployments[env][network][contractName];
-  const feeDeployments = getDeployments(
-    ContractType.Fee
-  ) as IDeploymentAdapters;
-  const feeAdapterAddress = feeDeployments[env][network][0];
 
   console.log(`Verifying ${contractName} Contract....`);
   await _hre.run("verify:verify", {
@@ -94,7 +83,6 @@ task(VERIFY_BATCH_TRANSACTION).setAction(async function (
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
       ASSET_BRIDGE[env][network],
-      feeAdapterAddress.address,
     ],
   });
 

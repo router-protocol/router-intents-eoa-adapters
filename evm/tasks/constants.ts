@@ -3,6 +3,12 @@ export const DEFAULT_ENV = "mainnet";
 
 export const DEPLOY_BATCH_TRANSACTION = "DEPLOY_BATCH_TRANSACTION";
 export const VERIFY_BATCH_TRANSACTION = "VERIFY_BATCH_TRANSACTION";
+
+export const DEPLOY_EXTERNAL_BATCH_TRANSACTION =
+  "DEPLOY_EXTERNAL_BATCH_TRANSACTION";
+export const VERIFY_EXTERNAL_BATCH_TRANSACTION =
+  "VERIFY_EXTERNAL_BATCH_TRANSACTION";
+
 export const DEPLOY_LIDO_STAKE_ETH_ADAPTER = "DEPLOY_LIDO_STAKE_ETH_ADAPTER";
 export const VERIFY_LIDO_STAKE_ETH_ADAPTER = "VERIFY_LIDO_STAKE_ETH_ADAPTER";
 export const DEPLOY_LIDO_STAKE_ETH_TESTNET_ADAPTER =
@@ -245,6 +251,14 @@ export const VERIFY_STAKESTONE_STAKE_BTC_ADAPTER =
 export const DEPLOY_RING_MINT_ADAPTER = "DEPLOY_RING_MINT_ADAPTER";
 export const VERIFY_RING_MINT_ADAPTER = "VERIFY_RING_MINT_ADAPTER";
 
+export const DEPLOY_BASENAME_REGISTRY_ADAPTER =
+  "DEPLOY_BASENAME_REGISTRY_ADAPTER";
+export const VERIFY_BASENAME_REGISTRY_ADAPTER =
+  "VERIFY_BASENAME_REGISTRY_ADAPTER";
+
+export const DEPLOY_TOKEN_LAUNCH_ADAPTER = "DEPLOY_TOKEN_LAUNCH_ADAPTER";
+export const VERIFY_TOKEN_LAUNCH_ADAPTER = "VERIFY_TOKEN_LAUNCH_ADAPTER";
+
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
 } = {
@@ -368,6 +382,8 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
     "11155111": "0xf550605cb56fbba5c0f0e01174cf4e707ce0c9ca",
     "534351": "0x5300000000000000000000000000000000000004",
     "10243": "",
+    "80002": "0x0ae690aad8663aab12a671a6a0d74242332de85f",
+    "421614": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
   },
   mainnet: {
     "1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -399,6 +415,7 @@ export const FEE_WALLET = "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee";
 
 export const CONTRACT_NAME: { [key: string]: string } = {
   BatchTransaction: "BatchTransaction",
+  BatchTransactionExternal: "BatchTransactionExternal",
   LidoStakeEth: "LidoStakeEth",
   LidoStakeEthTestnet: "LidoStakeEthTestnet",
   LidoStakeMatic: "LidoStakeMatic",
@@ -484,7 +501,9 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   ParifiVaultDeposit: "ParifiVaultDeposit",
   WenSwapper: "WenSwapper",
   ScribeMint: "ScribeMint",
+  BaseRegistry: "BaseNameRegistry",
   AgniMint: "AgniMint",
   StakeStoneStakeBTC: "StakeStoneStakeBTC",
+  TokenPreLaunch: "TokenLaunch",
   RingMint: "RingMint",
 };

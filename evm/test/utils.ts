@@ -22,6 +22,7 @@ export const getPathfinderData = async (
     fromTokenChainId,
     toTokenChainId,
     slippageTolerance: 10,
+    partnerId: 0,
   };
 
   const quoteData = await getQuote(quoteParams);

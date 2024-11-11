@@ -133,6 +133,14 @@ const config: HardhatUserConfig = {
           ? [process.env.PRIVATE_KEY]
           : [""],
     },
+    polygonAmoy: {
+      url: process.env.POLYGON_AMOY_URL || "",
+      chainId: 80002,
+      accounts:
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
+          : [""],
+    },
     bsc: {
       url: "https://bsc-dataseed2.binance.org",
       chainId: 56,
@@ -187,7 +195,7 @@ const config: HardhatUserConfig = {
       chainId: 43113,
     },
     arbitrum: {
-      url: "https://api.stateless.solutions/arbitrum-one/v1/demo",
+      url: "https://rpc.ankr.com/arbitrum",
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]
@@ -217,6 +225,14 @@ const config: HardhatUserConfig = {
           ? [process.env.PRIVATE_KEY]
           : [""],
       chainId: 42170,
+    },
+    arbitrumSepolia: {
+      url: "https://arbitrum-sepolia.blockpi.network/v1/rpc/public",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
+          : [""],
+      chainId: 421614,
     },
     linea: {
       url: "https://rpc.linea.build",
@@ -321,6 +337,7 @@ const config: HardhatUserConfig = {
           ? [process.env.PRIVATE_KEY]
           : [""],
       chainId: 11155111,
+      gasPrice: 35000000000,
     },
     moonbeam: {
       url: "https://rpc.api.moonbeam.network",
@@ -416,6 +433,7 @@ const config: HardhatUserConfig = {
       base: process.env.BASE_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
+      polygonAmoy: process.env.POLYGON_AMOY_URL || "",
       opera: process.env.FTMSCAN_API_KEY || "",
       ftmTestnet: process.env.FTMSCAN_API_KEY || "",
       bscTestnet: process.env.BSCSCAN_API_KEY || "",
@@ -541,18 +559,19 @@ const config: HardhatUserConfig = {
         network: "xlayer",
         chainId: 196,
         urls: {
-            apiURL: "https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER",
-            browserURL: "https://www.oklink.com/xlayer",
-        }
-    },
-    {
-      network: "mantle",
-      chainId: 5000,
-      urls: {
-        apiURL: "https://explorer.mantle.xyz/api",
-        browserURL: "https://explorer.mantle.xyz/",
+          apiURL:
+            "https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER",
+          browserURL: "https://www.oklink.com/xlayer",
+        },
       },
-    },
+      {
+        network: "mantle",
+        chainId: 5000,
+        urls: {
+          apiURL: "https://explorer.mantle.xyz/api",
+          browserURL: "https://explorer.mantle.xyz/",
+        },
+      },
     ],
   },
 };

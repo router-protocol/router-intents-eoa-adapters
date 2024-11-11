@@ -12,7 +12,8 @@ export enum ContractType {
   Perpetuals,
   StakestoneVault,
   Others,
-  Fee
+  Fee,
+  External,
 }
 
 export interface IDeployment {
@@ -39,8 +40,7 @@ const getFilePath = (contractType: ContractType): string => {
   if (contractType === ContractType.Swap) path = "deployment/swap.json";
   if (contractType === ContractType.LiquidStaking)
     path = "deployment/liquid-staking.json";
-  if (contractType === ContractType.Staking)
-    path = "deployment/staking.json";
+  if (contractType === ContractType.Staking) path = "deployment/staking.json";
   if (contractType === ContractType.LendingBorrowing)
     path = "deployment/lending-borrowing.json";
   if (contractType === ContractType.StakestoneVault)
@@ -49,6 +49,7 @@ const getFilePath = (contractType: ContractType): string => {
   if (contractType === ContractType.Perpetuals) path = "deployment/perps.json";
   if (contractType === ContractType.Fee) path = "deployment/fee.json";
   if (contractType === ContractType.Others) path = "deployment/others.json";
+  if (contractType === ContractType.External) path = "deployment/external.json";
 
   return path;
 };

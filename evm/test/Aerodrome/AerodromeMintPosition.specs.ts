@@ -20,7 +20,7 @@ const USDC = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const WNATIVE = "0x4200000000000000000000000000000000000006";
 const USDC_WETH_POOL = "0xcDAC0d6c6C59727a65F871236188350531885C43";
-
+const FEE_WALLET = "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee"
 describe("AerodromeMint Adapter: ", async () => {
   const [deployer, alice] = waffle.provider.getWallets();
 
@@ -35,7 +35,7 @@ describe("AerodromeMint Adapter: ", async () => {
     const FeeAdapter = await ethers.getContractFactory("FeeAdapter");
     const feeAdapter = await FeeAdapter.deploy(
       NATIVE_TOKEN,
-      WNATIVE_TOKEN,
+      WNATIVE,
       FEE_WALLET,
       5
     );
@@ -46,7 +46,7 @@ describe("AerodromeMint Adapter: ", async () => {
 
     const batchTransaction = await BatchTransaction.deploy(
       NATIVE_TOKEN,
-      WNATIVE_TOKEN,
+      WNATIVE,
       mockAssetForwarder.address,
       DEXSPAN[env][CHAIN_ID],
       zeroAddress(),
@@ -64,8 +64,8 @@ describe("AerodromeMint Adapter: ", async () => {
       );
 
     await batchTransaction.setAdapterWhitelist(
-      [aerodromeMintPositionAdapter.address],
-      [true]
+      [aerodromeMintPositionAdapter.address, feeAdapter.address],
+      [true, true]
     );
 
     const MockToken = await ethers.getContractFactory("MockToken");
@@ -107,7 +107,7 @@ describe("AerodromeMint Adapter: ", async () => {
       params: [
         {
           forking: {
-            jsonRpcUrl: RPC[CHAIN_ID],
+            jsonRpcUrl: "https://base-mainnet.g.alchemy.com/v2/bh8kdOiwQ7zFD7fJYheIbHDEzbobAi9x",
           },
         },
       ],

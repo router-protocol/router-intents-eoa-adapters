@@ -57,3 +57,6 @@ import "./agni";
 import "./ring";
 
 import "./BatchTransaction.deploy";
+import "./ExternalBatchTransaction.deploy";
+import "./basename-external";
+import "./tokenLaunch";

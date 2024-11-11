@@ -84,6 +84,10 @@ abstract contract IThenaNonfungiblePositionManager {
         uint128 amount1Max;
     }
 
+    function balanceOf(
+        address owner
+    ) external view virtual returns (uint256 balance);
+    
     function collect(
         CollectParams calldata params
     ) external payable virtual returns (uint256 amount0, uint256 amount1);
