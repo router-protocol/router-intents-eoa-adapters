@@ -275,12 +275,11 @@ export const ASSET_FORWARDER: {
     "250": "0x0000000000000000000000000000000000000000",
     "8453": "0x0000000000000000000000000000000000000000",
     "17000": "0x31b9834930109d5feac3115ae5d3c6d62fac3270",
-    "11155111": "0x9057e0977cdf1e3aa03a50860adee4775e992e88",
     "534351": "0x94C1aee83563342e7139A5eF9dd05561B81cae8e",
     "10243": "",
-    "80002": "0x5c2c6ab36a6e4e160fb9c529e164b7781f7d255f",
     "421614": "0x1d8a519e504ad8a52d35daa85caac188f834e01c",
-
+    "11155111": "0x9057e0977cdf1e3aa03a50860adee4775e992e88",
+    "80002": "0x5c2c6ab36a6e4e160fb9c529e164b7781f7d255f",
   },
   mainnet: {
     "1": "0xc21e4ebd1d92036cb467b53fe3258f219d909eb9",
@@ -306,6 +305,12 @@ export const ASSET_FORWARDER: {
 export const ASSET_BRIDGE: {
   [network: string]: { [chainId: string]: string };
 } = {
+  testnet: {
+    "421614": "0x2C14bE0E5c30644E48338a572A8A812a24A6Fb8c",
+    "80002": "0x773C5FB48739Dee9F9A0F38d5EFBE88D3fF83D88",
+    "11155111": "0xd6683360745405ab779790918058396697370A69",
+    "43113": "0x233d5bde3CF06E96E936C6d775968Fa375c2C88F",
+  },
   mainnet: {
     "1": "0xd87Fff92728792F6dFFA5A915Bd4F7BE1A5bb45E",
     "10": "0x21c1E74CAaDf990E237920d5515955a024031109",
@@ -331,7 +336,7 @@ export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
   testnet: {
     "5": "0x6dEcd37F5409e2D32cE5a792d9BcE07d3752c60B",
     "80001": "0x04D2b2C62d7Ba9aA583bfd930c6fa4Ac0AFFB25D",
-    "43113": "0x017F615438b9f0be26c23f5AB17db39BA1e63Cd1",
+    "43113": "0x7Be251B6Da3086E0f39F4e4E75A20E5ABCf59B93",
     "1": "0x35101b9DeCace6324aaDf65867d695D175c71D59",
     "137": "0xc57133521ffbd729cb81cc8ddc12d9e9f61e0f6a",
     "56": "0x0000000000000000000000000000000000000000",
@@ -345,6 +350,8 @@ export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
     "534351": "0x0000000000000000000000000000000000000000",
     "10243": "",
     "196": "0x0000000000000000000000000000000000000000",
+    "421614": "0x0000000000000000000000000000000000000000",
+    "80002": "0x0000000000000000000000000000000000000000",
   },
   mainnet: {
     "1": "0x35101b9DeCace6324aaDf65867d695D175c71D59",
@@ -386,7 +393,7 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
     "534351": "0x5300000000000000000000000000000000000004",
     "10243": "",
     "80002": "0x0ae690aad8663aab12a671a6a0d74242332de85f",
-    "421614": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    "421614": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
   },
   mainnet: {
     "1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -414,6 +421,14 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
   },
 };
 
+export const USDC: { [network: string]: { [chainId: string]: string } } = {
+  testnet: {
+    "11155111": "0xf08A50178dfcDe18524640EA6618a1f965821715",
+    "43113": "0xaf82969ecf299c1f1bb5e1d12ddacc9027431160",
+    "80002": "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582",
+    "421614": "0xe7E15A3027b6A08d2a6a3a9dc9250E711c206767",
+  },
+};
 export const FEE_WALLET = "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee";
 
 export const CONTRACT_NAME: { [key: string]: string } = {

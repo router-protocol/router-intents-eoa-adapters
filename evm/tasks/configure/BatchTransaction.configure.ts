@@ -42,6 +42,7 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
   const swapDeployments = getDeployments(
     ContractType.Swap
   ) as IDeploymentAdapters;
+
   if (swapDeployments[env] && swapDeployments[env][network]) {
     len = swapDeployments[env][network].length;
     for (let i = 0; i < len; i++) {
