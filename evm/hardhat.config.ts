@@ -1,5 +1,4 @@
 import * as dotenv from "dotenv";
-
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@typechain/hardhat";
@@ -14,24 +13,18 @@ import "hardhat-dependency-compiler";
 // import "@matterlabs/hardhat-zksync-deploy";
 // import "@matterlabs/hardhat-zksync-verify";
 // import "@matterlabs/hardhat-zksync-upgradable";
-
 import "./tasks";
-
 dotenv.config();
-
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
-
   for (const account of accounts) {
     console.log(account.address);
   }
 });
-
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
-
 const config: HardhatUserConfig = {
   paths: {
     artifacts: "artifacts",
@@ -134,12 +127,13 @@ const config: HardhatUserConfig = {
           : [""],
     },
     polygonAmoy: {
-      url: process.env.POLYGON_AMOY_URL || "",
+      url: "https://rpc-amoy.polygon.technology",
       chainId: 80002,
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]
           : [""],
+      blockGasLimit: 130294,
     },
     bsc: {
       url: "https://bsc-dataseed2.binance.org",
@@ -195,7 +189,7 @@ const config: HardhatUserConfig = {
       chainId: 43113,
     },
     arbitrum: {
-      url: "https://rpc.ankr.com/arbitrum",
+      url: "https://api.stateless.solutions/arbitrum-one/v1/demo",
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]
@@ -218,14 +212,6 @@ const config: HardhatUserConfig = {
           : [""],
       chainId: 421611,
     },
-    arbitrumNova: {
-      url: "https://nova.arbitrum.io/rpc",
-      accounts:
-        process.env.PRIVATE_KEY !== undefined
-          ? [process.env.PRIVATE_KEY]
-          : [""],
-      chainId: 42170,
-    },
     arbitrumSepolia: {
       url: "https://arbitrum-sepolia.blockpi.network/v1/rpc/public",
       accounts:
@@ -233,6 +219,14 @@ const config: HardhatUserConfig = {
           ? [process.env.PRIVATE_KEY]
           : [""],
       chainId: 421614,
+    },
+    arbitrumNova: {
+      url: "https://nova.arbitrum.io/rpc",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
+          : [""],
+      chainId: 42170,
     },
     linea: {
       url: "https://rpc.linea.build",
@@ -331,13 +325,12 @@ const config: HardhatUserConfig = {
       chainId: 169,
     },
     sepolia: {
-      url: `https://rpc2.sepolia.org`,
+      url: `https://1rpc.io/sepolia`,
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]
           : [""],
       chainId: 11155111,
-      gasPrice: 35000000000,
     },
     moonbeam: {
       url: "https://rpc.api.moonbeam.network",
@@ -395,7 +388,6 @@ const config: HardhatUserConfig = {
     //   deployPaths: "deploy", //single deployment directory
     // },
   },
-
   gasReporter: {
     outputFile: "gas-report.txt",
     enabled: process.env.REPORT_GAS !== undefined,
@@ -423,7 +415,6 @@ const config: HardhatUserConfig = {
   //     },
   //   },
   // },
-
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY || "",
@@ -432,8 +423,8 @@ const config: HardhatUserConfig = {
       holesky: process.env.ETHERSCAN_API_KEY || "",
       base: process.env.BASE_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
+      polygonAmoy: process.env.POLYGONSCAN_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
-      polygonAmoy: process.env.POLYGON_AMOY_URL || "",
       opera: process.env.FTMSCAN_API_KEY || "",
       ftmTestnet: process.env.FTMSCAN_API_KEY || "",
       bscTestnet: process.env.BSCSCAN_API_KEY || "",
@@ -448,6 +439,7 @@ const config: HardhatUserConfig = {
       arbitrumGoerli: process.env.ARBITRUM_API_KEY || "",
       arbitrumTestnet: process.env.ARBITRUM_API_KEY || "",
       arbitrumOne: process.env.ARBITRUM_API_KEY || "",
+      arbitrumSepolia: process.env.ARBITRUM_API_KEY || "",
       optimisticGoerli: process.env.OPTIMISM_API_KEY || "",
       optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
       manta: process.env.ETHERSCAN_API_KEY || "",
@@ -572,8 +564,23 @@ const config: HardhatUserConfig = {
           browserURL: "https://explorer.mantle.xyz/",
         },
       },
+      {
+        network: "polygonAmoy",
+        chainId: 80002,
+        urls: {
+          apiURL: "https://rpc-amoy.polygon.technology",
+          browserURL: "https://rpc.ankr.com/polygon_amoy",
+        },
+      },
+      {
+        network: "arbitrumSepolia",
+        chainId: 421614,
+        urls: {
+          apiURL: "https://arbitrum-sepolia.blockpi.network/v1/rpc/public/api",
+          browserURL: "https://arbitrum-sepolia.blockpi.network/v1/rpc/public",
+        },
+      },
     ],
   },
 };
-
 export default config;
