@@ -8,6 +8,7 @@ import {
   NATIVE,
   VERIFY_NITRO_ADAPTER,
   WNATIVE,
+  USDC,
 } from "../../constants";
 import { task } from "hardhat/config";
 import {
@@ -41,7 +42,11 @@ task(DEPLOY_NITRO_ADAPTER)
       NATIVE,
       WNATIVE[env][network],
       ASSET_FORWARDER[env][network],
-      DEXSPAN[env][network]
+      DEXSPAN[env][network],
+      USDC[env][network],
+      {
+        gasLimit: 7000000,
+      }
     );
     await instance.deployed();
 
@@ -93,15 +98,16 @@ task(VERIFY_NITRO_ADAPTER).setAction(async function (
 
   console.log(`Verifying ${contractName} Contract....`);
 
-  await _hre.run("verify:verify", {
-    address: dataStore,
-    constructorArguments: [
-      owner,
-      ASSET_FORWARDER[env][network],
-      DEXSPAN[env][network],
-    ],
-    contract: "contracts/intent-adapters/bridge/NitroAdapter.sol:NitroDataStore"
-  });
+  // await _hre.run("verify:verify", {
+  //   address: dataStore,
+  //   constructorArguments: [
+  //     owner,
+  //     ASSET_FORWARDER[env][network],
+  //     DEXSPAN[env][network],
+  //   ],
+  //   contract:
+  //     "contracts/intent-adapters/bridge/NitroAdapter.sol:NitroDataStore",
+  // });
 
   console.log(`Verifying ${contractName} Contract....`);
   await _hre.run("verify:verify", {
@@ -111,6 +117,7 @@ task(VERIFY_NITRO_ADAPTER).setAction(async function (
       WNATIVE[env][network],
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
+      USDC[env][network],
     ],
   });
 

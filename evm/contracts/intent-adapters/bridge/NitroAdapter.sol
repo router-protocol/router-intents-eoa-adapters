@@ -60,7 +60,8 @@ contract NitroAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         address __native,
         address __wnative,
         address __assetForwarder,
-        address __dexspan
+        address __dexspan,
+        address __usdc
     )
         RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative)
     // solhint-disable-next-line no-empty-blocks
@@ -70,7 +71,7 @@ contract NitroAdapter is RouterIntentEoaAdapterWithoutDataProvider {
             __assetForwarder,
             __dexspan
         );
-        usdc = IAssetForwarder(__assetForwarder).usdc();
+        usdc = __usdc;
     }
 
     function name() public pure override returns (string memory) {
