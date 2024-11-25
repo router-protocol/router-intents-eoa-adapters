@@ -12,7 +12,8 @@ export enum ContractType {
   Perpetuals,
   StakestoneVault,
   Others,
-  Fee
+  Fee,
+  FPA
 }
 
 export interface IDeployment {
@@ -49,6 +50,7 @@ const getFilePath = (contractType: ContractType): string => {
   if (contractType === ContractType.Perpetuals) path = "deployment/perps.json";
   if (contractType === ContractType.Fee) path = "deployment/fee.json";
   if (contractType === ContractType.Others) path = "deployment/others.json";
+  if (contractType === ContractType.FPA) path = "deployment/fpa.json";
 
   return path;
 };

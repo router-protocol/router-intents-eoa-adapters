@@ -133,6 +133,14 @@ const config: HardhatUserConfig = {
           ? [process.env.PRIVATE_KEY]
           : [""],
     },
+    polygonAmoy: {
+      url: "https://polygon-amoy.drpc.org",
+      chainId: 80002,
+      accounts:
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
+          : [""],
+    },
     bsc: {
       url: "https://bsc-dataseed2.binance.org",
       chainId: 56,
@@ -209,6 +217,14 @@ const config: HardhatUserConfig = {
           ? [process.env.PRIVATE_KEY]
           : [""],
       chainId: 421611,
+    },
+    arbitrumSepolia: {
+      url: "https://arbitrum-sepolia.blockpi.network/v1/rpc/public",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
+          : [""],
+      chainId: 421614,
     },
     arbitrumNova: {
       url: "https://nova.arbitrum.io/rpc",
@@ -315,7 +331,7 @@ const config: HardhatUserConfig = {
       chainId: 169,
     },
     sepolia: {
-      url: `https://rpc2.sepolia.org`,
+      url: `https://1rpc.io/sepolia`,
       accounts:
         process.env.PRIVATE_KEY !== undefined
           ? [process.env.PRIVATE_KEY]
@@ -415,6 +431,7 @@ const config: HardhatUserConfig = {
       holesky: process.env.ETHERSCAN_API_KEY || "",
       base: process.env.BASE_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
+      polygonAmoy: process.env.POLYGONSCAN_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       opera: process.env.FTMSCAN_API_KEY || "",
       ftmTestnet: process.env.FTMSCAN_API_KEY || "",
@@ -430,6 +447,7 @@ const config: HardhatUserConfig = {
       arbitrumGoerli: process.env.ARBITRUM_API_KEY || "",
       arbitrumTestnet: process.env.ARBITRUM_API_KEY || "",
       arbitrumOne: process.env.ARBITRUM_API_KEY || "",
+      arbitrumSepolia: process.env.ARBITRUM_API_KEY || "",
       optimisticGoerli: process.env.OPTIMISM_API_KEY || "",
       optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
       manta: process.env.ETHERSCAN_API_KEY || "",
@@ -551,6 +569,22 @@ const config: HardhatUserConfig = {
       urls: {
         apiURL: "https://explorer.mantle.xyz/api",
         browserURL: "https://explorer.mantle.xyz/",
+      },
+    },
+    {
+      network: "polygonAmoy",
+      chainId: 80002,
+      urls: {
+        apiURL: "https://polygon-amoy.drpc.org/api",
+        browserURL: "https://polygon-amoy.drpc.org",
+      },
+    },
+    {
+      network: "arbitrumSepolia",
+      chainId: 421614,
+      urls: {
+        apiURL: "https://arbitrum-sepolia.blockpi.network/v1/rpc/public/api",
+        browserURL: "https://arbitrum-sepolia.blockpi.network/v1/rpc/public",
       },
     },
     ],

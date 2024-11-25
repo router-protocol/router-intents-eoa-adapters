@@ -133,6 +133,19 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
   }
   console.log(`Setting Perp Adapters on ${contractName} complete`);
 
+  const fpaDeployments = getDeployments(
+    ContractType.FPA
+  ) as IDeploymentAdapters;
+
+  if (fpaDeployments[env] && fpaDeployments[env][network]) {
+    len = fpaDeployments[env][network].length;
+    for (let i = 0; i < len; i++) {
+      shouldWhitelist.push(true);
+      adapters.push(fpaDeployments[env][network][i].address);
+    }
+  }
+  console.log(`Setting FPA Adapters on ${contractName} complete`);
+
   const feeDeployments = getDeployments(
     ContractType.Fee
   ) as IDeploymentAdapters;

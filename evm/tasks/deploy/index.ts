@@ -55,5 +55,6 @@ import "./pumpFun";
 import "./scribe";
 import "./agni";
 import "./ring";
+import "./lucid";
 
 import "./BatchTransaction.deploy";
