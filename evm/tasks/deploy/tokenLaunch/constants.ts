@@ -1,3 +1,4 @@
 export const TOKEN_PRE_LAUNCH: { [chainId: string]: string } = {
   "8453": "0x494978Ce360dd2c2cF1D3ADDED8AAf18420F9096",
+  "43113": "0xBcAD6c4AEA63eF596e0D65e11D490e6BaD8FFe2c",
 };

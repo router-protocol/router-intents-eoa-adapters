@@ -39,17 +39,17 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
   const shouldWhitelist = [];
   let len = 0;
 
-  const swapDeployments = getDeployments(
-    ContractType.Swap
-  ) as IDeploymentAdapters;
+  // const swapDeployments = getDeployments(
+  //   ContractType.Swap
+  // ) as IDeploymentAdapters;
 
-  if (swapDeployments[env] && swapDeployments[env][network]) {
-    len = swapDeployments[env][network].length;
-    for (let i = 0; i < len; i++) {
-      shouldWhitelist.push(true);
-      adapters.push(swapDeployments[env][network][i].address);
-    }
-  }
+  // if (swapDeployments[env] && swapDeployments[env][network]) {
+  //   len = swapDeployments[env][network].length;
+  //   for (let i = 0; i < len; i++) {
+  //     shouldWhitelist.push(true);
+  //     adapters.push(swapDeployments[env][network][i].address);
+  //   }
+  // }
 
   console.log(`Setting swap Adapters on ${contractName} complete`);
 
@@ -108,17 +108,17 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
     }
   }
 
-  const bridgeDeployments = getDeployments(
-    ContractType.Bridge
-  ) as IDeploymentAdapters;
+  // const bridgeDeployments = getDeployments(
+  //   ContractType.Bridge
+  // ) as IDeploymentAdapters;
 
-  if (bridgeDeployments[env] && bridgeDeployments[env][network]) {
-    len = bridgeDeployments[env][network].length;
-    for (let i = 0; i < len; i++) {
-      shouldWhitelist.push(true);
-      adapters.push(bridgeDeployments[env][network][i].address);
-    }
-  }
+  // if (bridgeDeployments[env] && bridgeDeployments[env][network]) {
+  //   len = bridgeDeployments[env][network].length;
+  //   for (let i = 0; i < len; i++) {
+  //     shouldWhitelist.push(true);
+  //     adapters.push(bridgeDeployments[env][network][i].address);
+  //   }
+  // }
   console.log(`Setting Bridge Adapters on ${contractName} complete`);
 
   const perpDeployments = getDeployments(
@@ -134,18 +134,31 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
   }
   console.log(`Setting Perp Adapters on ${contractName} complete`);
 
-  const feeDeployments = getDeployments(
-    ContractType.Fee
+  const externalDeployments = getDeployments(
+    ContractType.External
   ) as IDeploymentAdapters;
 
-  if (feeDeployments[env] && feeDeployments[env][network]) {
-    len = feeDeployments[env][network].length;
+  if (externalDeployments[env] && externalDeployments[env][network]) {
+    len = externalDeployments[env][network].length;
     for (let i = 0; i < len; i++) {
       shouldWhitelist.push(true);
-      adapters.push(feeDeployments[env][network][i].address);
+      adapters.push(externalDeployments[env][network][i].address);
     }
   }
-  console.log(`Setting Fee Adapters on ${contractName} complete`);
+  console.log(`Setting Perp Adapters on ${contractName} complete`);
+
+  // const feeDeployments = getDeployments(
+  //   ContractType.Fee
+  // ) as IDeploymentAdapters;
+
+  // if (feeDeployments[env] && feeDeployments[env][network]) {
+  //   len = feeDeployments[env][network].length;
+  //   for (let i = 0; i < len; i++) {
+  //     shouldWhitelist.push(true);
+  //     adapters.push(feeDeployments[env][network][i].address);
+  //   }
+  // }
+  // console.log(`Setting Fee Adapters on ${contractName} complete`);
 
   if (adapters.length === 0) {
     console.log("Adapters length zero: ", adapters);
