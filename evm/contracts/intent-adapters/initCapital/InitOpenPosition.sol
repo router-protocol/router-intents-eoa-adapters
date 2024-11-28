@@ -5,7 +5,6 @@ import {ILoopingHookUniversalRouter} from "./Interfaces.sol";
 import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
-import "hardhat/console.sol";
 
 /**
  * @title InitOpenPosition
@@ -85,15 +84,6 @@ contract InitOpenPosition is RouterIntentEoaAdapterWithoutDataProvider {
     function _mint(
         ILoopingHookUniversalRouter.MintParams memory mintParams
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        console.log(" i am here");
-        console.log(mintParams._mode);
-        console.log(mintParams._viewer);
-        console.log(mintParams._tokenIn);
-        console.log(mintParams._amtIn);
-        console.log(mintParams._borrPool);
-        console.log(mintParams._borrAmt);
-        console.log(mintParams._collPool);
-        console.log(mintParams._minAmtOut);
         (uint posId, uint initPosId, uint amtOut) = universalRouter.openPos(
             mintParams._mode,
             mintParams._viewer,
