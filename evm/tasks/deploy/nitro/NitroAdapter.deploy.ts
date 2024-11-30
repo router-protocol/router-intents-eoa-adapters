@@ -41,7 +41,10 @@ task(DEPLOY_NITRO_ADAPTER)
       NATIVE,
       WNATIVE[env][network],
       ASSET_FORWARDER[env][network],
-      DEXSPAN[env][network]
+      DEXSPAN[env][network],
+      {
+        gasLimit: 10000000
+      }
     );
     await instance.deployed();
 
@@ -100,7 +103,8 @@ task(VERIFY_NITRO_ADAPTER).setAction(async function (
       ASSET_FORWARDER[env][network],
       DEXSPAN[env][network],
     ],
-    contract: "contracts/intent-adapters/bridge/NitroAdapter.sol:NitroDataStore"
+    contract:
+      "contracts/intent-adapters/bridge/NitroAdapter.sol:NitroDataStore",
   });
 
   console.log(`Verifying ${contractName} Contract....`);

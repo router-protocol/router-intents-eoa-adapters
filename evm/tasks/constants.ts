@@ -172,6 +172,10 @@ export const VERIFY_PARIFI_OPEN_POSITION_ADAPTER =
   "VERIFY_PARIFI_OPEN_POSITION_ADAPTER";
 export const DEPLOY_PARIFI_FAIRSALE_ADAPTER = "DEPLOY_PARIFI_FAIRSALE_ADAPTER";
 export const VERIFY_PARIFI_FAIRSALE_ADAPTER = "VERIFY_PARIFI_FAIRSALE_ADAPTER";
+
+export const DEPLOY_PARIFI_WRAPPER_ADAPTER = "DEPLOY_PARIFI_WRAPPER_ADAPTER";
+export const VERIFY_PARIFI_WRAPPER_ADAPTER = "VERIFY_PARIFI_WRAPPER_ADAPTER";
+
 export const DEPLOY_PENDLE_MINT_ADAPTER = "DEPLOY_PENDLE_MINT_ADAPTER";
 export const VERIFY_PENDLE_MINT_ADAPTER = "VERIFY_PENDLE_MINT_ADAPTER";
 export const DEPLOY_SWAPMODE_MINT_ADAPTER = "DEPLOY_SWAPMODE_MINT_ADAPTER";
@@ -280,7 +284,6 @@ export const ASSET_FORWARDER: {
     "10243": "",
     "80002": "0x5c2c6ab36a6e4e160fb9c529e164b7781f7d255f",
     "421614": "0x1d8a519e504ad8a52d35daa85caac188f834e01c",
-
   },
   mainnet: {
     "1": "0xc21e4ebd1d92036cb467b53fe3258f219d909eb9",
@@ -333,7 +336,7 @@ export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
     "80001": "0x04D2b2C62d7Ba9aA583bfd930c6fa4Ac0AFFB25D",
     "43113": "0x017F615438b9f0be26c23f5AB17db39BA1e63Cd1",
     "1": "0x35101b9DeCace6324aaDf65867d695D175c71D59",
-    "137": "0xc57133521ffbd729cb81cc8ddc12d9e9f61e0f6a",
+    "137": "0x1bA8CA832496F0B66C08aB5f248217eB27b89a25",
     "56": "0x0000000000000000000000000000000000000000",
     "43114": "0x0000000000000000000000000000000000000000",
     "42161": "0xe3b713300E73a8127135aDFBb859947f3d3c4FB6",
@@ -386,7 +389,7 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
     "534351": "0x5300000000000000000000000000000000000004",
     "10243": "",
     "80002": "0x0ae690aad8663aab12a671a6a0d74242332de85f",
-    "421614": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    "421614": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
   },
   mainnet: {
     "1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -475,6 +478,7 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   MendiSupply: "MendiSupply",
   ParifiOpenPosition: "ParifiOpenPosition",
   ParifiFairsale: "ParifiFairsale",
+  ParifiIntentWrapper: "ParifiIntentWrapper",
   StakeStoneStakeEth: "StakeStoneStakeEth",
   PendleMint: "PendleMint",
   SwapModeMint: "SwapModeMint",

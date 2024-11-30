@@ -18,6 +18,7 @@ interface IDexSpan {
         IERC20[] tokens;
         uint256 amount;
         uint256 minReturn;
+        uint256 destAmount;
         uint256[] flags;
         bytes[] dataTx;
         bool isWrapper;
