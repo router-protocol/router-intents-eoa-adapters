@@ -37,6 +37,12 @@ task(DEPLOY_NITRO_ADAPTER)
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
     const factory = await _hre.ethers.getContractFactory(contractName);
 
+    const xx = {
+      a: NATIVE,
+      b: WNATIVE[env][network],
+      c: ASSET_FORWARDER[env][network],
+      d: DEXSPAN[env][network],
+    };
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
