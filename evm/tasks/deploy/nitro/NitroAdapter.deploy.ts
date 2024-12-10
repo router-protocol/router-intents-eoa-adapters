@@ -38,6 +38,12 @@ task(DEPLOY_NITRO_ADAPTER)
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
     const factory = await _hre.ethers.getContractFactory(contractName);
 
+    const xx = {
+      a: NATIVE,
+      b: WNATIVE[env][network],
+      c: ASSET_FORWARDER[env][network],
+      d: DEXSPAN[env][network],
+    };
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
@@ -98,16 +104,16 @@ task(VERIFY_NITRO_ADAPTER).setAction(async function (
 
   console.log(`Verifying ${contractName} Contract....`);
 
-  // await _hre.run("verify:verify", {
-  //   address: dataStore,
-  //   constructorArguments: [
-  //     owner,
-  //     ASSET_FORWARDER[env][network],
-  //     DEXSPAN[env][network],
-  //   ],
-  //   contract:
-  //     "contracts/intent-adapters/bridge/NitroAdapter.sol:NitroDataStore",
-  // });
+  await _hre.run("verify:verify", {
+    address: dataStore,
+    constructorArguments: [
+      owner,
+      ASSET_FORWARDER[env][network],
+      DEXSPAN[env][network],
+    ],
+    contract:
+      "contracts/intent-adapters/bridge/NitroAdapter.sol:NitroDataStore",
+  });
 
   console.log(`Verifying ${contractName} Contract....`);
   await _hre.run("verify:verify", {
