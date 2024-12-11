@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
-import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
-import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
+import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
+import {Errors} from "../../Errors.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
 
 /**
@@ -13,23 +11,15 @@ import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
  * @notice Providing approval for ERC20 tokens.
  */
 contract ERC20Approval is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler,
-    DefaultRefundable
+    RouterIntentEoaAdapterWithoutDataProvider
 {
     using SafeERC20 for IERC20;
 
     constructor(
         address __native,
-        address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
-        address __defaultRefundAddress
+        address __wnative
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-        DefaultRefundable(__defaultRefundAddress)
+        RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -40,11 +30,9 @@ contract ERC20Approval is
     }
 
     /**
-     * @inheritdoc EoaExecutor
+     * @inheritdoc EoaExecutorWithoutDataProvider
      */
     function execute(
-        address,
-        address,
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
         (
@@ -89,18 +77,6 @@ contract ERC20Approval is
         }
 
         return totalValue;
-    }
-
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory
-    ) external override onlyNitro nonReentrant {
-        withdrawTokens(tokenSent, defaultRefundAddress(), amount);
-        emit UnsupportedOperation(tokenSent, defaultRefundAddress(), amount);
     }
 
     /**
