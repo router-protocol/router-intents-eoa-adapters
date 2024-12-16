@@ -86,7 +86,7 @@ contract ParifiTargetDataStore is Ownable {
 contract ParifiIntentWrapper is RouterIntentEoaAdapterWithoutDataProvider {
     using SafeERC20 for IERC20;
 
-    ParifiTargetDataStore public immutable parifiTarget;
+    ParifiTargetDataStore public immutable parifiTargetDataStore;
 
     constructor(
         address __native,
@@ -96,7 +96,7 @@ contract ParifiIntentWrapper is RouterIntentEoaAdapterWithoutDataProvider {
 
     ) RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative) {
 
-        parifiTarget = new ParifiTargetDataStore(
+        parifiTargetDataStore = new ParifiTargetDataStore(
             msg.sender,
             __stableProxy,
             __syntheticProxy
@@ -132,7 +132,7 @@ contract ParifiIntentWrapper is RouterIntentEoaAdapterWithoutDataProvider {
 
         for(uint256 i = 0; i < calls.length;) {
             address target = calls[i].target;
-            require(parifiTarget.isTargetWhitelisted(target),"target not whitelisted");
+            require(parifiTargetDataStore.isTargetWhitelisted(target),"target not whitelisted");
             IERC20(token[0]).safeIncreaseAllowance(
                 address(target),
                 amount
@@ -159,11 +159,11 @@ contract ParifiIntentWrapper is RouterIntentEoaAdapterWithoutDataProvider {
         ParifiCall[] memory calls
     ) internal returns (address[] memory tokens, bytes memory logData) {
         IERC20(token[0]).safeIncreaseAllowance(
-            address(parifiTarget.stableProxy()),
+            address(parifiTargetDataStore.stableProxy()),
             amount
         );
         IERC20(token[0]).safeIncreaseAllowance(
-            address(parifiTarget.syntheticProxy()),
+            address(parifiTargetDataStore.syntheticProxy()),
             amount
         );
         for (uint256 i = 0; i < calls.length;) {
