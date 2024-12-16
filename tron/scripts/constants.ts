@@ -2,8 +2,8 @@ export const DEFAULT_ENV = "testnet";
 export const DEFAULT_NETWORK = "shasta";
 export const ETH = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 export const DEFAULT_REFUND_ADDRESS =
-  "0x77834697bEC6B098a7325538f0fF0565293ccDe5";
-export const DEFAULT_OWNER = "0x77834697bEC6B098a7325538f0fF0565293ccDe5";
+  "TLs8g5wh1T7im8X3FbyqPBEEBrkfRSnN3t";
+export const DEFAULT_OWNER = "TLs8g5wh1T7im8X3FbyqPBEEBrkfRSnN3t";
 
 export const WETH: { [network: string]: { [chainId: string]: string } } = {
   testnet: {
@@ -53,5 +53,10 @@ export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
 export const CONTRACTS: { [key: string]: string } = {
   JustLendStakeTrx: "JustLendStakeTrx",
   SunswapMint: "SunswapMint",
-  JustLendSupply: "JustLendSupply"
+  JustLendSupply: "JustLendSupply",
+  BatchTransaction: "BatchTransaction",
+  FeeAdapter: "FeeAdapter",
+  NitroAdapter: "NitroAdapter",
+  DexSpanAdapter: "DexSpanAdapter",
+  AssetBridgeAdapter: "AssetBridgeAdapter"
 };
