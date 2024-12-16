@@ -1,1 +1,1 @@
-{"mainnet":{"8453":[{"name":"BaseNameRegistry","address":"0x406A8D90ED2d12a7Ed09b5Cad9CB57C6015D3BF1"},{"name":"TokenLaunch","address":"0x0e060d7ec50fC55A0C7BCd383b80F7806Cf1ecFb"}]}}
+{"mainnet":{"1":[{"name":"TokenLaunch","address":"0xD41384aFD551553443E11F2aD207a2c1190B50c8"}],"8453":[{"name":"BaseNameRegistry","address":"0x406A8D90ED2d12a7Ed09b5Cad9CB57C6015D3BF1"},{"name":"TokenLaunch","address":"0x0e060d7ec50fC55A0C7BCd383b80F7806Cf1ecFb"}]}}
