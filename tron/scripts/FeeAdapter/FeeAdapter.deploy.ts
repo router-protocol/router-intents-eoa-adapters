@@ -54,9 +54,10 @@ async function main() {
       name: contractName,
     },
     [
-      "TLs8g5wh1T7im8X3FbyqPBEEBrkfRSnN3t",
+      "0x4142232832BF6C9548B25F08BFE908B4728DE1C3",
+      "0x891CDB91D149F23B1A45D9C5CA78A88D0CB44C18",
+      "0x4120C8BB95BAF192345993F1BB38519D2C5B1193",
       5,
-      "TA44zUh6Uc1rmNCPRQhm4B7KmCPk977zCa"
     ]
   );
 
