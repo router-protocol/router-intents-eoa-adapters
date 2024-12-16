@@ -175,6 +175,7 @@ export const VERIFY_PARIFI_FAIRSALE_ADAPTER = "VERIFY_PARIFI_FAIRSALE_ADAPTER";
 
 export const DEPLOY_PARIFI_WRAPPER_ADAPTER = "DEPLOY_PARIFI_WRAPPER_ADAPTER";
 export const VERIFY_PARIFI_WRAPPER_ADAPTER = "VERIFY_PARIFI_WRAPPER_ADAPTER";
+export const SET_PARIFI_WHITELIST = "SET_PARIFI_WHITELIST";
 
 export const DEPLOY_PENDLE_MINT_ADAPTER = "DEPLOY_PENDLE_MINT_ADAPTER";
 export const VERIFY_PENDLE_MINT_ADAPTER = "VERIFY_PENDLE_MINT_ADAPTER";
@@ -412,7 +413,6 @@ export const WNATIVE: { [network: string]: { [chainId: string]: string } } = {
 };
 
 export const FEE_WALLET = "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee";
-
 export const CONTRACT_NAME: { [key: string]: string } = {
   BatchTransaction: "BatchTransaction",
   BatchTransactionExternal: "BatchTransactionExternal",
