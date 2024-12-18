@@ -44,9 +44,6 @@ async function main() {
 
   const etronWeb = new ExtraTronWeb(network);
 
-  const trx = etronWeb.fromHex(ETH);
-  const wtrx =  WETH[env][chainId];
-
   // Deploy contract
   const response = await etronWeb.deployWithParams(
     {
@@ -57,7 +54,7 @@ async function main() {
       name: contractName,
     },
     [
-      etronWeb.fromHex(ETH),
+      ETH,
       WETH[env][chainId],
       "TA44zUh6Uc1rmNCPRQhm4B7KmCPk977zCa",
       5,
@@ -65,7 +62,7 @@ async function main() {
   );
 
   console.log(
-    `${contractName} contract deployed at: ${(response.address)}`
+    `${contractName} contract deployed at: ${etronWeb.fromHex(response.address)}`
   );
   const deployments = await recordAllDeployments(
     env,

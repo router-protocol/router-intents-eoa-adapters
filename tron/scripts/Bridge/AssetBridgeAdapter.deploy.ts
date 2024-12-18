@@ -53,7 +53,7 @@ async function main() {
       bytecode: contractJson.bytecode,
       name: contractName,
     },
-    [etronWeb.fromHex(ETH), WETH[env][chainId], etronWeb.fromHex(ASSET_BRIDGE[env][chainId])]
+    [ETH, WETH[env][chainId], etronWeb.fromHex(ASSET_BRIDGE[env][chainId])]
   );
 
   console.log(

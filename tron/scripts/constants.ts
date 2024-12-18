@@ -1,6 +1,6 @@
 export const DEFAULT_ENV = "shasta";
 export const DEFAULT_NETWORK = "shasta";
-export const ETH = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+export const ETH = "T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb";
 export const DEFAULT_REFUND_ADDRESS = "TLs8g5wh1T7im8X3FbyqPBEEBrkfRSnN3t";
 export const DEFAULT_OWNER = "TLs8g5wh1T7im8X3FbyqPBEEBrkfRSnN3t";
 
@@ -9,7 +9,7 @@ export const WETH: { [network: string]: { [chainId: string]: string } } = {
     "728126428": "TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR",
   },
   shasta: {
-    "2494104990": "TWjz7xJdL5PPvHxFJvysVpZFsVyfrW4N3k",
+    "2494104990": "",
   },
 };
 
