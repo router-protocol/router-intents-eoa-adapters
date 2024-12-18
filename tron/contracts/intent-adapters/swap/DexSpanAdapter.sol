@@ -1,39 +1,41 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 import {IDexSpan} from "../../interfaces/IDexSpan.sol";
-import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
-import {DefaultRefundable} from "router-intents/contracts/utils/DefaultRefundable.sol";
+import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
+import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+contract DexSpanDataStore is Ownable {
+    address public dexspan;
+
+    constructor(address _owner, address _dexspan) {
+        _transferOwnership(_owner);
+        dexspan = _dexspan;
+    }
+
+    function setDexSpan(address _dexspan) external onlyOwner {
+        dexspan = _dexspan;
+    }
+}
 
 /**
  * @title DexSpanAdapter
  * @author Shivam Agrawal
  * @notice Swapping tokens using DexSpan contract
  */
-contract DexSpanAdapter is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler,
-    DefaultRefundable
-{
+contract DexSpanAdapter is RouterIntentEoaAdapterWithoutDataProvider {
     using SafeERC20 for IERC20;
+
+    DexSpanDataStore public immutable dexSpanDataStore;
 
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
-        address __defaultRefundAddress
-    )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
-        DefaultRefundable(__defaultRefundAddress)
-    // solhint-disable-next-line no-empty-blocks
-    {
-
+        address __dexspan
+    ) RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative) {
+        dexSpanDataStore = new DexSpanDataStore(msg.sender, __dexspan);
     }
 
     function name() public pure override returns (string memory) {
@@ -41,14 +43,12 @@ contract DexSpanAdapter is
     }
 
     /**
-     * @inheritdoc EoaExecutor
+     * @inheritdoc EoaExecutorWithoutDataProvider
      */
     function execute(
-        address,
-        address,
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
-        IDexSpan.SwapParams memory swapData = parseInputs(data);
+        IDexSpan.SameChainSwapParams memory swapData = parseInputs(data);
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
@@ -63,6 +63,10 @@ contract DexSpanAdapter is
                     msg.value == swapData.amount,
                     Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
                 );
+        } else if (swapData.amount == type(uint256).max) {
+            if (address(swapData.tokens[0]) != native())
+                swapData.amount = swapData.tokens[0].balanceOf(address(this));
+            else swapData.amount = address(this).balance;
         }
 
         bytes memory logData;
@@ -73,30 +77,16 @@ contract DexSpanAdapter is
         return tokens;
     }
 
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory
-    ) external override onlyNitro nonReentrant {
-        withdrawTokens(tokenSent, defaultRefundAddress(), amount);
-        emit UnsupportedOperation(tokenSent, defaultRefundAddress(), amount);
-    }
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _swap(
-        IDexSpan.SwapParams memory _swapData
+        IDexSpan.SameChainSwapParams memory _swapData
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        withdrawTokens(
-            address(_swapData.tokens[0]),
-            dexspan(),
-            _swapData.amount
-        );
+        address dexspan = dexSpanDataStore.dexspan();
 
-        IDexSpan(dexspan()).swapInSameChain(
+        withdrawTokens(address(_swapData.tokens[0]), dexspan, _swapData.amount);
+
+        IDexSpan(dexspan).swapInSameChain(
             _swapData.tokens,
             _swapData.amount,
             _swapData.minReturn,
@@ -104,7 +94,7 @@ contract DexSpanAdapter is
             _swapData.dataTx,
             true,
             _swapData.recipient,
-            0
+            _swapData.widgetId
         );
 
         tokens = new address[](2);
@@ -120,7 +110,12 @@ contract DexSpanAdapter is
      */
     function parseInputs(
         bytes memory data
-    ) public pure returns (IDexSpan.SwapParams memory swapData) {
-        swapData = abi.decode(data, (IDexSpan.SwapParams));
+    ) public pure returns (IDexSpan.SameChainSwapParams memory) {
+        IDexSpan.SameChainSwapParams memory swapData = abi.decode(
+            data,
+            (IDexSpan.SameChainSwapParams)
+        );
+
+        return swapData;
     }
 }
