@@ -37,7 +37,7 @@ export const ASSET_BRIDGE: {
 
 export const DEXSPAN: { [network: string]: { [chainId: string]: string } } = {
   mainnet: {
-    "728126428": "0x0000000000000000000000000000000000000000",
+    "728126428": "0x2fb5adf1f1539d49619ea5aea6d0aa4cbcc6e707",
   },
   shasta: {
     "2494104990": "0x0000000000000000000000000000000000000000",

@@ -18,12 +18,10 @@ import {
   ASSET_BRIDGE,
 } from "../constants";
 
-const contractName = CONTRACTS.DexSpanAdapter;
+const contractName = CONTRACTS.BatchTransaction;
 
-// ts-node ./scripts/Bridge/DexSpanAdapter.deploy.ts --network "mainnet"
+// ts-node ./scripts/BatchTransaction/BatchTransaction.configure.ts --network "shasta"
 async function main() {
-  console.log(`${contractName} Deployment Started:`);
-
   const contractJson = JSON.parse(
     fs.readFileSync(
       path.join(__dirname, `../../build/contracts/${contractName}.json`),
@@ -44,33 +42,23 @@ async function main() {
 
   const etronWeb = new ExtraTronWeb(network);
 
-  // Deploy contract
-  const response = await etronWeb.deployWithParams(
-    {
-      feeLimit: 15000000000,
-      userFeePercentage: 100,
-      abi: contractJson.abi,
-      bytecode: contractJson.bytecode,
-      name: contractName,
-    },
-    [
-      ETH,
-      WETH[env][chainId],
-      etronWeb.fromHex(DEXSPAN[env][chainId])
-    ]
+  const batchInstance = etronWeb.tronWeb.contract(
+    contractJson.abi,
+    "TVfiuyQ25KezC8Emz4nff9zSpNJH4cNMnB"
   );
 
-  console.log(
-    `${contractName} contract deployed at: ${etronWeb.fromHex(response.address)}`
-  );
-  const deployments = await recordAllDeployments(
-    env,
-    etronWeb.chainId,
-    contractName,
-    etronWeb.fromHex(response.address)
-  );
-
-  await saveDeployments(deployments);
+  const setWhitelistTxHash = await (
+    await batchInstance.setAdapterWhitelist(
+      [
+        "TYMRZCXEMEnASXZaEzL8b3d6Ey8ec4qopu",
+        "TNbhmKx5yf7JBAYeWcWtNiEPS5UdkPtH9R",
+        "TLXRoj6sKUXoUHMAHQgutA1HnHvcgX15cd",
+        "TSYFQjohptEqtqcscwHLYF4HWRPUaJrrJ2",
+      ],
+      [true, true, true, true]
+    )
+  ).send();
+  console.log("BATCH -  SETADAPTERWHITELIST: txhash: ", setWhitelistTxHash);
 }
 
 main().catch((err) => {

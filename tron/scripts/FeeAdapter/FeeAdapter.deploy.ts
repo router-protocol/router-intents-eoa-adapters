@@ -68,7 +68,7 @@ async function main() {
     env,
     etronWeb.chainId,
     contractName,
-    (response.address)
+    etronWeb.fromHex(response.address)
   );
 
   await saveDeployments(deployments);

@@ -60,18 +60,18 @@ async function main() {
       etronWeb.fromHex(ASSET_FORWARDER[env][chainId]),
       etronWeb.fromHex(DEXSPAN[env][chainId]),
       etronWeb.fromHex(ASSET_BRIDGE[env][chainId]),
-      ""
+      "TYMRZCXEMEnASXZaEzL8b3d6Ey8ec4qopu"
     ]
   );
 
   console.log(
-    `${contractName} contract deployed at: ${etronWeb.toHex(response.address)}`
+    `${contractName} contract deployed at: ${etronWeb.fromHex(response.address)}`
   );
   const deployments = await recordAllDeployments(
     env,
     etronWeb.chainId,
     contractName,
-    etronWeb.toHex(response.address)
+    etronWeb.fromHex(response.address)
   );
 
   await saveDeployments(deployments);

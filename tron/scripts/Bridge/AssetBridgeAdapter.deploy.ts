@@ -57,13 +57,13 @@ async function main() {
   );
 
   console.log(
-    `${contractName} contract deployed at: ${etronWeb.toHex(response.address)}`
+    `${contractName} contract deployed at: ${etronWeb.fromHex(response.address)}`
   );
   const deployments = await recordAllDeployments(
     env,
     etronWeb.chainId,
     contractName,
-    etronWeb.toHex(response.address)
+    etronWeb.fromHex(response.address)
   );
 
   await saveDeployments(deployments);
