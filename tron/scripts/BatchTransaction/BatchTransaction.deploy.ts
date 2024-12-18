@@ -20,7 +20,7 @@ import {
 
 const contractName = CONTRACTS.BatchTransaction;
 
-// ts-node ./scripts/BatchTransaction/BatchTransaction.deploy.ts --network "mainnet"
+// ts-node ./scripts/BatchTransaction/BatchTransaction.deploy.ts --network "shasta"
 async function main() {
   console.log(`${contractName} Deployment Started:`);
 
@@ -42,6 +42,7 @@ async function main() {
   if (!network) network = DEFAULT_NETWORK;
   const chainId = networkJson[network].chainId;
 
+  
   const etronWeb = new ExtraTronWeb(network);
 
   // Deploy contract
@@ -54,11 +55,11 @@ async function main() {
       name: contractName,
     },
     [
-      ETH,
+      etronWeb.fromHex(ETH),
       WETH[env][chainId],
-      ASSET_FORWARDER[env][chainId],
-      DEXSPAN[env][chainId],
-      ASSET_BRIDGE[env][chainId],
+      etronWeb.fromHex(ASSET_FORWARDER[env][chainId]),
+      etronWeb.fromHex(DEXSPAN[env][chainId]),
+      etronWeb.fromHex(ASSET_BRIDGE[env][chainId]),
       ""
     ]
   );

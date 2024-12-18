@@ -54,9 +54,9 @@ async function main() {
       name: contractName,
     },
     [
-      ETH,
+      etronWeb.fromHex(ETH),
       WETH[env][chainId],
-      DEXSPAN[env][chainId]
+      etronWeb.fromHex(DEXSPAN[env][chainId])
     ]
   );
 

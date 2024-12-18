@@ -20,7 +20,7 @@ import {
 
 const contractName = CONTRACTS.NitroAdapter;
 
-// ts-node ./scripts/Bridge/NitroAdapter.deploy.ts --network "mainnet"
+// ts-node ./scripts/Bridge/NitroAdapter.deploy.ts --network "shasta"
 async function main() {
   console.log(`${contractName} Deployment Started:`);
 
@@ -54,10 +54,10 @@ async function main() {
       name: contractName,
     },
     [
-      ETH,
+      etronWeb.fromHex(ETH),
       WETH[env][chainId],
-      ASSET_FORWARDER[env][chainId],
-      DEXSPAN[env][chainId]
+      etronWeb.fromHex(ASSET_FORWARDER[env][chainId]),
+      etronWeb.fromHex(DEXSPAN[env][chainId]),
     ]
   );
 

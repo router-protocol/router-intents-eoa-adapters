@@ -20,7 +20,7 @@ import {
 
 const contractName = CONTRACTS.FeeAdapter;
 
-// ts-node ./scripts/FeeAdapter/FeeAdapter.deploy.ts --network "testnet"
+// ts-node ./scripts/FeeAdapter/FeeAdapter.deploy.ts --network "shasta"
 async function main() {
   console.log(`${contractName} Deployment Started:`);
 
@@ -44,6 +44,9 @@ async function main() {
 
   const etronWeb = new ExtraTronWeb(network);
 
+  const trx = etronWeb.fromHex(ETH);
+  const wtrx =  WETH[env][chainId];
+
   // Deploy contract
   const response = await etronWeb.deployWithParams(
     {
@@ -54,21 +57,21 @@ async function main() {
       name: contractName,
     },
     [
-      "0x4142232832BF6C9548B25F08BFE908B4728DE1C3",
-      "0x891CDB91D149F23B1A45D9C5CA78A88D0CB44C18",
-      "0x4120C8BB95BAF192345993F1BB38519D2C5B1193",
+      etronWeb.fromHex(ETH),
+      WETH[env][chainId],
+      "TA44zUh6Uc1rmNCPRQhm4B7KmCPk977zCa",
       5,
     ]
   );
 
   console.log(
-    `${contractName} contract deployed at: ${etronWeb.toHex(response.address)}`
+    `${contractName} contract deployed at: ${(response.address)}`
   );
   const deployments = await recordAllDeployments(
     env,
     etronWeb.chainId,
     contractName,
-    etronWeb.toHex(response.address)
+    (response.address)
   );
 
   await saveDeployments(deployments);

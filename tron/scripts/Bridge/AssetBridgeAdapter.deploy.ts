@@ -20,7 +20,7 @@ import {
 
 const contractName = CONTRACTS.AssetBridgeAdapter;
 
-// ts-node ./scripts/Bridge/AssetBridgeAdapter.deploy.ts --network "mainnet"
+// ts-node ./scripts/Bridge/AssetBridgeAdapter.deploy.ts --network "shasta"
 async function main() {
   console.log(`${contractName} Deployment Started:`);
 
@@ -53,11 +53,7 @@ async function main() {
       bytecode: contractJson.bytecode,
       name: contractName,
     },
-    [
-      ETH,
-      WETH[env][chainId],
-      ASSET_BRIDGE[env][chainId],
-    ]
+    [etronWeb.fromHex(ETH), WETH[env][chainId], etronWeb.fromHex(ASSET_BRIDGE[env][chainId])]
   );
 
   console.log(
