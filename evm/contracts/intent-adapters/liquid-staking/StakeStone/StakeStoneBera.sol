@@ -78,7 +78,9 @@ contract StakeStoneBera is RouterIntentEoaAdapterWithoutDataProvider {
     ) internal returns (address[] memory tokens, bytes memory logData) {
         uint256 _receivedberaSTONE;
         if (_token == native()) {
-            _receivedberaSTONE = depositWrapper.depositETH(_amount, _recipient);
+            _receivedberaSTONE = depositWrapper.depositETH{
+                        value: _amount
+                    }(_recipient);
         } else {
             IERC20(_token).safeIncreaseAllowance(
                 address(beraStoneVault),

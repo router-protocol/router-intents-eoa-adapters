@@ -33,7 +33,7 @@ interface BeraStoneVault {
 }
 
 interface DepositWrapper {
-    function depositETH(uint256 _amount, address _receiver) external payable returns (uint256 minted);
+    function depositETH(address _receiver) external payable returns (uint256 minted);
 }
 
 interface ISBTCLzAdapter {
