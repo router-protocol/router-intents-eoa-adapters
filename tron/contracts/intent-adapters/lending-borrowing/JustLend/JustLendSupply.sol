@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 import {IJustLendPool} from "./interfaces/IJustLendPool.sol";
-import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {SafeMath} from "../../../utils/SafeMath.sol";
 
@@ -15,8 +14,7 @@ import {SafeMath} from "../../../utils/SafeMath.sol";
  */
 
 contract JustLendSupply is
-    RouterIntentEoaAdapter,
-    NitroMessageHandler
+    RouterIntentEoaAdapterWithoutDataProvider
 {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
@@ -28,13 +26,9 @@ contract JustLendSupply is
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __cToken
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
+        RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative)
     // solhint-disable-next-line no-empty-blocks
     {
         _cToken = __cToken;
@@ -49,11 +43,9 @@ contract JustLendSupply is
     }
 
     /**
-     * @inheritdoc EoaExecutor
+     * @inheritdoc EoaExecutorWithoutDataProvider
      */
     function execute(
-        address,
-        address,
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
         (address _asset, address _recipient, uint256 _amount) = parseInputs(
@@ -76,40 +68,6 @@ contract JustLendSupply is
 
         emit ExecutionEvent(name(), logData);
         return tokens;
-    }
-
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        uint256 cTokenAmountBefore = getBalance(_cToken, address(this));
-
-        if (tokenSent == native())
-            try IJustLendPool(_cToken).mint{value: amount}() {
-                uint256 cTokenAmountReceived = getBalance(_cToken, address(this)).sub(cTokenAmountBefore);
-
-                withdrawTokens(_cToken, recipient, cTokenAmountReceived);
-                emit JustLendSupplyDest(native(), recipient, amount);
-            } catch {
-                withdrawTokens(native(), recipient, amount);
-                emit OperationFailedRefundEvent(native(), recipient, amount);
-            }
-        else try IJustLendPool(_cToken).mint(amount){
-                uint256 cTokenAmountReceived = getBalance(_cToken, address(this))
-                .sub(cTokenAmountBefore);
-
-                withdrawTokens(_cToken, recipient, cTokenAmountReceived);
-                emit JustLendSupplyDest(native(), recipient, amount);
-        } catch {
-                withdrawTokens(native(), recipient, amount);
-                emit OperationFailedRefundEvent(native(), recipient, amount);
-            }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////

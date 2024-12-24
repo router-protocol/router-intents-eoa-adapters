@@ -15,9 +15,14 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
+import { ParifiIntentWrapper__factory } from "../../../typechain/factories/ParifiIntentWrapper__factory";
+import { ParifiTargetDataStore__factory } from "../../../typechain/factories/ParifiTargetDataStore__factory";
 
-const contractName: string = CONTRACT_NAME.ParifiWrapper;
-const contractType = ContractType.Others;
+const contractName: string = CONTRACT_NAME.ParifiIntentWrapper;
+const contractType = ContractType.Perpetuals;
+
+const STABLE_PROXY = "0xa65538A6B9A8442854dEcB6E3F85782C60757D60";
+const SYNTHETIC_PROXY = "0xd762960c31210Cf1bDf75b06A5192d395EEDC659";
 
 task(DEPLOY_PARIFI_WRAPPER_ADAPTER)
   .addFlag("verify", "pass true to verify the contract")
@@ -32,7 +37,12 @@ task(DEPLOY_PARIFI_WRAPPER_ADAPTER)
 
     console.log(`Deploying ${contractName} Contract on chainId ${network}....`);
     const factory = await _hre.ethers.getContractFactory(contractName);
-    const instance = await factory.deploy(NATIVE, WNATIVE[env][network]);
+    const instance = await factory.deploy(
+      NATIVE,
+      WNATIVE[env][network],
+      STABLE_PROXY,
+      SYNTHETIC_PROXY
+    );
     await instance.deployed();
 
     const deployment = await recordAllDeployments(
@@ -69,10 +79,33 @@ task(VERIFY_PARIFI_WRAPPER_ADAPTER).setAction(async function (
       break;
     }
   }
+  const parifiAdapter = ParifiIntentWrapper__factory.connect(
+    address!,
+    _hre.ethers.provider
+  );
+
+  const dataStore = await parifiAdapter.parifiTargetDataStore();
+  const parifiDataStore = ParifiTargetDataStore__factory.connect(
+    dataStore,
+    _hre.ethers.provider
+  );
+  const owner = await parifiDataStore.owner();
+
+  console.log(`Verifying ${contractName} Contract....`);
+  await _hre.run("verify:verify", {
+    address: dataStore,
+    constructorArguments: [owner, STABLE_PROXY, SYNTHETIC_PROXY],
+  });
+
   console.log(`Verifying ${contractName} Contract....`);
   await _hre.run("verify:verify", {
     address,
-    constructorArguments: [NATIVE, WNATIVE[env][network]],
+    constructorArguments: [
+      NATIVE,
+      WNATIVE[env][network],
+      STABLE_PROXY,
+      SYNTHETIC_PROXY,
+    ],
   });
 
   console.log(`Verified ${contractName} contract address `, address);

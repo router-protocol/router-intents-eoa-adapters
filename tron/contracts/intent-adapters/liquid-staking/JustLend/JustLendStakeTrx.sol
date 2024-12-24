@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 import {IJustLendStakeTrx} from "./Interfaces.sol";
-import {RouterIntentEoaAdapter, EoaExecutor} from "router-intents/contracts/RouterIntentEoaAdapter.sol";
-import {NitroMessageHandler} from "router-intents/contracts/utils/NitroMessageHandler.sol";
-import {Errors} from "router-intents/contracts/utils/Errors.sol";
+import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
+import {Errors} from "../../../Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 
 /**
  * @title JustLendStakeTrx
- * @author Shivam Agrawal
+ * @author Yashika Goyal
  * @notice Staking TRX to receive sTRX on JustLend.
  * @notice This contract is only for Tron chain.
  */
-contract JustLendStakeTrx is RouterIntentEoaAdapter, NitroMessageHandler {
+contract JustLendStakeTrx is RouterIntentEoaAdapterWithoutDataProvider {
     using SafeERC20 for IERC20;
 
     address private immutable _sTrx;
@@ -23,13 +22,9 @@ contract JustLendStakeTrx is RouterIntentEoaAdapter, NitroMessageHandler {
     constructor(
         address __native,
         address __wnative,
-        address __owner,
-        address __assetForwarder,
-        address __dexspan,
         address __sTrx
     )
-        RouterIntentEoaAdapter(__native, __wnative, __owner)
-        NitroMessageHandler(__assetForwarder, __dexspan)
+        RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative)
     {
         _sTrx = __sTrx;
     }
@@ -43,11 +38,9 @@ contract JustLendStakeTrx is RouterIntentEoaAdapter, NitroMessageHandler {
     }
 
     /**
-     * @inheritdoc EoaExecutor
+     * @inheritdoc EoaExecutorWithoutDataProvider
      */
     function execute(
-        address,
-        address,
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
         (address _recipient, uint256 _amount) = parseInputs(data);
@@ -66,36 +59,6 @@ contract JustLendStakeTrx is RouterIntentEoaAdapter, NitroMessageHandler {
 
         emit ExecutionEvent(name(), logData);
         return tokens;
-    }
-
-    /**
-     * @inheritdoc NitroMessageHandler
-     */
-    function handleMessage(
-        address tokenSent,
-        uint256 amount,
-        bytes memory instruction
-    ) external override onlyNitro nonReentrant {
-        address recipient = abi.decode(instruction, (address));
-
-        if (tokenSent != native()) {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-            return;
-        }
-
-        try IJustLendStakeTrx(_sTrx).deposit{value: amount}() {
-            uint256 _receivedSTrx = withdrawTokens(
-                _sTrx,
-                recipient,
-                type(uint256).max
-            );
-
-            emit JustLendStakeTrxDest(recipient, amount, _receivedSTrx);
-        } catch {
-            withdrawTokens(tokenSent, recipient, amount);
-            emit OperationFailedRefundEvent(tokenSent, recipient, amount);
-        }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////

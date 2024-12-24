@@ -3,5 +3,14 @@
     "728126428": {
       "JustLendStakeTrx": "0x979ba4a3781df75d3a737c415ea864ca479dc5eb"
     }
+  },
+  "mainnet": {
+    "728126428": {
+      "FeeAdapter": "TYMRZCXEMEnASXZaEzL8b3d6Ey8ec4qopu",
+      "BatchTransaction": "TVfiuyQ25KezC8Emz4nff9zSpNJH4cNMnB",
+      "AssetBridgeAdapter": "TNbhmKx5yf7JBAYeWcWtNiEPS5UdkPtH9R",
+      "NitroAdapter": "TLXRoj6sKUXoUHMAHQgutA1HnHvcgX15cd",
+      "DexSpanAdapter": "TSYFQjohptEqtqcscwHLYF4HWRPUaJrrJ2"
+    }
   }
 }

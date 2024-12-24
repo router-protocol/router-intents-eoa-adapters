@@ -13,8 +13,8 @@
   },
   "mainnet": {
     "chainId": "728126428",
-    "fullNode": "https://rpc.ankr.com/http/tron",
-    "solidityNode": "https://rpc.ankr.com/http/tron",
-    "eventServer": "https://rpc.ankr.com/http/tron"
+    "fullNode": "https://api.trongrid.io/",
+    "solidityNode": "https://api.trongrid.io/",
+    "eventServer": "https://api.trongrid.io/"
   }
 }

@@ -146,6 +146,19 @@ task(SET_ADAPTERS_ON_BATCH_TX).setAction(async function (
   }
   console.log(`Setting Fee Adapters on ${contractName} complete`);
 
+  const externalDeployments = getDeployments(
+    ContractType.External
+  ) as IDeploymentAdapters;
+
+  if (externalDeployments[env] && externalDeployments[env][network]) {
+    len = externalDeployments[env][network].length;
+    for (let i = 0; i < len; i++) {
+      shouldWhitelist.push(true);
+      adapters.push(externalDeployments[env][network][i].address);
+    }
+  }
+  console.log(`Setting Fee Adapters on ${contractName} complete`);
+
   if (adapters.length === 0) {
     console.log("Adapters length zero: ", adapters);
     return;
