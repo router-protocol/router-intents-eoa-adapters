@@ -265,6 +265,8 @@ export const VERIFY_BASENAME_REGISTRY_ADAPTER =
 
 export const DEPLOY_TOKEN_LAUNCH_ADAPTER = "DEPLOY_TOKEN_LAUNCH_ADAPTER";
 export const VERIFY_TOKEN_LAUNCH_ADAPTER = "VERIFY_TOKEN_LAUNCH_ADAPTER";
+export const DEPLOY_HYPER_LIQUID_ADAPTER = "DEPLOY_HYPER_LIQUID_ADAPTER";
+export const VERIFY_HYPER_LIQUID_ADAPTER = "VERIFY_HYPER_LIQUID_ADAPTER";
 
 export const ASSET_FORWARDER: {
   [network: string]: { [chainId: string]: string };
@@ -510,4 +512,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   StakeStoneBera: "StakeStoneBera",
   TokenPreLaunch: "TokenLaunch",
   RingMint: "RingMint",
+  HyperliquidAdapter: "HyperliquidAdapter"
 };

@@ -1,0 +1,1 @@
+import "./HyperliquidAdapter.deploy";
