@@ -5,6 +5,38 @@ import {IHyperliquidBridge} from "./Interfaces.sol";
 import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+contract HyperliquidAdapterDataStore is Ownable {
+    address public assetForwarder;
+    address public dexspan;
+    address public assetBridge;
+
+    constructor(
+        address _owner,
+        address _assetForwarder,
+        address _dexspan,
+        address _assetBridge
+    ) {
+        _transferOwnership(_owner);
+        assetForwarder = _assetForwarder;
+        dexspan = _dexspan;
+        assetBridge = _assetBridge;
+    }
+
+    function setDexSpan(address _dexspan) external onlyOwner {
+        dexspan = _dexspan;
+    }
+
+    function setAssetForwarder(address _assetForwarder) external onlyOwner {
+        assetForwarder = _assetForwarder;
+    }
+
+    function setAssetBridge(address _assetBridge) external onlyOwner {
+        assetBridge = _assetBridge;
+    }
+}
 
 /**
  * @title HyperliquidAdapter
@@ -13,16 +45,28 @@ import {IERC20, SafeERC20} from "../../utils/SafeERC20.sol";
  */
 contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
     using SafeERC20 for IERC20;
+    HyperliquidAdapterDataStore public immutable hlDataStore;
 
     address public immutable usdc;
     IHyperliquidBridge public immutable hyperliquidDepositBridge;
 
+    event OperationSuccessful();
+
     constructor(
         address __native,
         address __wnative,
+        address __assetForwarder,
+        address __dexspan,
+        address __assetBridge,
         address __usdc,
         address __hyperliquidDepositBridge
     ) RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative) {
+        hlDataStore = new HyperliquidAdapterDataStore(
+            msg.sender,
+            __assetForwarder,
+            __dexspan,
+            __assetBridge
+        );
         usdc = __usdc;
         hyperliquidDepositBridge = IHyperliquidBridge(
             __hyperliquidDepositBridge
@@ -43,7 +87,8 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
             address user,
             uint64 usd,
             uint64 deadline,
-            IHyperliquidBridge.Signature memory signature
+            IHyperliquidBridge.Signature memory signature,
+            address refundAddress
         ) = parseInputs(data);
 
         // If the adapter is called using `call` and not `delegatecall`
@@ -52,28 +97,61 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         } else if (usd == type(uint64).max)
             usd = uint64(IERC20(usdc).balanceOf(address(this)));
 
-        bytes memory logData;
+        (tokens, ) = this.deposit(user, usd, deadline, signature);
+    }
 
-        (tokens, logData) = _deposit(user, usd, deadline, signature);
+    function handleMessage(
+        address tokenSent,
+        uint256 amount,
+        bytes memory instruction
+    ) external onlyNitro nonReentrant {
+        (
+            address user,
+            uint64 usd,
+            uint64 deadline,
+            IHyperliquidBridge.Signature memory signature,
+            address refundAddress
+        ) = parseInputs(instruction);
 
-        emit ExecutionEvent(name(), logData);
-        return tokens;
+        require(refundAddress != address(0), "Invalid refund address");
+        require(usd > 0 && usd <= amount, "Invalid amount");
+
+        // Save initial state
+        uint256 initialBalance = IERC20(usdc).balanceOf(address(this));
+
+        // Transfer funds first
+        IERC20(usdc).safeTransferFrom(msg.sender, address(this), usd);
+
+        // Lock state before external call
+        uint256 finalBalance = IERC20(usdc).balanceOf(address(this));
+
+        require(finalBalance >= initialBalance + usd, "Transfer failed");
+
+        try this.deposit(user, usd, deadline, signature) {
+            emit OperationSuccessful();
+        } catch {
+            IERC20(tokenSent).safeTransfer(refundAddress, amount);
+            emit OperationFailedRefundEvent(tokenSent, refundAddress, amount);
+        }
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _deposit(
+    function deposit(
         address user,
         uint64 usd,
         uint64 deadline,
         IHyperliquidBridge.Signature memory signature
-    ) internal returns (address[] memory tokens, bytes memory logData) {
-        IERC20(usdc).safeIncreaseAllowance(
-            address(hyperliquidDepositBridge),
-            usd
+    ) external returns (address[] memory tokens, bytes memory logData) {
+        require(
+            msg.sender == address(this),
+            "Can only call by this contract"
         );
-        
-        IHyperliquidBridge.DepositWithPermit[] memory deposits;
+        require(deadline > block.timestamp, "Expired deadline");
+        IHyperliquidBridge.DepositWithPermit[]
+            memory deposits = new IHyperliquidBridge.DepositWithPermit[](1);
+
+        IERC20(usdc).safeTransfer(user, usd);
 
         deposits[0] = IHyperliquidBridge.DepositWithPermit({
             user: user,
@@ -88,6 +166,8 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         tokens[0] = usdc;
 
         logData = abi.encode(user, usd);
+
+        emit ExecutionEvent(name(), logData);
     }
 
     /**
@@ -99,13 +179,39 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
     )
         public
         pure
-        returns (address, uint64, uint64, IHyperliquidBridge.Signature memory)
+        returns (
+            address,
+            uint64,
+            uint64,
+            IHyperliquidBridge.Signature memory,
+            address
+        )
     {
         return
             abi.decode(
                 data,
-                (address, uint64, uint64, IHyperliquidBridge.Signature)
+                (address, uint64, uint64, IHyperliquidBridge.Signature, address)
             );
+    }
+
+    /**
+     * @notice modifier to ensure that only Nitro bridge can call handleMessage function
+     */
+    modifier onlyNitro() {
+        _onlyNitro();
+        _;
+    }
+
+    function _onlyNitro() private view {
+        address _assetForwarder = hlDataStore.assetForwarder();
+        address _dexspan = hlDataStore.dexspan();
+        address _assetBridge = hlDataStore.assetBridge();
+        require(
+            msg.sender == _assetForwarder ||
+                msg.sender == _dexspan ||
+                msg.sender == _assetBridge,
+            Errors.ONLY_NITRO
+        );
     }
 
     // solhint-disable-next-line no-empty-blocks
