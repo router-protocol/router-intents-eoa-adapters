@@ -1,8 +1,11 @@
 import { HardhatRuntimeEnvironment, TaskArguments } from "hardhat/types";
 import {
+  ASSET_BRIDGE,
+  ASSET_FORWARDER,
   CONTRACT_NAME,
   DEFAULT_ENV,
   DEPLOY_HYPER_LIQUID_ADAPTER,
+  DEXSPAN,
   NATIVE,
   VERIFY_HYPER_LIQUID_ADAPTER,
   WNATIVE,
@@ -16,6 +19,8 @@ import {
   saveDeployments,
 } from "../../utils";
 import { USDC, DEPOSIT_BRIDGE } from "./constants";
+import { HyperliquidAdapter__factory } from "../../../typechain/factories/HyperliquidAdapter__factory";
+import { HyperliquidAdapterDataStore__factory } from "../../../typechain/factories/HyperliquidAdapterDataStore__factory";
 
 const contractName: string = CONTRACT_NAME.HyperliquidAdapter;
 const contractType = ContractType.LiquidStaking;
@@ -35,6 +40,9 @@ task(DEPLOY_HYPER_LIQUID_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
+      ASSET_FORWARDER[env][network],
+      DEXSPAN[env][network],
+      ASSET_BRIDGE[env][network],
       USDC[network],
       DEPOSIT_BRIDGE[network]
     );
@@ -75,14 +83,43 @@ task(VERIFY_HYPER_LIQUID_ADAPTER).setAction(async function (
     }
   }
 
+  const hlAdapter = HyperliquidAdapter__factory.connect(
+      address!,
+      _hre.ethers.provider
+    );
+    const dataStore = await hlAdapter.hlDataStore();
+
+  const hlDataStore = HyperliquidAdapterDataStore__factory.connect(
+      dataStore,
+      _hre.ethers.provider
+    );
+    const owner = await hlDataStore.owner();
+  
+    console.log(`Verifying ${contractName} Contract....`);
+  
+    await _hre.run("verify:verify", {
+      address: dataStore,
+      constructorArguments: [
+        owner,
+        ASSET_FORWARDER[env][network],
+        DEXSPAN[env][network],
+        ASSET_BRIDGE[env][network]
+      ],
+      contract:
+        "contracts/intent-adapters/hyperliquid/HyperliquidAdapter.sol:HyperliquidAdapterDataStore",
+    });
+
   console.log(`Verifying ${contractName} Contract....`);
   await _hre.run("verify:verify", {
     address,
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
+      ASSET_FORWARDER[env][network],
+      DEXSPAN[env][network],
+      ASSET_BRIDGE[env][network],
       USDC[network],
-      DEPOSIT_BRIDGE[network],
+      DEPOSIT_BRIDGE[network]
     ],
   });
 

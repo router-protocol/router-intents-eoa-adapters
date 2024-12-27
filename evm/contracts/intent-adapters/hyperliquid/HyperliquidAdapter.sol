@@ -116,17 +116,6 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         require(refundAddress != address(0), "Invalid refund address");
         require(usd > 0 && usd <= amount, "Invalid amount");
 
-        // Save initial state
-        uint256 initialBalance = IERC20(usdc).balanceOf(address(this));
-
-        // Transfer funds first
-        IERC20(usdc).safeTransferFrom(msg.sender, address(this), usd);
-
-        // Lock state before external call
-        uint256 finalBalance = IERC20(usdc).balanceOf(address(this));
-
-        require(finalBalance >= initialBalance + usd, "Transfer failed");
-
         try this.deposit(user, usd, deadline, signature) {
             emit OperationSuccessful();
         } catch {
