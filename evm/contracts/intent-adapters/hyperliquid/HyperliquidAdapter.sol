@@ -114,9 +114,9 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         ) = parseInputs(instruction);
 
         require(refundAddress != address(0), "Invalid refund address");
-        require(usd > 0 && usd <= amount, "Invalid amount");
+        require(usd > 0 && uint64(amount) <= usd, "Invalid amount");
 
-        try this.deposit(user, usd, deadline, signature) {
+        try this.deposit(user, uint64(amount), deadline, signature) {
             emit OperationSuccessful();
         } catch {
             IERC20(tokenSent).safeTransfer(refundAddress, amount);
@@ -157,7 +157,7 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         logData = abi.encode(user, usd);
 
         emit ExecutionEvent(name(), logData);
-    }
+    }   
 
     /**
      * @dev function to parse input data.
