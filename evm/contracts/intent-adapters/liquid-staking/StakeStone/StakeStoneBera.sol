@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {BeraStoneVault} from "./Interfaces.sol";
+import {BeraStoneVault, DepositWrapper} from "./Interfaces.sol";
 import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
@@ -17,15 +17,18 @@ contract StakeStoneBera is RouterIntentEoaAdapterWithoutDataProvider {
 
     address public immutable beraSTONE;
     BeraStoneVault public immutable beraStoneVault;
+    DepositWrapper public immutable depositWrapper;
 
     constructor(
         address __native,
         address __wnative,
         address __beraSTONE,
-        address __beraStoneVault
+        address __beraStoneVault,
+        address __depositWrapper
     ) RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative) {
         beraSTONE = __beraSTONE;
         beraStoneVault = BeraStoneVault(__beraStoneVault);
+        depositWrapper = DepositWrapper(__depositWrapper);
     }
 
     function name() public pure override returns (string memory) {
@@ -38,17 +41,25 @@ contract StakeStoneBera is RouterIntentEoaAdapterWithoutDataProvider {
     function execute(
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
-        (
-            address _token,
-            address _recipient,
-            uint256 _amount
-        ) = parseInputs(data);
+        (address _token, address _recipient, uint256 _amount) = parseInputs(
+            data
+        );
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
-            IERC20(_token).safeTransferFrom(msg.sender, self(), _amount);
+            if (_token != native())
+                IERC20(_token).safeTransferFrom(msg.sender, self(), _amount);
+            else
+                require(
+                    msg.value == _amount,
+                    Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
+                );
         } else if (_amount == type(uint256).max)
-            _amount = IERC20(_token).balanceOf(address(this));
+            if (_token == native()) {
+                _amount = address(this).balance;
+            } else {
+                _amount = IERC20(_token).balanceOf(address(this));
+            }
 
         bytes memory logData;
 
@@ -65,8 +76,23 @@ contract StakeStoneBera is RouterIntentEoaAdapterWithoutDataProvider {
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        IERC20(_token).safeIncreaseAllowance(address(beraStoneVault), _amount);
-        uint256 _receivedberaSTONE = beraStoneVault.deposit(_token, _amount, _recipient);
+        uint256 _receivedberaSTONE;
+        if (_token == native()) {
+            _receivedberaSTONE = depositWrapper.depositETH{
+                        value: _amount
+                    }(_recipient);
+        } else {
+            IERC20(_token).safeIncreaseAllowance(
+                address(beraStoneVault),
+                _amount
+            );
+            _receivedberaSTONE = beraStoneVault.deposit(
+                _token,
+                _amount,
+                _recipient
+            );
+        }
+
         // uint256 _receivedberaSTONE = IERC20(beraSTONE).balanceOf(address(this));
         tokens = new address[](2);
         tokens[0] = _token;

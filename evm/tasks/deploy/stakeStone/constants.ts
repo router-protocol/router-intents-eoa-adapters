@@ -24,6 +24,10 @@ export const BERA_VAULT: { [chainId: string]: string } = {
   "1": "0x8f88aE3798E8fF3D0e0DE7465A0863C9bbB577f0",
 };
 
+export const BERA_DEPOSIT_WRAPPER: { [chainId: string]: string } = {
+  "1": "0x2aCA0C7ED4d5EB4a2116A3bc060A2F264a343357",
+};
+
 export const SBTC_LZ_ADAPTER: { [chainId: string]: string } = {
   "1": "0x3f690f43a9fCA689829A22bf925c89B7a48ca57F",
   "56": "0x7122985656e38BDC0302Db86685bb972b145bD3C",

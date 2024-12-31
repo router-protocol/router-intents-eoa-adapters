@@ -15,7 +15,7 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { BERA_STONE, BERA_VAULT } from "./constants";
+import { BERA_DEPOSIT_WRAPPER, BERA_STONE, BERA_VAULT } from "./constants";
 
 const contractName: string = CONTRACT_NAME.StakeStoneBera;
 const contractType = ContractType.LiquidStaking;
@@ -37,7 +37,8 @@ task(DEPLOY_STAKESTONE_BERA_ADAPTER)
       NATIVE,
       WNATIVE[env][network],
       BERA_STONE[network],
-      BERA_VAULT[network]
+      BERA_VAULT[network],
+      BERA_DEPOSIT_WRAPPER[network]
     );
     await instance.deployed();
 
@@ -83,6 +84,7 @@ task(VERIFY_STAKESTONE_BERA_ADAPTER).setAction(async function (
       WNATIVE[env][network],
       BERA_STONE[network],
       BERA_VAULT[network],
+      BERA_DEPOSIT_WRAPPER[network],
     ],
   });
 
