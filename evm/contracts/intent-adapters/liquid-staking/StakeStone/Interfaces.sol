@@ -36,6 +36,10 @@ interface DepositWrapper {
     function depositETH(address _receiver) external payable returns (uint256 minted);
 }
 
+interface BeraSBTCVault {
+    function deposit(address _asset, uint256 _amount, address _receiver) external returns (uint256 shares);
+}
+
 interface ISBTCLzAdapter {
     struct SendParam {
         uint32 dstEid; // Destination endpoint ID.

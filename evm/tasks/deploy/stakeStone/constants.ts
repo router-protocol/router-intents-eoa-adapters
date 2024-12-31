@@ -28,6 +28,10 @@ export const BERA_DEPOSIT_WRAPPER: { [chainId: string]: string } = {
   "1": "0x2aCA0C7ED4d5EB4a2116A3bc060A2F264a343357",
 };
 
+export const BERA_SBTC_VAULT: { [chainId: string]: string } = {
+  "1": "0x437c885357425686b53e0d18c8D9c26A4a6Be43f",
+};
+
 export const SBTC_LZ_ADAPTER: { [chainId: string]: string } = {
   "1": "0x3f690f43a9fCA689829A22bf925c89B7a48ca57F",
   "56": "0x7122985656e38BDC0302Db86685bb972b145bD3C",
@@ -40,4 +44,8 @@ export const SBTC: { [chainId: string]: string } = {
 
 export const BERA_STONE: { [chainId: string]: string } = {
   "1": "0x97Ad75064b20fb2B2447feD4fa953bF7F007a706",
+};
+
+export const BERA_SBTC: { [chainId: string]: string } = {
+  "1": "0xd7F311a29b54E13b0A6c97027ece4a41cBe9EA38",
 };
