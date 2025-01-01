@@ -5,6 +5,7 @@ import {BeraSBTCVault, DepositWrapper} from "./Interfaces.sol";
 import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
+import "hardhat/console.sol";
 
 /**
  * @title StakeStoneBeraSBTC
@@ -41,18 +42,17 @@ contract StakeStoneBeraSBTC is RouterIntentEoaAdapterWithoutDataProvider {
         (address _token, address _recipient, uint256 _amount) = parseInputs(
             data
         );
-
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
-            if (_token != native())
+            if (_token != native()) {
                 IERC20(_token).safeTransferFrom(msg.sender, self(), _amount);
-            else
+            } else
                 require(
                     msg.value == _amount,
                     Errors.INSUFFICIENT_NATIVE_FUNDS_PASSED
                 );
         } else if (_amount == type(uint256).max)
-            _amount = IERC20(_token).balanceOf(address(this));
+        _amount = IERC20(_token).balanceOf(address(this));
 
         bytes memory logData;
 
