@@ -97,7 +97,7 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         } else if (usd == type(uint64).max)
             usd = uint64(IERC20(usdc).balanceOf(address(this)));
 
-        (tokens, ) = this.deposit(user, usd, deadline, signature);
+        (tokens, ) = this._deposit(user, usd, deadline, signature);
     }
 
     function handleMessage(
@@ -116,7 +116,7 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         require(refundAddress != address(0), "Invalid refund address");
         require(usd > 0 && uint64(amount) <= usd, "Invalid amount");
 
-        try this.deposit(user, uint64(amount), deadline, signature) {
+        try this._deposit(user, uint64(amount), deadline, signature) {
             emit OperationSuccessful();
         } catch {
             IERC20(tokenSent).safeTransfer(refundAddress, amount);
@@ -132,10 +132,7 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         uint64 deadline,
         IHyperliquidBridge.Signature memory signature
     ) external returns (address[] memory tokens, bytes memory logData) {
-        require(
-            msg.sender == address(this),
-            "Can only call by this contract"
-        );
+        require(msg.sender == address(this), "Can only call by this contract");
         require(deadline > block.timestamp, "Expired deadline");
         IHyperliquidBridge.DepositWithPermit[]
             memory deposits = new IHyperliquidBridge.DepositWithPermit[](1);
@@ -157,7 +154,37 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         logData = abi.encode(user, usd);
 
         emit ExecutionEvent(name(), logData);
-    }   
+    }
+
+    function _deposit(
+        address user,
+        uint64 usd,
+        uint64 deadline,
+        IHyperliquidBridge.Signature memory signature
+    ) external returns (address[] memory tokens, bytes memory logData) {
+        require(msg.sender == address(this), "Can only call by this contract");
+        require(deadline > block.timestamp, "Expired deadline");
+        IHyperliquidBridge.DepositWithPermit[]
+            memory deposits = new IHyperliquidBridge.DepositWithPermit[](1);
+
+        IERC20(usdc).safeTransfer(user, usd);
+
+        deposits[0] = IHyperliquidBridge.DepositWithPermit({
+            user: user,
+            usd: usd,
+            deadline: deadline,
+            signature: signature
+        });
+
+        hyperliquidDepositBridge.batchedDepositWithPermit(deposits);
+
+        tokens = new address[](1);
+        tokens[0] = usdc;
+
+        logData = abi.encode(user, usd);
+
+        emit ExecutionEvent(name(), logData);
+    }
 
     /**
      * @dev function to parse input data.
