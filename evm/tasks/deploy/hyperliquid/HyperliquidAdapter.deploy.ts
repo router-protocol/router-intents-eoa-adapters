@@ -84,32 +84,30 @@ task(VERIFY_HYPER_LIQUID_ADAPTER).setAction(async function (
   }
 
   const hlAdapter = HyperliquidAdapter__factory.connect(
-      address!,
-      _hre.ethers.provider
-    );
-    const dataStore = await hlAdapter.hlDataStore();
+    address!,
+    _hre.ethers.provider
+  );
+  const dataStore = await hlAdapter.hlDataStore();
 
   const hlDataStore = HyperliquidAdapterDataStore__factory.connect(
-      dataStore,
-      _hre.ethers.provider
-    );
-    const owner = await hlDataStore.owner();
-  
-    console.log(`Verifying ${contractName} Contract....`);
-  
-    await _hre.run("verify:verify", {
-      address: dataStore,
-      constructorArguments: [
-        owner,
-        ASSET_FORWARDER[env][network],
-        DEXSPAN[env][network],
-        ASSET_BRIDGE[env][network]
-      ],
-      contract:
-        "contracts/intent-adapters/hyperliquid/HyperliquidAdapter.sol:HyperliquidAdapterDataStore",
-    });
+    dataStore,
+    _hre.ethers.provider
+  );
+  const owner = await hlDataStore.owner();
 
   console.log(`Verifying ${contractName} Contract....`);
+
+  // await _hre.run("verify:verify", {
+  //   address: dataStore,
+  //   constructorArguments: [
+  //     owner,
+  //     ASSET_FORWARDER[env][network],
+  //     DEXSPAN[env][network],
+  //     ASSET_BRIDGE[env][network],
+  //   ],
+  // });
+
+  // console.log(`Verifying ${contractName} Contract....`);
   await _hre.run("verify:verify", {
     address,
     constructorArguments: [
@@ -119,7 +117,7 @@ task(VERIFY_HYPER_LIQUID_ADAPTER).setAction(async function (
       DEXSPAN[env][network],
       ASSET_BRIDGE[env][network],
       USDC[network],
-      DEPOSIT_BRIDGE[network]
+      DEPOSIT_BRIDGE[network],
     ],
   });
 

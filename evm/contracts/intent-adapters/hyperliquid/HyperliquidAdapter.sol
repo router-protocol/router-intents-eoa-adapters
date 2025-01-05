@@ -97,7 +97,7 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         } else if (usd == type(uint64).max)
             usd = uint64(IERC20(usdc).balanceOf(address(this)));
 
-        (tokens, ) = this._deposit(user, usd, deadline, signature);
+        (tokens, ) = _deposit(user, usd, deadline, signature);
     }
 
     function handleMessage(
@@ -116,7 +116,7 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         require(refundAddress != address(0), "Invalid refund address");
         require(usd > 0 && uint64(amount) <= usd, "Invalid amount");
 
-        try this._deposit(user, uint64(amount), deadline, signature) {
+        try this.deposit(user, uint64(amount), deadline, signature) {
             emit OperationSuccessful();
         } catch {
             IERC20(tokenSent).safeTransfer(refundAddress, amount);
@@ -161,8 +161,7 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         uint64 usd,
         uint64 deadline,
         IHyperliquidBridge.Signature memory signature
-    ) external returns (address[] memory tokens, bytes memory logData) {
-        require(msg.sender == address(this), "Can only call by this contract");
+    ) internal returns (address[] memory tokens, bytes memory logData) {
         require(deadline > block.timestamp, "Expired deadline");
         IHyperliquidBridge.DepositWithPermit[]
             memory deposits = new IHyperliquidBridge.DepositWithPermit[](1);
