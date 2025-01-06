@@ -29,7 +29,7 @@ export const BERA_DEPOSIT_WRAPPER: { [chainId: string]: string } = {
 };
 
 export const BERA_SBTC_VAULT: { [chainId: string]: string } = {
-  "1": "0x437c885357425686b53e0d18c8D9c26A4a6Be43f",
+  "1": "0xf401Cc9f467c7046796D9A8b44b0c1348b4DEec7",
 };
 
 export const SBTC_LZ_ADAPTER: { [chainId: string]: string } = {
@@ -47,5 +47,5 @@ export const BERA_STONE: { [chainId: string]: string } = {
 };
 
 export const BERA_SBTC: { [chainId: string]: string } = {
-  "1": "0xd7F311a29b54E13b0A6c97027ece4a41cBe9EA38",
+  "1": "0xc620cb64C6C504f417dA517048AE2Dab7CcA75fa",
 };
