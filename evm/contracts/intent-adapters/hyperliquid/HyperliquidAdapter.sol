@@ -36,6 +36,7 @@ contract HyperliquidAdapterDataStore is Ownable {
     function setAssetBridge(address _assetBridge) external onlyOwner {
         assetBridge = _assetBridge;
     }
+
 }
 
 /**
@@ -85,7 +86,8 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
     ) external payable override returns (address[] memory tokens) {
         (
             address user,
-            uint64 usd,
+            uint64 amountMax,
+            uint64 minReturnUsd,
             uint64 deadline,
             IHyperliquidBridge.Signature memory signature,
             address refundAddress
@@ -93,34 +95,62 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
-            IERC20(usdc).safeTransferFrom(msg.sender, self(), usd);
-        } else if (usd == type(uint64).max)
-            usd = uint64(IERC20(usdc).balanceOf(address(this)));
+            IERC20(usdc).safeTransferFrom(msg.sender, self(), amountMax);
+        } else if (amountMax == type(uint64).max)
+            amountMax = uint64(IERC20(usdc).balanceOf(address(this)));
 
-        (tokens, ) = _deposit(user, usd, deadline, signature);
+        bytes memory logData;
+        (tokens, logData) = _deposit(
+            user,
+            amountMax,
+            minReturnUsd,
+            deadline,
+            signature
+        );
+
+         emit ExecutionEvent(name(), logData);
+        return tokens;
     }
 
     function handleMessage(
         address tokenSent,
-        uint256 amount,
+        uint256 amountSent,
         bytes memory instruction
     ) external onlyNitro nonReentrant {
         (
             address user,
-            uint64 usd,
+            uint64 amountMax,
+            uint64 minReturnUsd,
             uint64 deadline,
             IHyperliquidBridge.Signature memory signature,
             address refundAddress
         ) = parseInputs(instruction);
 
         require(refundAddress != address(0), "Invalid refund address");
-        require(usd > 0 && uint64(amount) <= usd, "Invalid amount");
+        require(
+            minReturnUsd > 0 &&
+                uint64(amountSent) <= amountMax &&
+                uint64(amountSent) >= minReturnUsd,
+            "Invalid amount"
+        );
 
-        try this.deposit(user, uint64(amount), deadline, signature) {
+        try
+            this.deposit(
+                user,
+                uint64(amountSent),
+                minReturnUsd,
+                deadline,
+                signature
+            )
+        {
             emit OperationSuccessful();
         } catch {
-            IERC20(tokenSent).safeTransfer(refundAddress, amount);
-            emit OperationFailedRefundEvent(tokenSent, refundAddress, amount);
+            IERC20(tokenSent).safeTransfer(refundAddress, amountSent);
+            emit OperationFailedRefundEvent(
+                tokenSent,
+                refundAddress,
+                amountSent
+            );
         }
     }
 
@@ -128,37 +158,18 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
 
     function deposit(
         address user,
-        uint64 usd,
+        uint64 amountSent,
+        uint64 minReturnUsd,
         uint64 deadline,
         IHyperliquidBridge.Signature memory signature
     ) external returns (address[] memory tokens, bytes memory logData) {
-        require(msg.sender == address(this), "Can only call by this contract");
-        require(deadline > block.timestamp, "Expired deadline");
-        IHyperliquidBridge.DepositWithPermit[]
-            memory deposits = new IHyperliquidBridge.DepositWithPermit[](1);
-
-        IERC20(usdc).safeTransfer(user, usd);
-
-        deposits[0] = IHyperliquidBridge.DepositWithPermit({
-            user: user,
-            usd: usd,
-            deadline: deadline,
-            signature: signature
-        });
-
-        hyperliquidDepositBridge.batchedDepositWithPermit(deposits);
-
-        tokens = new address[](1);
-        tokens[0] = usdc;
-
-        logData = abi.encode(user, usd);
-
-        emit ExecutionEvent(name(), logData);
+        return _deposit(user, amountSent, minReturnUsd, deadline, signature);
     }
 
     function _deposit(
         address user,
-        uint64 usd,
+        uint64 amountSent,
+        uint64 minReturnUsd,
         uint64 deadline,
         IHyperliquidBridge.Signature memory signature
     ) internal returns (address[] memory tokens, bytes memory logData) {
@@ -166,11 +177,11 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         IHyperliquidBridge.DepositWithPermit[]
             memory deposits = new IHyperliquidBridge.DepositWithPermit[](1);
 
-        IERC20(usdc).safeTransfer(user, usd);
+        IERC20(usdc).safeTransfer(user, amountSent);
 
         deposits[0] = IHyperliquidBridge.DepositWithPermit({
             user: user,
-            usd: usd,
+            usd: minReturnUsd,
             deadline: deadline,
             signature: signature
         });
@@ -180,9 +191,7 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         tokens = new address[](1);
         tokens[0] = usdc;
 
-        logData = abi.encode(user, usd);
-
-        emit ExecutionEvent(name(), logData);
+        logData = abi.encode(user, amountSent);
     }
 
     /**
@@ -198,6 +207,7 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
             address,
             uint64,
             uint64,
+            uint64,
             IHyperliquidBridge.Signature memory,
             address
         )
@@ -205,7 +215,14 @@ contract HyperliquidAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         return
             abi.decode(
                 data,
-                (address, uint64, uint64, IHyperliquidBridge.Signature, address)
+                (
+                    address,
+                    uint64,
+                    uint64,
+                    uint64,
+                    IHyperliquidBridge.Signature,
+                    address
+                )
             );
     }
 
