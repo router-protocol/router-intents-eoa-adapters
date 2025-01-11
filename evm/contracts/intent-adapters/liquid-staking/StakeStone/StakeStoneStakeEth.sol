@@ -69,6 +69,7 @@ contract StakeStoneStakeEth is RouterIntentEoaAdapterWithoutDataProvider {
         uint16 dstEid,
         bytes memory crossChainData
     ) internal returns (address[] memory tokens, bytes memory logData) {
+        require(_amount > 0, "Invalid Amount");
         uint256 receivedStone = stoneVault.deposit{value: _amount}();
 
         if (dstEid != 0) {

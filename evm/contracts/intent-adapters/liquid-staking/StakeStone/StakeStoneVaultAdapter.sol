@@ -63,6 +63,7 @@ contract StakeStoneVaultAdapter is RouterIntentEoaAdapterWithoutDataProvider {
         address _recipient,
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
+        require(_amount > 0 , "Invalid Amount");
         IERC20(weth).safeIncreaseAllowance(address(stakeStoneVault), _amount);
         uint256 stoneAmount = stakeStoneVault.deposit(_amount, _recipient);
 

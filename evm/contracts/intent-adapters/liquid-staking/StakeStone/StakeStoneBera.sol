@@ -77,6 +77,7 @@ contract StakeStoneBera is RouterIntentEoaAdapterWithoutDataProvider {
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
         uint256 _receivedberaSTONE;
+        require(_amount > 0 , "Invalid Amount");
         if (_token == native()) {
             _receivedberaSTONE = depositWrapper.depositETH{
                         value: _amount

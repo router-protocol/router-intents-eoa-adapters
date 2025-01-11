@@ -5,7 +5,6 @@ import {BeraSBTCVault, DepositWrapper} from "./Interfaces.sol";
 import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
-import "hardhat/console.sol";
 
 /**
  * @title StakeStoneBeraSBTC
@@ -70,6 +69,7 @@ contract StakeStoneBeraSBTC is RouterIntentEoaAdapterWithoutDataProvider {
         uint256 _amount
     ) internal returns (address[] memory tokens, bytes memory logData) {
         uint256 _receivedberaSTONE;
+        require(_amount > 0, "Invalid Amount");
         IERC20(_token).safeIncreaseAllowance(address(beraSBTCVault), _amount);
         _receivedberaSTONE = beraSBTCVault.deposit(_token, _amount, _recipient);
 

@@ -72,6 +72,7 @@ contract StakeStoneStakeBTC is RouterIntentEoaAdapterWithoutDataProvider {
         bytes memory crossChainData
     ) internal returns (address[] memory tokens, bytes memory logData) {
         IERC20(_token).safeIncreaseAllowance(address(sBTCVault), _amount);
+        require(_amount > 0 , "Invalid Amount");
         sBTCVault.deposit(_token, _amount);
         uint256 _receivedsBTC = IERC20(sBTC).balanceOf(address(this));
         tokens = new address[](2);
