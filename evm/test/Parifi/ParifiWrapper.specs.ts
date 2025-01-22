@@ -12,13 +12,13 @@ import { defaultAbiCoder } from "ethers/lib/utils";
 import { zeroAddress } from "ethereumjs-util";
 import { getTransaction } from "../utils";
 
-const CHAIN_ID = "42161";
-const WETH = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
-const USDC = "0xaf88d065e77c8cc2239327c5edb3a432268e5831";
+const CHAIN_ID = "8453";
+const WETH = "0x4200000000000000000000000000000000000006";
+const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const SUSDC = "0xE81Be4495f138FAE5846d21AC2cA822BEf452365";
 const FEE_WALLET = "0x00EB64b501613F8Cf8Ef3Ac4F82Fc63a50343fee";
-const STABLE_PROXY = "0xa65538A6B9A8442854dEcB6E3F85782C60757D60";
-const SYNTHETIC_PROXY = "0xd762960c31210Cf1bDf75b06A5192d395EEDC659";
+const STABLE_PROXY = "0x18141523403e2595D31b22604AcB8Fc06a4CaA61";
+const SYNTHETIC_PROXY = "0x0A2AF931eFFd34b81ebcc57E3d3c9B1E1dE1C9Ce";
 describe("Parifi Wrapper Adapter: ", async () => {
   const [deployer] = waffle.provider.getWallets();
 

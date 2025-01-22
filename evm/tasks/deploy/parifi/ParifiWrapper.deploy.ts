@@ -21,8 +21,8 @@ import { ParifiTargetDataStore__factory } from "../../../typechain/factories/Par
 const contractName: string = CONTRACT_NAME.ParifiIntentWrapper;
 const contractType = ContractType.Perpetuals;
 
-const STABLE_PROXY = "0xa65538A6B9A8442854dEcB6E3F85782C60757D60";
-const SYNTHETIC_PROXY = "0xd762960c31210Cf1bDf75b06A5192d395EEDC659";
+const STABLE_PROXY = "0x18141523403e2595D31b22604AcB8Fc06a4CaA61";
+const SYNTHETIC_PROXY = "0x0A2AF931eFFd34b81ebcc57E3d3c9B1E1dE1C9Ce";
 
 task(DEPLOY_PARIFI_WRAPPER_ADAPTER)
   .addFlag("verify", "pass true to verify the contract")
