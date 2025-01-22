@@ -1,14 +1,1 @@
-{
-  "mainnet": {
-    "42161": [
-      {
-        "name": "ParifiOpenPosition",
-        "address": "0x1c6A2240bFCbE22f06f5D657490aacA6E0400281"
-      },
-      {
-        "name": "ParifiIntentWrapper",
-        "address": "0xD41384aFD551553443E11F2aD207a2c1190B50c8"
-      }
-    ]
-  }
-}
+{"mainnet":{"8453":[{"name":"ParifiIntentWrapper","address":"0xD41384aFD551553443E11F2aD207a2c1190B50c8"}],"42161":[{"name":"ParifiOpenPosition","address":"0x1c6A2240bFCbE22f06f5D657490aacA6E0400281"},{"name":"ParifiIntentWrapper","address":"0xD41384aFD551553443E11F2aD207a2c1190B50c8"}]}}
