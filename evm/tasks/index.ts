@@ -1,2 +1,2 @@
-import "./deploy";
-import "./configure";
+// import "./deploy";
+// import "./configure";
