@@ -14,8 +14,9 @@ import { BatchTransaction__factory } from "../../typechain/factories/BatchTransa
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 import { zeroAddress } from "ethereumjs-util";
-import { MaxUint256 } from "@ethersproject/constants";
-import { getTransaction } from "../utils";
+import { BigNumber, Contract, Wallet } from "ethers";
+// import { MaxUint256 } from "@ethersproject/constants";
+// import { getTransaction } from "../utils";
 
 const CHAIN_ID = "1";
 const LIQUID_USD = "0x08c6F91e2B681FaF5e17227F2a44C307b3C1364C";
@@ -70,7 +71,8 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       LIQUID_USD,
-      STABLES_DEPOSITS_VAULT
+      STABLES_DEPOSITS_VAULT,
+      [USDC, USDT]
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -157,7 +159,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   //     );
 
   //     const balBefore = await ethers.provider.getBalance(deployer.address);
-  //     const beraStoneBalBefore = await liquidUSD.balanceOf(deployer.address);
+  //     const liquidUSDBalBefore = await liquidUSD.balanceOf(deployer.address);
 
   //     await batchTransaction.executeBatchCallsSameChain(
   //       0,
@@ -172,42 +174,74 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   //     );
 
   //     const balAfter = await ethers.provider.getBalance(deployer.address);
-  //     const beraStoneBalAfter = await liquidUSD.balanceOf(deployer.address);
+  //     const liquidUSDBalAfter = await liquidUSD.balanceOf(deployer.address);
 
   //     expect(balBefore).gt(balAfter);
-  //     expect(beraStoneBalAfter).gt(beraStoneBalBefore);
+  //     expect(liquidUSDBalAfter).gt(liquidUSDBalBefore);
   //   });
 
+  const toBytes32 = (bn: BigNumber) => {
+    return ethers.utils.hexlify(ethers.utils.zeroPad(bn.toHexString(), 32));
+  };
+
+  // This works for token when it has balance mapping at slot 0.
+  const setUserTokenBalance = async (
+    contract: Contract,
+    user: Wallet,
+    balance: BigNumber
+  ) => {
+    const index = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256"],
+      [user.address, 0] // key, slot
+    );
+
+    await hardhat.network.provider.request({
+      method: "hardhat_setStorageAt",
+      params: [contract.address, index, toBytes32(balance).toString()],
+    });
+
+    await hardhat.network.provider.request({
+      method: "evm_mine",
+      params: [],
+    });
+  };
+
   it("Can deposits on EtherFi USDC for liquidUSD on same chain", async () => {
-    const { batchTransaction, etherFiStablesDepositsAdapter, liquidUSD, usdc } =
+    const { batchTransaction, etherFiStablesDepositsAdapter, liquidUSD, usdt } =
       await setupTests();
 
-    const amount = ethers.utils.parseEther("0.2");
+    // const amount = ethers.utils.parseEther("0.2");
 
-    const txn = await getTransaction({
-      fromTokenAddress: NATIVE_TOKEN,
-      toTokenAddress: USDC,
-      amount: ethers.utils.parseEther("0.2").toString(),
-      fromTokenChainId: CHAIN_ID,
-      toTokenChainId: CHAIN_ID,
-      senderAddress: deployer.address,
-      receiverAddress: deployer.address,
-    });
+    // const txn = await getTransaction({
+    //   fromTokenAddress: NATIVE_TOKEN,
+    //   toTokenAddress: USDT,
+    //   amount: ethers.utils.parseEther("0.5").toString(),
+    //   fromTokenChainId: CHAIN_ID,
+    //   toTokenChainId: CHAIN_ID,
+    //   senderAddress: deployer.address,
+    //   receiverAddress: deployer.address,
+    // });
 
-    await deployer.sendTransaction({
-      to: txn.to,
-      value: txn.value,
-      data: txn.data,
-    });
-    expect(await usdc.balanceOf(deployer.address)).gt(0);
+    // await deployer.sendTransaction({
+    //   to: txn.to,
+    //   value: txn.value,
+    //   data: txn.data,
+    // });
+    await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("100"));
+    const usdcBalBefore = await usdt.balanceOf(deployer.address);
+    expect(usdcBalBefore).gt(0);
+
+    const unit256Max = ethers.BigNumber.from(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    );
 
     const EtherFiStablesDepositData = defaultAbiCoder.encode(
       ["address", "address", "uint256", "uint256"],
-      [NATIVE, deployer.address, MaxUint256, 0]
+      [NATIVE, deployer.address, unit256Max, 0]
     );
 
-    const tokens = [USDC];
-    const amounts = [ethers.constants.MaxUint256];
+    const tokens = [USDT];
+    const amounts = [usdcBalBefore];
     const targets = [etherFiStablesDepositsAdapter.address];
     const data = [EtherFiStablesDepositData];
     const value = [0];
@@ -221,9 +255,9 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
     );
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
-    const beraStoneBalBefore = await liquidUSD.balanceOf(deployer.address);
+    const liquidUSDBalBefore = await liquidUSD.balanceOf(deployer.address);
 
-    await usdc.approve(batchTransaction.address, ethers.constants.MaxUint256);
+    await usdt.approve(batchTransaction.address, ethers.constants.MaxUint256);
 
     await batchTransaction.executeBatchCallsSameChain(
       0,
@@ -234,14 +268,14 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
       value,
       callType,
       data,
-      { value: amount, gasLimit: 10000000 }
+      { gasLimit: 10000000 }
     );
 
     const balAfter = await ethers.provider.getBalance(deployer.address);
-    const beraStoneBalAfter = await liquidUSD.balanceOf(deployer.address);
+    const liquidUSDBalAfter = await liquidUSD.balanceOf(deployer.address);
 
     expect(balBefore).gt(balAfter);
-    expect(beraStoneBalAfter).gt(beraStoneBalBefore);
+    expect(liquidUSDBalAfter).gt(liquidUSDBalBefore);
   });
 
   //   it("Can stake ETH on Stader on dest chain when instruction is received from BatchTransaction contract", async () => {
@@ -270,7 +304,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   //     );
 
   //     const balBefore = await ethers.provider.getBalance(deployer.address);
-  //     const beraStoneBalBefore = await liquidUSD.balanceOf(deployer.address);
+  //     const liquidUSDBalBefore = await liquidUSD.balanceOf(deployer.address);
 
   //     await mockAssetForwarder.handleMessage(
   //       NATIVE_TOKEN,
@@ -281,9 +315,9 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   //     );
 
   //     const balAfter = await ethers.provider.getBalance(deployer.address);
-  //     const beraStoneBalAfter = await liquidUSD.balanceOf(deployer.address);
+  //     const liquidUSDBalAfter = await liquidUSD.balanceOf(deployer.address);
 
   //     expect(balAfter).lt(balBefore);
-  //     expect(beraStoneBalAfter).gt(beraStoneBalBefore);
+  //     expect(liquidUSDBalAfter).gt(liquidUSDBalBefore);
   //   });
 });
