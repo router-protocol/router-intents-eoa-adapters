@@ -5,6 +5,7 @@ import {IStablesDepositsVault} from "./Interfaces.sol";
 import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvider} from "@routerprotocol/intents-core/contracts/RouterIntentEoaAdapter.sol";
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
+import "hardhat/console.sol";
 
 /**
  * @title EtherFiStablesDeposits
@@ -44,18 +45,33 @@ contract EtherFiStablesDeposits is RouterIntentEoaAdapterWithoutDataProvider {
     function execute(
         bytes calldata data
     ) external payable override returns (address[] memory tokens) {
-        (address _token, address _recipient, uint256 _amount, uint256 _minimumMint) = parseInputs(
-            data
-        );
-
-        require(isStablecoin[_token], "Only stablecoins are allowed");
-
+        console.log("Starting calling contracts:");
+        (
+            address _token,
+            address _recipient,
+            uint256 _amount,
+            uint256 _minimumMint
+        ) = parseInputs(data);
+        console.log("_token:", _token);
+        console.log("_recipient:", _recipient);
+        console.log("_amount:", _amount, type(uint256).max);
+        console.log("minimumMint:", _minimumMint);
+        console.log("address(this):", address(this));
+        console.log("self:", self());
+        console.log("is Stable token passed:", isStablecoin[_token]);
+        // require(isStablecoin[_token], "Only stablecoins are allowed");
+        
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
+            console.log("self", isStablecoin[_token]);
             IERC20(_token).safeTransferFrom(msg.sender, self(), _amount);
-        } else if (_amount == type(uint256).max)
+        } else if (_amount == type(uint256).max){
+            console.log("max");
             _amount = IERC20(_token).balanceOf(address(this));
-
+            console.log("_amount", _amount);
+        }
+            
+        console.log("_amount", _amount);
         bytes memory logData;
 
         (tokens, logData) = _stake(_token, _recipient, _amount, _minimumMint);
@@ -72,17 +88,26 @@ contract EtherFiStablesDeposits is RouterIntentEoaAdapterWithoutDataProvider {
         uint256 _amount,
         uint256 _minimumMint
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        uint256 _receivedLiquidUSD;
-            IERC20(_token).safeIncreaseAllowance(
-                address(stablesDepositsVault),
-                _amount
-            );
-            _receivedLiquidUSD = stablesDepositsVault.deposit(
-                _token,
-                _amount,
-                _minimumMint
-            );
 
+        console.log("Staking Token:", _token);
+        console.log("Recipient:", _recipient);
+        console.log("Amount:", _amount);
+        uint256 _receivedLiquidUSD;
+        IERC20(_token).safeIncreaseAllowance(
+            address(stablesDepositsVault),
+            _amount
+        );
+        console.log("Allowance Done:");
+        console.log("_token:", _token);
+        console.log("_amount:", _amount);
+        console.log("_minimumMint:", _minimumMint);
+        _receivedLiquidUSD = stablesDepositsVault.deposit(
+            _token,
+            _amount,
+            _minimumMint
+        );
+
+        console.log("_receivedLiquidUSD:", _receivedLiquidUSD);
         // uint256 _receivedLiquidUSD = IERC20(liquidUSD).balanceOf(address(this));
         tokens = new address[](2);
         tokens[0] = _token;

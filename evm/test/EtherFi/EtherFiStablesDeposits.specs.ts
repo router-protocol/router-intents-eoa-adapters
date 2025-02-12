@@ -15,8 +15,8 @@ import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 import { zeroAddress } from "ethereumjs-util";
 import { BigNumber, Contract, Wallet } from "ethers";
-// import { MaxUint256 } from "@ethersproject/constants";
 // import { getTransaction } from "../utils";
+// import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "1";
 const LIQUID_USD = "0x08c6F91e2B681FaF5e17227F2a44C307b3C1364C";
@@ -72,7 +72,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
       WNATIVE[env][CHAIN_ID],
       LIQUID_USD,
       STABLES_DEPOSITS_VAULT,
-      [USDC, USDT]
+      [USDT]
     );
 
     await batchTransaction.setAdapterWhitelist(
@@ -127,6 +127,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
         {
           forking: {
             jsonRpcUrl: "https://rpc.ankr.com/eth",
+            blockNumber: 21830775,
           },
         },
       ],
@@ -192,7 +193,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   ) => {
     const index = ethers.utils.solidityKeccak256(
       ["uint256", "uint256"],
-      [user.address, 0] // key, slot
+      [user.address, 2] // key, slot
     );
 
     await hardhat.network.provider.request({
@@ -209,13 +210,13 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   it("Can deposits on EtherFi USDC for liquidUSD on same chain", async () => {
     const { batchTransaction, etherFiStablesDepositsAdapter, liquidUSD, usdt } =
       await setupTests();
-
+    // const usdcBalBefore = await usdt.balanceOf(deployer.address);
     // const amount = ethers.utils.parseEther("0.2");
 
     // const txn = await getTransaction({
     //   fromTokenAddress: NATIVE_TOKEN,
     //   toTokenAddress: USDT,
-    //   amount: ethers.utils.parseEther("0.5").toString(),
+    //   amount: ethers.utils.parseEther("1").toString(),
     //   fromTokenChainId: CHAIN_ID,
     //   toTokenChainId: CHAIN_ID,
     //   senderAddress: deployer.address,
@@ -227,7 +228,10 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
     //   value: txn.value,
     //   data: txn.data,
     // });
-    await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("100"));
+    // console.log(res);
+    // const res2 = await res.wait();
+    // console.log(res2);
+    await setUserTokenBalance(usdt, deployer, ethers.utils.parseEther("0.2"));
     const usdcBalBefore = await usdt.balanceOf(deployer.address);
     expect(usdcBalBefore).gt(0);
 
@@ -237,11 +241,11 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
 
     const EtherFiStablesDepositData = defaultAbiCoder.encode(
       ["address", "address", "uint256", "uint256"],
-      [NATIVE, deployer.address, unit256Max, 0]
+      [usdt.address, deployer.address, unit256Max, 0]
     );
 
     const tokens = [USDT];
-    const amounts = [usdcBalBefore];
+    const amounts = [100000000];
     const targets = [etherFiStablesDepositsAdapter.address];
     const data = [EtherFiStablesDepositData];
     const value = [0];

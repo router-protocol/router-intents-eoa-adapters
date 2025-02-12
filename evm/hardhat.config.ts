@@ -64,7 +64,7 @@ const config: HardhatUserConfig = {
       },
       allowUnlimitedContractSize: true,
       chainId: 31337,
-      zksync: true,
+      zksync: false,
     },
     ganache: {
       chainId: 1337,
