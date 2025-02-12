@@ -135,7 +135,7 @@ describe("VirtualsDeposits Adapter: ", async () => {
     const txn = await getTransaction({
       fromTokenAddress: VIRTUALS_TOKEN,
       toTokenAddress: VITA_NOVA_TOKEN,
-      amount: ethers.utils.parseEther("200").toString(),
+      amount: ethers.utils.parseEther("1").toString(),
       fromTokenChainId: CHAIN_ID,
       toTokenChainId: CHAIN_ID,
       senderAddress: deployer.address,
@@ -161,8 +161,8 @@ describe("VirtualsDeposits Adapter: ", async () => {
     );
 
     const VirtualsDepositsData = defaultAbiCoder.encode(
-      ["address", "address", "uint256"],
-      [virtualToken.address, deployer.address, unit256Max]
+      ["address", "address", "address", "uint256"],
+      [virtualToken.address, vitaNova.address, deployer.address, unit256Max]
     );
 
     const tokens = [VITA_NOVA_TOKEN];
