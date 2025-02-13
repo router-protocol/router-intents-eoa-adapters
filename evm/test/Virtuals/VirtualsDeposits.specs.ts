@@ -133,9 +133,9 @@ describe("VirtualsDeposits Adapter: ", async () => {
     // const amount = ethers.utils.parseEther("0.2");
 
     const txn = await getTransaction({
-      fromTokenAddress: VIRTUALS_TOKEN,
-      toTokenAddress: VITA_NOVA_TOKEN,
-      amount: ethers.utils.parseEther("1").toString(),
+      fromTokenAddress: NATIVE_TOKEN,
+      toTokenAddress: VIRTUALS_TOKEN,
+      amount: ethers.utils.parseEther("100").toString(),
       fromTokenChainId: CHAIN_ID,
       toTokenChainId: CHAIN_ID,
       senderAddress: deployer.address,
@@ -165,7 +165,7 @@ describe("VirtualsDeposits Adapter: ", async () => {
       [virtualToken.address, vitaNova.address, deployer.address, unit256Max]
     );
 
-    const tokens = [VITA_NOVA_TOKEN];
+    const tokens = [VIRTUALS_TOKEN];
     const amounts = [virtualTokenBalBefore];
     const targets = [virtualsDeposits.address];
     const data = [VirtualsDepositsData];
