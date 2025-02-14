@@ -56,7 +56,7 @@ contract EtherFiStablesDeposits is RouterIntentEoaAdapterWithoutDataProvider {
         console.log("_recipient:", _recipient);
         console.log("_amount:", _amount, type(uint256).max);
         console.log("minimumMint:", _minimumMint);
-        console.log("address(this):", address(this));
+        console.log("address(this):", IERC20(_token).balanceOf(address(this)), address(this));
         console.log("self:", self());
         console.log("is Stable token passed:", isStablecoin[_token]);
         // require(isStablecoin[_token], "Only stablecoins are allowed");
@@ -75,7 +75,7 @@ contract EtherFiStablesDeposits is RouterIntentEoaAdapterWithoutDataProvider {
         bytes memory logData;
 
         (tokens, logData) = _stake(_token, _recipient, _amount, _minimumMint);
-
+        console.log("stake return");
         emit ExecutionEvent(name(), logData);
         return tokens;
     }
@@ -92,9 +92,10 @@ contract EtherFiStablesDeposits is RouterIntentEoaAdapterWithoutDataProvider {
         console.log("Staking Token:", _token);
         console.log("Recipient:", _recipient);
         console.log("Amount:", _amount);
+        console.log("liquidUSD:", liquidUSD);
         uint256 _receivedLiquidUSD;
         IERC20(_token).safeIncreaseAllowance(
-            address(stablesDepositsVault),
+            address(liquidUSD),
             _amount
         );
         console.log("Allowance Done:");
@@ -108,11 +109,15 @@ contract EtherFiStablesDeposits is RouterIntentEoaAdapterWithoutDataProvider {
         );
 
         console.log("_receivedLiquidUSD:", _receivedLiquidUSD);
-        // uint256 _receivedLiquidUSD = IERC20(liquidUSD).balanceOf(address(this));
+        uint256 _afterBalanceLiquidUSD = IERC20(liquidUSD).balanceOf(address(this));
+        console.log("_afterBalanceLiquidUSD:", _afterBalanceLiquidUSD);
         tokens = new address[](2);
         tokens[0] = _token;
         tokens[1] = liquidUSD;
-        // withdrawTokens(liquidUSD, _recipient, type(uint256).max);
+        
+        console.log("after token imp");
+        IERC20(liquidUSD).safeTransfer(_recipient, 1);
+        console.log("after withdrawTokens imp");
         logData = abi.encode(_recipient, _amount, _receivedLiquidUSD);
     }
 
