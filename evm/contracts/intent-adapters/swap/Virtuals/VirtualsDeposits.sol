@@ -6,7 +6,6 @@ import {RouterIntentEoaAdapterWithoutDataProvider, EoaExecutorWithoutDataProvide
 import {Errors} from "@routerprotocol/intents-core/contracts/utils/Errors.sol";
 import {IERC20, SafeERC20} from "../../../utils/SafeERC20.sol";
 import {SafeMath} from "../../../utils/SafeMath.sol";
-import "hardhat/console.sol";
 
 /**
  * @title VirtualsDeposits
@@ -19,15 +18,18 @@ contract VirtualsDeposits is RouterIntentEoaAdapterWithoutDataProvider {
     using SafeMath for uint256;
 
     address public immutable virtualToken;
+    address public immutable approvalContract;
     VirtualsDepositsWrapper public immutable depositWrapper;
 
     constructor(
         address __native,
         address __wnative,
         address __virtualToken,
+        address __approvalContract,
         address __depositWrapper
     ) RouterIntentEoaAdapterWithoutDataProvider(__native, __wnative) {
         virtualToken = __virtualToken;
+        approvalContract = __approvalContract;
         depositWrapper = VirtualsDepositsWrapper(__depositWrapper);
     }
 
@@ -48,14 +50,7 @@ contract VirtualsDeposits is RouterIntentEoaAdapterWithoutDataProvider {
             uint256 _amount
         ) = parseInputs(data);
 
-        console.log('_tokenIn',_tokenIn);
-        console.log('_tokenOut',_tokenOut);
-        console.log('_recipient',_recipient);
-        console.log('_amount',_amount);
-
         require(_tokenIn == virtualToken, "Invalid Token"); // Restrict deposits to Virtual Tokens
-
-        console.log('token is virtual token',_tokenIn == virtualToken);
 
         // If the adapter is called using `call` and not `delegatecall`
         if (address(this) == self()) {
@@ -83,27 +78,21 @@ contract VirtualsDeposits is RouterIntentEoaAdapterWithoutDataProvider {
         uint256 _amount,
         address _tokenOut
     ) internal returns (address[] memory tokens, bytes memory logData) {
-        console.log('_amount',_amount);
         require(_amount > 0, "Required amount is greater than zero");
 
         uint256 _aiTokenAmountBefore = getBalance(_tokenOut, address(this));
-        console.log('_aiTokenAmountBefore',_aiTokenAmountBefore);
         // Approve Deposit Wrapper contract to use Virtual Tokens
         IERC20(virtualToken).safeIncreaseAllowance(
-            address(depositWrapper),
+            address(approvalContract),
             _amount
         );
-
         // Buy AI Agent Tokens
         bool success = depositWrapper.buy(_amount, _tokenOut);
-        console.log('success',success);
         require(success, "Buy failed");
 
         uint256 _aiTokenAmountReceived = getBalance(_tokenOut, address(this)).sub(
             _aiTokenAmountBefore
         );
-
-        console.log('_aiTokenAmountReceived',_aiTokenAmountReceived);
 
         withdrawTokens(_tokenOut, _recipient, _aiTokenAmountReceived);
 

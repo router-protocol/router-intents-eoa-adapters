@@ -15,9 +15,13 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { VIRTUALS_FACTORY } from "./constants";
+import {
+  APPROVAL_CONTRACT,
+  VIRTUAL_TOKEN,
+  VIRTUALS_FACTORY,
+} from "./constants";
 
-const contractName: string = CONTRACT_NAME.VirtualsStake;
+const contractName: string = CONTRACT_NAME.VirtualsDeposits;
 const contractType = ContractType.Swap;
 
 task(DEPLOY_VIRTUALS_ADAPTER)
@@ -36,6 +40,8 @@ task(DEPLOY_VIRTUALS_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
+      VIRTUAL_TOKEN[network],
+      APPROVAL_CONTRACT[network],
       VIRTUALS_FACTORY[network]
     );
     await instance.deployed();
@@ -80,6 +86,8 @@ task(VERIFY_VIRTUALS_ADAPTER).setAction(async function (
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
+      VIRTUAL_TOKEN[network],
+      APPROVAL_CONTRACT[network],
       VIRTUALS_FACTORY[network],
     ],
   });

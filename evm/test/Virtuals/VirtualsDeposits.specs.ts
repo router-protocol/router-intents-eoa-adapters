@@ -15,14 +15,16 @@ import { defaultAbiCoder } from "ethers/lib/utils";
 import { DexSpanAdapter__factory } from "../../typechain/factories/DexSpanAdapter__factory";
 import { zeroAddress } from "ethereumjs-util";
 // import { MaxUint256 } from "@ethersproject/constants";
-import { getTransaction } from "../utils";
+// import { getTransaction } from "../utils";
 // import { RPC } from "../constants";
+import { BigNumber, Contract, Wallet } from "ethers";
 
 const CHAIN_ID = "8453";
 const VIRTUALS_TOKEN = "0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b";
 const VIRTUALS_FACTORY = "0xF66DeA7b3e897cD44A5a231c61B6B4423d613259";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const VITA_NOVA_TOKEN = "0xa1Aa9888Ec058CAf2C9813c93493ab6b3bbB3F50";
+const APPROVAL_CONTRACT = "0x8292B43aB73EfAC11FAF357419C38ACF448202C5";
 
 describe("VirtualsDeposits Adapter: ", async () => {
   const [deployer] = waffle.provider.getWallets();
@@ -70,6 +72,7 @@ describe("VirtualsDeposits Adapter: ", async () => {
       NATIVE,
       WNATIVE[env][CHAIN_ID],
       VIRTUALS_TOKEN,
+      APPROVAL_CONTRACT,
       VIRTUALS_FACTORY
     );
 
@@ -119,12 +122,39 @@ describe("VirtualsDeposits Adapter: ", async () => {
       params: [
         {
           forking: {
-            jsonRpcUrl: "https://base.llamarpc.com",
+            jsonRpcUrl: "https://base.meowrpc.com",
+            blockNumber: 26539211,
           },
         },
       ],
     });
   });
+
+  const toBytes32 = (bn: BigNumber) => {
+    return ethers.utils.hexlify(ethers.utils.zeroPad(bn.toHexString(), 32));
+  };
+
+  // This works for token when it has balance mapping at slot 0.
+  const setUserTokenBalance = async (
+    contract: Contract,
+    user: Wallet,
+    balance: BigNumber
+  ) => {
+    const index = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256"],
+      [user.address, 5] // key, slot
+    );
+
+    await hardhat.network.provider.request({
+      method: "hardhat_setStorageAt",
+      params: [contract.address, index, toBytes32(balance).toString()],
+    });
+
+    await hardhat.network.provider.request({
+      method: "evm_mine",
+      params: [],
+    });
+  };
 
   it("Can deposits on virtuals protocol for vitaNova on same chain", async () => {
     const { batchTransaction, virtualsDeposits, vitaNova, virtualToken } =
@@ -132,27 +162,35 @@ describe("VirtualsDeposits Adapter: ", async () => {
 
     // const amount = ethers.utils.parseEther("0.2");
 
-    const txn = await getTransaction({
-      fromTokenAddress: NATIVE_TOKEN,
-      toTokenAddress: VIRTUALS_TOKEN,
-      amount: ethers.utils.parseEther("100").toString(),
-      fromTokenChainId: CHAIN_ID,
-      toTokenChainId: CHAIN_ID,
-      senderAddress: deployer.address,
-      receiverAddress: deployer.address,
-    });
+    // const txn = await getTransaction({
+    //   fromTokenAddress: NATIVE_TOKEN,
+    //   toTokenAddress: VIRTUALS_TOKEN,
+    //   amount: ethers.utils.parseEther("100").toString(),
+    //   fromTokenChainId: CHAIN_ID,
+    //   toTokenChainId: CHAIN_ID,
+    //   senderAddress: deployer.address,
+    //   receiverAddress: deployer.address,
+    // });
 
-    // console.log("txn", txn);
+    // // console.log("txn", txn);
 
-    await deployer.sendTransaction({
-      to: txn.to,
-      value: txn.value,
-      data: txn.data,
-    });
+    // await deployer.sendTransaction({
+    //   to: txn.to,
+    //   value: txn.value,
+    //   data: txn.data,
+    // });
 
+    await setUserTokenBalance(
+      virtualToken,
+      deployer,
+      ethers.utils.parseEther("0.2")
+    );
     const virtualTokenBalBefore = await virtualToken.balanceOf(
       deployer.address
     );
+    // const virtualTokenBalBefore = await virtualToken.balanceOf(
+    //   deployer.address
+    // );
 
     expect(virtualTokenBalBefore).gt(0);
 
@@ -196,7 +234,7 @@ describe("VirtualsDeposits Adapter: ", async () => {
       value,
       callType,
       data,
-      { gasLimit: 10000000 }
+      { gasLimit: 25000000 }
     );
 
     const balAfter = await ethers.provider.getBalance(deployer.address);
