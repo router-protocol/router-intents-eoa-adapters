@@ -7,7 +7,7 @@ import {
   WNATIVE,
   FEE_WALLET,
 } from "../../tasks/constants";
-import { EtherFiStablesDeposits__factory } from "../../typechain/factories/EtherFiStablesDeposits__factory";
+import { MizuStablesDeposits__factory } from "../../typechain/factories/MizuStablesDeposits__factory";
 import { TokenInterface__factory } from "../../typechain/factories/TokenInterface__factory";
 import { MockAssetForwarder__factory } from "../../typechain/factories/MockAssetForwarder__factory";
 import { BatchTransaction__factory } from "../../typechain/factories/BatchTransaction__factory";
@@ -19,13 +19,13 @@ import { BigNumber, Contract, Wallet } from "ethers";
 // import { MaxUint256 } from "@ethersproject/constants";
 
 const CHAIN_ID = "1";
-const LIQUID_USD = "0x08c6F91e2B681FaF5e17227F2a44C307b3C1364C";
-const STABLES_DEPOSITS_VAULT = "0x221Ea02d409074546265CCD1123050F4D498ef64";
+const HYPER_USD = "0x340116F605Ca4264B8bC75aAE1b3C8E42AE3a3AB";
+const STABLES_DEPOSITS_VAULT = "0xbC08eF3368615Be8495EB394a0b7d8d5FC6d1A55";
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 
-describe("EtherFiStablesDeposits Adapter: ", async () => {
+describe("MizuStablesDeposits Adapter: ", async () => {
   const [deployer] = waffle.provider.getWallets();
 
   const setupTests = async () => {
@@ -64,21 +64,24 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
       DEXSPAN[env][CHAIN_ID]
     );
 
-    const EtherFiStablesDeposits = await ethers.getContractFactory(
-      "EtherFiStablesDeposits"
+    const MizuStablesDeposits = await ethers.getContractFactory(
+      "MizuStablesDeposits"
     );
-    const etherFiStablesDepositsAdapter = await EtherFiStablesDeposits.deploy(
+
+    const initialStablecoins = [USDT];
+
+    const mizuStablesDepositsAdapter = await MizuStablesDeposits.deploy(
       NATIVE,
       WNATIVE[env][CHAIN_ID],
-      LIQUID_USD,
+      HYPER_USD,
       STABLES_DEPOSITS_VAULT,
-      [USDT]
+      initialStablecoins
     );
 
     await batchTransaction.setAdapterWhitelist(
       [
         dexSpanAdapter.address,
-        etherFiStablesDepositsAdapter.address,
+        mizuStablesDepositsAdapter.address,
         feeAdapter.address,
       ],
       [true, true, true]
@@ -102,8 +105,8 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
         batchTransaction.address,
         deployer
       ),
-      etherFiStablesDepositsAdapter: EtherFiStablesDeposits__factory.connect(
-        etherFiStablesDepositsAdapter.address,
+      mizuStablesDepositsAdapter: MizuStablesDeposits__factory.connect(
+        mizuStablesDepositsAdapter.address,
         deployer
       ),
       dexSpanAdapter: DexSpanAdapter__factory.connect(
@@ -116,7 +119,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
       ),
       usdt: TokenInterface__factory.connect(USDT, deployer),
       usdc: TokenInterface__factory.connect(USDC, deployer),
-      liquidUSD: TokenInterface__factory.connect(LIQUID_USD, deployer),
+      hyperUSD: TokenInterface__factory.connect(HYPER_USD, deployer),
     };
   };
 
@@ -127,7 +130,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
         {
           forking: {
             jsonRpcUrl: "https://rpc.ankr.com/eth",
-            blockNumber: 21830775,
+            blockNumber: 21881240,
           },
         },
       ],
@@ -135,20 +138,20 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   });
 
   //   it("Can stake on StakeStone for BeraStone on same chain", async () => {
-  //     const { batchTransaction, etherFiStablesDepositsAdapter, liquidUSD } =
+  //     const { batchTransaction, mizuStablesDepositsAdapter, hyperUSD } =
   //       await setupTests();
 
   //     const amount = ethers.utils.parseEther("1");
 
-  //     const EtherFiStablesDepositData = defaultAbiCoder.encode(
+  //     const MizuStablesDepositData = defaultAbiCoder.encode(
   //       ["address", "address", "uint256"],
   //       [NATIVE, deployer.address, MaxUint256]
   //     );
 
   //     const tokens = [NATIVE_TOKEN];
   //     const amounts = [amount];
-  //     const targets = [etherFiStablesDepositsAdapter.address];
-  //     const data = [EtherFiStablesDepositData];
+  //     const targets = [mizuStablesDepositsAdapter.address];
+  //     const data = [MizuStablesDepositData];
   //     const value = [0];
   //     const callType = [2];
   //     // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
@@ -160,7 +163,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   //     );
 
   //     const balBefore = await ethers.provider.getBalance(deployer.address);
-  //     const liquidUSDBalBefore = await liquidUSD.balanceOf(deployer.address);
+  //     const hyperUSDBalBefore = await hyperUSD.balanceOf(deployer.address);
 
   //     await batchTransaction.executeBatchCallsSameChain(
   //       0,
@@ -175,10 +178,10 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   //     );
 
   //     const balAfter = await ethers.provider.getBalance(deployer.address);
-  //     const liquidUSDBalAfter = await liquidUSD.balanceOf(deployer.address);
+  //     const hyperUSDBalAfter = await hyperUSD.balanceOf(deployer.address);
 
   //     expect(balBefore).gt(balAfter);
-  //     expect(liquidUSDBalAfter).gt(liquidUSDBalBefore);
+  //     expect(hyperUSDBalAfter).gt(hyperUSDBalBefore);
   //   });
 
   const toBytes32 = (bn: BigNumber) => {
@@ -207,8 +210,8 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
     });
   };
 
-  it("Can deposits on EtherFi USDC for liquidUSD on same chain", async () => {
-    const { batchTransaction, etherFiStablesDepositsAdapter, liquidUSD, usdt } =
+  it("Can deposits on Mizu USDC for hyperUSD on same chain", async () => {
+    const { batchTransaction, mizuStablesDepositsAdapter, hyperUSD, usdt } =
       await setupTests();
     // const usdcBalBefore = await usdt.balanceOf(deployer.address);
     // const amount = ethers.utils.parseEther("0.2");
@@ -239,15 +242,15 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
       "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
     );
 
-    const EtherFiStablesDepositData = defaultAbiCoder.encode(
+    const MizuStablesDepositData = defaultAbiCoder.encode(
       ["address", "address", "uint256", "uint256"],
       [usdt.address, deployer.address, unit256Max, 0]
     );
 
     const tokens = [USDT];
     const amounts = [100000000];
-    const targets = [etherFiStablesDepositsAdapter.address];
-    const data = [EtherFiStablesDepositData];
+    const targets = [mizuStablesDepositsAdapter.address];
+    const data = [MizuStablesDepositData];
     const value = [0];
     const callType = [2];
     // const feeInfo = [{ fee: 0, recipient: zeroAddress() }];
@@ -259,7 +262,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
     );
 
     const balBefore = await ethers.provider.getBalance(deployer.address);
-    const liquidUSDBalBefore = await liquidUSD.balanceOf(deployer.address);
+    const hyperUSDBalBefore = await hyperUSD.balanceOf(deployer.address);
 
     await usdt.approve(batchTransaction.address, ethers.constants.MaxUint256);
 
@@ -276,23 +279,23 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
     );
 
     const balAfter = await ethers.provider.getBalance(deployer.address);
-    const liquidUSDBalAfter = await liquidUSD.balanceOf(deployer.address);
+    const hyperUSDBalAfter = await hyperUSD.balanceOf(deployer.address);
 
     expect(balBefore).gt(balAfter);
-    expect(liquidUSDBalAfter).gt(liquidUSDBalBefore);
+    expect(hyperUSDBalAfter).gt(hyperUSDBalBefore);
   });
 
   //   it("Can stake ETH on Stader on dest chain when instruction is received from BatchTransaction contract", async () => {
   //     const {
   //       batchTransaction,
-  //       etherFiStablesDepositsAdapter,
-  //       liquidUSD,
+  //       mizuStablesDepositsAdapter,
+  //       hyperUSD,
   //       mockAssetForwarder,
   //     } = await setupTests();
 
   //     const amount = "100000000000000000";
 
-  //     const targets = [etherFiStablesDepositsAdapter.address];
+  //     const targets = [mizuStablesDepositsAdapter.address];
   //     const data = [
   //       defaultAbiCoder.encode(
   //         ["address", "uint256"],
@@ -308,7 +311,7 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   //     );
 
   //     const balBefore = await ethers.provider.getBalance(deployer.address);
-  //     const liquidUSDBalBefore = await liquidUSD.balanceOf(deployer.address);
+  //     const hyperUSDBalBefore = await hyperUSD.balanceOf(deployer.address);
 
   //     await mockAssetForwarder.handleMessage(
   //       NATIVE_TOKEN,
@@ -319,9 +322,9 @@ describe("EtherFiStablesDeposits Adapter: ", async () => {
   //     );
 
   //     const balAfter = await ethers.provider.getBalance(deployer.address);
-  //     const liquidUSDBalAfter = await liquidUSD.balanceOf(deployer.address);
+  //     const hyperUSDBalAfter = await hyperUSD.balanceOf(deployer.address);
 
   //     expect(balAfter).lt(balBefore);
-  //     expect(liquidUSDBalAfter).gt(liquidUSDBalBefore);
+  //     expect(hyperUSDBalAfter).gt(hyperUSDBalBefore);
   //   });
 });

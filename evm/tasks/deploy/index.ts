@@ -56,8 +56,8 @@ import "./scribe";
 import "./agni";
 import "./ring";
 import "./hyperliquid";
-
 import "./BatchTransaction.deploy";
 import "./ExternalBatchTransaction.deploy";
 import "./basename-external";
 import "./tokenLaunch";
+import "./mizu";

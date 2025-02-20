@@ -2,9 +2,9 @@ import { HardhatRuntimeEnvironment, TaskArguments } from "hardhat/types";
 import {
   CONTRACT_NAME,
   DEFAULT_ENV,
-  DEPLOY_ETHERFI_STABLES_DEPOSITS_ADAPTER,
+  DEPLOY_MIZU_STABLES_DEPOSITS_ADAPTER,
   NATIVE,
-  VERIFY_ETHERFI_STABLES_DEPOSITS_ADAPTER,
+  VERIFY_MIZU_STABLES_DEPOSITS_ADAPTER,
   WNATIVE,
 } from "../../constants";
 import { task } from "hardhat/config";
@@ -15,12 +15,12 @@ import {
   recordAllDeployments,
   saveDeployments,
 } from "../../utils";
-import { LIQUID_USD, STABLES_DEPOSITS_VAULT } from "./constants";
+import { HYPER_USD, STABLES_DEPOSITS_VAULT, USDT, USDC } from "./constants";
 
-const contractName: string = CONTRACT_NAME.EtherFiStablesDepositsVault;
+const contractName: string = CONTRACT_NAME.MizuStablesDeposits;
 const contractType = ContractType.LiquidStaking;
 
-task(DEPLOY_ETHERFI_STABLES_DEPOSITS_ADAPTER)
+task(DEPLOY_MIZU_STABLES_DEPOSITS_ADAPTER)
   .addFlag("verify", "pass true to verify the contract")
   .setAction(async function (
     _taskArguments: TaskArguments,
@@ -36,8 +36,9 @@ task(DEPLOY_ETHERFI_STABLES_DEPOSITS_ADAPTER)
     const instance = await factory.deploy(
       NATIVE,
       WNATIVE[env][network],
-      LIQUID_USD[network],
-      STABLES_DEPOSITS_VAULT[network]
+      HYPER_USD[network],
+      STABLES_DEPOSITS_VAULT[network],
+      [USDT, USDC]
     );
     await instance.deployed();
 
@@ -54,11 +55,11 @@ task(DEPLOY_ETHERFI_STABLES_DEPOSITS_ADAPTER)
     console.log(`${contractName} contract deployed at`, instance.address);
 
     if (_taskArguments.verify === true) {
-      await _hre.run(VERIFY_ETHERFI_STABLES_DEPOSITS_ADAPTER);
+      await _hre.run(VERIFY_MIZU_STABLES_DEPOSITS_ADAPTER);
     }
   });
 
-task(VERIFY_ETHERFI_STABLES_DEPOSITS_ADAPTER).setAction(async function (
+task(VERIFY_MIZU_STABLES_DEPOSITS_ADAPTER).setAction(async function (
   _taskArguments: TaskArguments,
   _hre: HardhatRuntimeEnvironment
 ) {
@@ -81,8 +82,9 @@ task(VERIFY_ETHERFI_STABLES_DEPOSITS_ADAPTER).setAction(async function (
     constructorArguments: [
       NATIVE,
       WNATIVE[env][network],
-      LIQUID_USD[network],
+      HYPER_USD[network],
       STABLES_DEPOSITS_VAULT[network],
+      [USDT, USDC],
     ],
   });
 
