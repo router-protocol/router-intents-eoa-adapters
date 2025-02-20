@@ -259,6 +259,8 @@ export const DEPLOY_MIZU_STABLES_DEPOSITS_ADAPTER =
   "DEPLOY_MIZU_STABLES_DEPOSITS_ADAPTER";
 export const VERIFY_MIZU_STABLES_DEPOSITS_ADAPTER =
   "VERIFY_MIZU_STABLES_DEPOSITS_ADAPTER";
+export const DEPLOY_VIRTUALS_ADAPTER = "DEPLOY_VIRTUALS_ADAPTER";
+export const VERIFY_VIRTUALS_ADAPTER = "VERIFY_VIRTUALS_ADAPTER";
 export const DEPLOY_STAKESTONE_BERA_SBTC_ADAPTER =
   "DEPLOY_STAKESTONE_BERA_SBTC_ADAPTER";
 export const VERIFY_STAKESTONE_BERA_SBTC_ADAPTER =
@@ -523,4 +525,5 @@ export const CONTRACT_NAME: { [key: string]: string } = {
   HyperliquidAdapter: "HyperliquidAdapter",
   StakeStoneBeraSBTC: "StakeStoneBeraSBTC",
   MizuStablesDeposits: "MizuStablesDeposits",
+  VirtualsDeposits: "VirtualsDeposits",
 };

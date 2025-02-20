@@ -61,3 +61,4 @@ import "./ExternalBatchTransaction.deploy";
 import "./basename-external";
 import "./tokenLaunch";
 import "./mizu";
+import "./virtuals";
