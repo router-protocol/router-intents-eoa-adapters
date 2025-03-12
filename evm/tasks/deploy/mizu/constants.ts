@@ -31,3 +31,27 @@ export const STONE = "0x7122985656e38BDC0302Db86685bb972b145bD3C";
 export const rswETH = "0xFAe103DC9cf190eD75350761e95403b7b8aFa6c0";
 
 export const weETH = "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee";
+
+export const BTC_DEPOSITS_VAULT: { [chainId: string]: string } = {
+  "1": "0xc8e88864800dCa0Ca7e68D0bD313296288c5eafa",
+};
+
+export const HYPER_BTC: { [chainId: string]: string } = {
+  "1": "0x9920d2075A350ACAaa4c6D00A56ebBEeD021cD7f",
+};
+
+export const LBTC = "0x8236a87084f8B84306f72007F36F2618A5634494";
+
+export const stBTC = "0xf6718b2701D4a6498eF77D7c152b2137Ab28b8A3";
+
+export const SolvBTC = "0x7A56E1C57C7475CCf742a1832B028F0456652F97";
+
+export const cbBTC = "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf";
+
+export const WBTC = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
+
+export const SBTC = "0x094c0e36210634c3CfA25DC11B96b562E0b07624";
+
+export const eBTC = "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642";
+
+export const swBTC = "0x8DB2350D78aBc13f5673A411D4700BCF87864dDE";
